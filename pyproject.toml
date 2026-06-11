@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,7 @@ name = "tessera-slides"
 version = "0.1.0"
 description = "Generate self-contained HTML slideshows for technical documents"
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
 requires-python = ">=3.9"
 authors = [
     { name = "André Rezende Dessimoni Carvalho", email = "andre.rdc@outlook.com" },
@@ -20,7 +20,6 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
@@ -44,9 +43,10 @@ full     = ["markdown-it-py>=3.0", "plotly>=5.0", "pandas>=1.5"]
 dev      = ["pytest>=8.0", "pytest-cov", "ruff>=0.4", "mypy>=1.10", "build", "twine"]
 
 [project.urls]
-Homepage   = "https://github.com/andre-dessimoni/tessera-slides"
-Repository = "https://github.com/andre-dessimoni/tessera-slides"
-Issues     = "https://github.com/andre-dessimoni/tessera-slides/issues"
+Homepage      = "https://github.com/andre-dessimoni/tessera-slides"
+Repository    = "https://github.com/andre-dessimoni/tessera-slides"
+Issues        = "https://github.com/andre-dessimoni/tessera-slides/issues"
+Documentation = "https://tessera-slides.readthedocs.io/"
 
 [tool.setuptools.packages.find]
 where   = ["."]
