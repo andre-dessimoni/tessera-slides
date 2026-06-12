@@ -16,6 +16,7 @@ from tessera.cells.base import (
 )
 from tessera.cells.image import ImageCell
 from tessera.cells.image_slider import ImageSliderCell
+from tessera.cells.matplotlib import MatplotlibCell
 from tessera.cells.misc import (
     CodeCell,
     EmptyCell,
@@ -39,6 +40,7 @@ __all__ = [
     "TextCell",
     "ImageCell",
     "ImageSliderCell",
+    "MatplotlibCell",
     "TableCell",
     "ListCell",
     "PlotlyCell",

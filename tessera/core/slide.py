@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Literal
 
 if TYPE_CHECKING:
+    import matplotlib.figure
     import pandas as pd
     import plotly.graph_objects as go
 
@@ -22,6 +23,7 @@ from tessera.cells import (
     ImageCell,
     ImageSliderCell,
     ListCell,
+    MatplotlibCell,
     MermaidCell,
     MetricCell,
     PlotlyCell,
@@ -235,6 +237,29 @@ class Slide:
     ) -> PlotlyCell:
         self._require_plugin("plotly", "add_plotly")
         return PlotlyCell(fig=fig, params=_params)
+
+    @cell_method
+    def add_matplotlib(
+        self,
+        fig: "matplotlib.figure.Figure",
+        *,
+        dpi:           int         = 150,
+        fmt:           str         = "png",
+        lightbox:      bool        = True,
+        col:           int | None  = None,
+        row:           int | None  = None,
+        colspan:       int         = 1,
+        rowspan:       int         = 1,
+        caption:       str         = "",
+        overflow:      bool        = _UNSET,  # type: ignore[assignment]
+        copy_button:   bool        = _UNSET,  # type: ignore[assignment]
+        expand_button: bool        = _UNSET,  # type: ignore[assignment]
+        transparent:   bool        = _UNSET,  # type: ignore[assignment]
+        halign:        str         = _UNSET,  # type: ignore[assignment]
+        valign:        str         = _UNSET,  # type: ignore[assignment]
+        _params: Any               = None,
+    ) -> MatplotlibCell:
+        return MatplotlibCell(fig=fig, dpi=dpi, fmt=fmt, lightbox=lightbox, params=_params)
 
     @cell_method
     def add_code(
