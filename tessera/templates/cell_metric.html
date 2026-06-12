@@ -15,10 +15,8 @@
     <div class="metric-value">{{ cell.value }}</div>
     <div class="metric-label">{{ cell.label }}</div>
     {% if cell.delta is not none %}
-    <div class="metric-delta {% if cell.delta > 0 %}delta-positive{% elif cell.delta < 0 %}delta-negative{% endif %}">
-      {% if cell.delta > 0 %}&#9650;{% elif cell.delta < 0 %}&#9660;{% endif %}
-      {{ cell.delta }}
-      {% if cell.delta_label %} {{ cell.delta_label }}{% endif %}
+    <div class="metric-delta {{ cell.delta_class }}"{% if cell.delta_color %} style="color: {{ cell.delta_color }}"{% endif %}>
+      {{ cell.delta_symbol }} {{ cell.delta }}{% if cell.delta_label %} {{ cell.delta_label }}{% endif %}
     </div>
     {% endif %}
   </div>

@@ -36,5 +36,6 @@
   margin-top: 4px;
 }
 
-.delta-positive { color: #4ade80; }
+.delta-positive { color: #4ade80; }   /* fallback if inline style absent */
 .delta-negative { color: #f87171; }
+.delta-neutral  { color: var(--color-text-muted); }

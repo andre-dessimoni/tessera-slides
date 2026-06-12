@@ -45,8 +45,12 @@ class CodeCell(Cell):
 class MetricCell(Cell):
     """
     KPI card: large value + label + optional delta.
-    delta > 0 → green; delta < 0 → red; None → hidden.
-    Effective overflow default: False.
+
+    By default a positive delta is coloured green and negative red.
+    Set ``lower_is_better=True`` to invert that (e.g. defect counts, latency).
+
+    ``symbol_good``, ``symbol_bad``, ``symbol_neutral`` customise the indicator
+    character — pass any string, including emoji (e.g. ``"✅"``, ``"🔴"``).
     """
 
     def __init__(
@@ -55,6 +59,13 @@ class MetricCell(Cell):
         label: str,
         delta: int | float | str | None,
         delta_label: str,
+        lower_is_better: bool,
+        symbol_good: str,
+        symbol_bad: str,
+        symbol_neutral: str,
+        color_good: str,
+        color_bad: str,
+        color_neutral: str,
         params: CellParams,
     ) -> None:
         super().__init__(params)
@@ -62,6 +73,35 @@ class MetricCell(Cell):
         self.label       = label
         self.delta       = delta
         self.delta_label = delta_label
+        self.delta_class, self.delta_symbol, self.delta_color = self._classify(
+            delta, lower_is_better,
+            symbol_good, symbol_bad, symbol_neutral,
+            color_good, color_bad, color_neutral,
+        )
+
+    @staticmethod
+    def _classify(
+        delta: "int | float | str | None",
+        lower_is_better: bool,
+        symbol_good: str,
+        symbol_bad: str,
+        symbol_neutral: str,
+        color_good: str,
+        color_bad: str,
+        color_neutral: str,
+    ) -> "tuple[str | None, str | None, str | None]":
+        if delta is None:
+            return None, None, None
+        try:
+            d = float(delta)
+        except (TypeError, ValueError):
+            return "delta-neutral", symbol_neutral, color_neutral
+        if d == 0:
+            return "delta-neutral", symbol_neutral, color_neutral
+        good = (d > 0) != lower_is_better
+        symbol = symbol_good if d > 0 else symbol_bad
+        color  = color_good  if good  else color_bad
+        return ("delta-positive" if good else "delta-negative", symbol, color)
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_metric.html").render(cell=self)

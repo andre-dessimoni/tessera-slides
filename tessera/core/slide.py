@@ -286,21 +286,35 @@ class Slide:
         value: "int | float | str",
         label: str,
         *,
-        delta:         "int | float | str | None" = None,
-        delta_label:   str         = "",
-        col:           int | None  = None,
-        row:           int | None  = None,
-        colspan:       int         = 1,
-        rowspan:       int         = 1,
-        caption:       str         = "",
-        overflow:      bool        = _UNSET,  # type: ignore[assignment]
-        copy_button:   bool        = _UNSET,  # type: ignore[assignment]
-        expand_button: bool        = _UNSET,  # type: ignore[assignment]
-        _params: Any               = None,
+        delta:           "int | float | str | None" = None,
+        delta_label:     str         = "",
+        lower_is_better: bool        = False,
+        symbol_good:     str         = "▲",
+        symbol_bad:      str         = "▼",
+        symbol_neutral:  str         = "—",
+        color_good:      str         = "#4ade80",
+        color_bad:       str         = "#f87171",
+        color_neutral:   str         = "",
+        col:             int | None  = None,
+        row:             int | None  = None,
+        colspan:         int         = 1,
+        rowspan:         int         = 1,
+        caption:         str         = "",
+        overflow:        bool        = _UNSET,  # type: ignore[assignment]
+        copy_button:     bool        = _UNSET,  # type: ignore[assignment]
+        expand_button:   bool        = _UNSET,  # type: ignore[assignment]
+        _params: Any                 = None,
     ) -> MetricCell:
         return MetricCell(
             value=value, label=label,
             delta=delta, delta_label=delta_label,
+            lower_is_better=lower_is_better,
+            symbol_good=symbol_good,
+            symbol_bad=symbol_bad,
+            symbol_neutral=symbol_neutral,
+            color_good=color_good,
+            color_bad=color_bad,
+            color_neutral=color_neutral,
             params=_params,
         )
 
