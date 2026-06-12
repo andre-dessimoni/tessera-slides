@@ -5,7 +5,40 @@
 
 
 ```bash
+# Core only
+pip install tessera-slides
+
+
+# Full support (Plotly, Pandas, Markdown)
 pip install "tessera-slides[full]"
+```
+
+## Live demo
+
+The presentaion below is an example of the capabilities of téssera.
+
+For better visualization click on the **Full screen** button on the bottom toolbar
+
+```{raw} html
+<div style="
+  width: 65vw;
+  position: relative;
+  padding: 0 1rem;
+  box-sizing: border-box;
+">
+  <iframe
+    src="_static/example1.html"
+    style="
+      display: block;
+      width: 100%;
+      height: 600px;
+      border: 1px solid var(--color-background-border, #ccc);
+      border-radius: 8px;
+    "
+    loading="lazy"
+    allowfullscreen
+  ></iframe>
+</div>
 ```
 
 ```python

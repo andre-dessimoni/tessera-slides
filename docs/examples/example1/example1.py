@@ -116,7 +116,7 @@ slide = slides.add_slide('Iframes, Plotly and Tables', nrows=2, ncols=2,
                          row_heights=['70%', '30%'])
 slide.add_iframe(
     "https://www.openstreetmap.org/export/embed.html?bbox=-46.504440307617195%2C-23.414107280167556%2C-45.62690734863281%2C-22.986841807912054&amp;layer=mapnik",
-    caption='Example of an iframe cell embedding a live flight radar map.',
+    caption='Example of an iframe cell embedding a interactive map.',
 )
 # -----------------------------------------------------------------------------
 
