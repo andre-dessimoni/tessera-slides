@@ -4,10 +4,11 @@
 
 ```bash
 # Core only
-pip install py-tessera
+pip install tessera-slides
+
 
 # Full support (Plotly, Pandas, Markdown)
-pip install "py-tessera[full]"
+pip install "tessera-slides[full]"
 ```
 
 ## Basic structure

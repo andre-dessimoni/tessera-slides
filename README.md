@@ -3,6 +3,10 @@
 Python library for generating self-contained HTML slideshows for technical 
 documents.
 
+## Documentation:
+
+https://tessera-slides.readthedocs.io/
+
 ## Installation
 
 ```bash

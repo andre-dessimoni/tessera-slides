@@ -13,8 +13,11 @@ _STATIC_DIR = _HERE / "_static"
 sys.path.insert(0, str(_ROOT))
 
 # ---------------------------------------------------------------------------
-# Demo build hook — generate the _static/demo.html slide
+# Demo build hook — generate the _static/example1.html slide
 # ---------------------------------------------------------------------------
+
+_EXAMPLE_DIR    = _HERE / "examples" / "example1"
+_EXAMPLE_SCRIPT = _EXAMPLE_DIR / "example1.py"
 
 def _generate_demo(app):
     import os
@@ -22,13 +25,13 @@ def _generate_demo(app):
     env = {**os.environ, "PYTHONPATH": str(_ROOT)}
     try:
         subprocess.run(
-            [sys.executable, str(_HERE / "example.py")],
-            cwd=str(_HERE),
+            [sys.executable, str(_EXAMPLE_SCRIPT)],
+            cwd=str(_EXAMPLE_DIR),
             check=True,
             timeout=90,
             env=env,
         )
-        print("tessera demo: demo.html written to docs/_static/")
+        print("tessera demo: example1.html written to docs/_static/")
     except subprocess.CalledProcessError as exc:
         print(f"tessera demo: warning — could not generate demo: {exc}")
     except Exception as exc:

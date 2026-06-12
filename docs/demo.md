@@ -10,7 +10,7 @@ The code used to generate it is shown in the sequence.
 
 ```{raw} html
 <iframe
-  src="_static/demo.html"
+  src="_static/example1.html"
   style="
     width: 100%;
     height: 560px;
@@ -26,6 +26,6 @@ The code used to generate it is shown in the sequence.
 
 The code that generated this presentation:
 
-```{literalinclude} example.py
+```{literalinclude} examples/example1/example1.py
 :language: python
 ```
