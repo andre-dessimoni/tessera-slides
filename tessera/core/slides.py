@@ -9,7 +9,7 @@ from __future__ import annotations
 import datetime
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Literal, Hashable
+from typing import Any, Hashable, Literal
 
 from tessera.cells import _UNSET
 from tessera.core.slide import Slide
@@ -33,7 +33,19 @@ class Plugin:
 
 @dataclass
 class SlideDefaults:
-    """Global defaults applied to every ``add_slide()`` call."""
+    """Grid layout defaults applied to every :meth:`~HTMLSlides.add_slide` call.
+
+    Any value set here acts as the fallback when the corresponding argument is
+    omitted from ``add_slide()``. Per-call arguments always take precedence.
+
+    Attributes:
+        nrows: Number of grid rows (default ``1``).
+        ncols: Number of grid columns (default ``1``).
+        row_heights: CSS height for each row (e.g. ``["2fr", "1fr"]``).
+            ``None`` distributes space evenly.
+        col_widths: CSS width for each column (e.g. ``["300px", "1fr"]``).
+            ``None`` distributes space evenly.
+    """
 
     nrows:       int                      = 1
     ncols:       int                      = 1
@@ -43,14 +55,32 @@ class SlideDefaults:
 
 @dataclass
 class CellDefaults:
-    """Global defaults applied to every ``add_*()`` cell method."""
+    """Visual and behaviour defaults applied to every ``add_*()`` cell method.
 
-    overflow:      bool = True
-    copy_button:   bool = False
-    expand_button: bool = False
-    transparent:   bool = False
-    halign:        str  = "left"
-    valign:        str  = "top"
+    Any value set here acts as the fallback when the corresponding argument is
+    omitted from a cell-creation call. Per-call arguments always take precedence.
+
+    Attributes:
+        overflow: Whether cell content is scrollable when it overflows
+            (default ``True``).
+        copy_button: Show a copy-to-clipboard button on the cell
+            (default ``False``).
+        expand_button: Show a fullscreen-expand button on the cell
+            (default ``False``).
+        transparent: Render the cell without a background card
+            (default ``False``).
+        halign: Horizontal alignment of cell content — ``"left"``,
+            ``"center"``, or ``"right"`` (default ``"left"``).
+        valign: Vertical alignment of cell content — ``"top"``,
+            ``"middle"``, or ``"bottom"`` (default ``"top"``).
+    """
+
+    overflow:      bool                                    = True
+    copy_button:   bool                                    = False
+    expand_button: bool                                    = False
+    transparent:   bool                                    = False
+    halign:        Literal["left", "center", "right"]      = "left"
+    valign:        Literal["top", "middle", "bottom"]      = "top"
 
 
 # ---------------------------------------------------------------------------
@@ -217,8 +247,9 @@ class HTMLSlides:
         notes:          str                      = "",
         slide_id:       Hashable | None          = None,
         slide_defaults: SlideDefaults | None     = None,
+        cell_defaults:  CellDefaults | None      = None,
     ) -> Slide:
-        """Add a standard content slide with an ``nrows × ncols`` cell canvas.
+        """Add a standard content slide with an ``nrows x ncols`` cell canvas.
 
         Args:
             title (str): Slide heading shown in the header bar.
@@ -241,6 +272,9 @@ class HTMLSlides:
                 precedence over ``self.slide_defaults`` but is overridden by
                 any explicitly supplied ``nrows`` / ``ncols`` / ``row_heights``
                 / ``col_widths`` argument.
+            cell_defaults: Per-call override for cell defaults. Takes
+                precedence over ``self.cell_defaults`
+
 
         Returns:
             The newly created :class:`~tessera.core.slide.Slide`.
@@ -256,6 +290,7 @@ class HTMLSlides:
             col_widths=sd.col_widths   if col_widths  is _UNSET else col_widths,
             notes=notes,
             slide_id=slide_id,
+            cell_defaults=cell_defaults if cell_defaults is not None else self.cell_defaults,
         )
 
     def write(
@@ -301,6 +336,7 @@ class HTMLSlides:
         col_widths:  list[int | str] | None,
         notes:       str,
         slide_id:    Hashable | None = None,
+        cell_defaults: CellDefaults | None = None,
     ) -> Slide:
         self._slide_counter += 1
         
@@ -322,7 +358,7 @@ class HTMLSlides:
             row_heights   = row_heights,
             col_widths    = col_widths,
             notes         = notes,
-            cell_defaults = self.cell_defaults,
+            cell_defaults = cell_defaults,
             plugin_names  = self._plugin_names,
             parent        = self,
         )
