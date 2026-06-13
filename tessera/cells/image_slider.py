@@ -33,3 +33,10 @@ class ImageSliderCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_image_slider.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"ImageSliderCell(ID={self.params.cell_id!r}, sources={self.sources!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
+

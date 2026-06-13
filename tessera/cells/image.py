@@ -37,6 +37,12 @@ class ImageCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_image.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"ImageCell(ID={self.params.cell_id!r}, source={str(self.source)!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 
 def _looks_like_base64(s: str) -> bool:

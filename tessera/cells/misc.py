@@ -24,6 +24,12 @@ class ListCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_list.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"ListCell(ID={self.params.cell_id!r}, items={self.items!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 
 class CodeCell(Cell):
@@ -40,6 +46,12 @@ class CodeCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_code.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"CodeCell(ID={self.params.cell_id!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 
 class MetricCell(Cell):
@@ -106,6 +118,11 @@ class MetricCell(Cell):
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_metric.html").render(cell=self)
 
+    def __repr__(self) -> str:
+        return (
+            f"MetricCell(ID={self.params.cell_id!r}, value={self.value!r}, label={self.label!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 class MermaidCell(Cell):
     """
@@ -121,7 +138,12 @@ class MermaidCell(Cell):
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_mermaid.html").render(cell=self)
 
-
+    def __repr__(self) -> str:
+        return (
+            f"MermaidCell(ID={self.params.cell_id!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
+    
 class HtmlCell(Cell):
     """Raw HTML injected without escaping."""
 
@@ -131,6 +153,12 @@ class HtmlCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_html.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"HtmlCell(ID={self.params.cell_id!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 
 class IframeCell(Cell):
@@ -146,6 +174,12 @@ class IframeCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_iframe.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"IframeCell(ID={self.params.cell_id!r}"
+            f" at row={self.params.row}, col={self.params.col}"
+        )
 
 
 class EmptyCell(Cell):
@@ -153,3 +187,9 @@ class EmptyCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_empty.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (
+            f"EmptyCell(ID={self.params.cell_id!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )

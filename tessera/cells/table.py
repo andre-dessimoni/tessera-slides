@@ -94,6 +94,11 @@ class TableCell(Cell):
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_table.html").render(cell=self)
 
+    def __repr__(self) -> str:
+        return (
+            f"TableCell(ID={self.params.cell_id!r}_, "
+            f"at row={self.params.row}, col={self.params.col}"
+        )
 
 def _detect_separator(text: str) -> str:
     """Detect separator: presence of \\t → TSV; otherwise → CSV."""

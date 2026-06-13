@@ -33,3 +33,9 @@ class PlotlyCell(Cell):
 
     def render(self, env: "jinja2.Environment") -> str:
         return env.get_template("cell_plotly.html").render(cell=self)
+
+    def __repr__(self) -> str:
+        return (
+            f"PlotlyCell(ID={self.params.cell_id!r})"
+            f" at row={self.params.row}, col={self.params.col}"
+        )

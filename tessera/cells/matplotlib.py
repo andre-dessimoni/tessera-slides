@@ -44,6 +44,7 @@ class MatplotlibCell(Cell):
         super().__init__(params)
         self.lightbox = lightbox
         self.fmt = fmt
+        self.fig = fig
         self.src = self._encode(fig, dpi, fmt)
 
     @staticmethod
@@ -65,3 +66,7 @@ class MatplotlibCell(Cell):
         if self.fmt == "svg":
             return env.get_template("cell_matplotlib_svg.html").render(cell=self)
         return env.get_template("cell_matplotlib.html").render(cell=self)
+    
+    def __repr__(self) -> str:
+        return (f"MatplotlibCell(ID={self.params.cell_id!r}, fig={self.fig}) "
+                f"at row={self.params.row}, col={self.params.col})")
