@@ -208,17 +208,44 @@ class HTMLSlides:
 
     def add_slide(
         self,
-        title:       str,
-        subtitle:    str                      = "",
-        nrows:       Any                      = _UNSET,
-        ncols:       Any                      = _UNSET,
-        row_heights: list[int | str] | None   = _UNSET,   # type: ignore[assignment]
-        col_widths:  list[int | str] | None   = _UNSET,   # type: ignore[assignment]
-        notes:       str                      = "",
-        slide_id:    Hashable | None          = None,
+        title:          str,
+        subtitle:       str                      = "",
+        nrows:          Any                      = _UNSET,
+        ncols:          Any                      = _UNSET,
+        row_heights:    list[int | str] | None   = _UNSET,
+        col_widths:     list[int | str] | None   = _UNSET,
+        notes:          str                      = "",
+        slide_id:       Hashable | None          = None,
+        slide_defaults: SlideDefaults | None     = None,
     ) -> Slide:
-        """Add a standard slide with an ``nrows x ncols`` canvas."""
-        sd = self.slide_defaults
+        """Add a standard content slide with an ``nrows × ncols`` cell canvas.
+
+        Args:
+            title (str): Slide heading shown in the header bar.
+            subtitle (str): Optional secondary heading shown below the title.
+            nrows (int): Number of grid rows. Falls back to ``slide_defaults.nrows``
+                then ``self.slide_defaults.nrows`` when omitted.
+            ncols (int): Number of grid columns. Same fallback chain as ``nrows``.
+            row_heights (List[str,...]): Explicit heights for each row (CSS 
+                values such as ``"1fr"`` or ``200``). ``None`` lets the grid 
+                distribute space evenly. Falls back through the defaults 
+                hierarchy when omitted.
+            col_widths(List[str,...]): Explicit widths for each column. Same 
+                semantics as ``row_heights``.
+            notes: Presenter notes attached to this slide (not rendered in the
+                slide itself).
+            slide_id: Stable identifier for this slide. Auto-generated as
+                ``"slide-<n>"`` when ``None``. Raises ``DuplicateSlideError``
+                if the id is already in use.
+            slide_defaults: Per-call override for grid defaults. Takes
+                precedence over ``self.slide_defaults`` but is overridden by
+                any explicitly supplied ``nrows`` / ``ncols`` / ``row_heights``
+                / ``col_widths`` argument.
+
+        Returns:
+            The newly created :class:`~tessera.core.slide.Slide`.
+        """
+        sd = slide_defaults if slide_defaults is not None else self.slide_defaults
         return self._make_slide(
             title=title,
             subtitle=subtitle,
