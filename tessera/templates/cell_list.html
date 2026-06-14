@@ -1,8 +1,10 @@
 {% macro render_list(items, ordered) %}
 {% if ordered %}<ol class="hs-list">{% else %}<ul class="hs-list">{% endif %}
 {% for item in items %}
-  {% if item is iterable and item is not string %}
-  <li>{{ render_list(item, ordered) }}</li>
+  {% if item is mapping %}
+  {% for key, subitems in item.items() %}
+  <li>{{ key }}{{ render_list(subitems, ordered) }}</li>
+  {% endfor %}
   {% else %}
   <li>{{ item }}</li>
   {% endif %}

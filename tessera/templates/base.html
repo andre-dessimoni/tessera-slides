@@ -140,6 +140,10 @@ window.MathJax = {
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
 {% endif %}
 
+{% if "mermaid" in plugin_names %}
+<script>mermaid.initialize({ startOnLoad: false, theme: "dark" });</script>
+{% endif %}
+
 <!-- ===================== JS ===================== -->
 <script>
 {{ main_js }}
@@ -147,9 +151,6 @@ window.MathJax = {
 
 {% if "highlight" in plugin_names %}
 <script>hljs.highlightAll();</script>
-{% endif %}
-{% if "mermaid" in plugin_names %}
-<script>mermaid.initialize({ startOnLoad: false, theme: "dark" });</script>
 {% endif %}
 {% if "mathjax" in plugin_names %}
 <script>
