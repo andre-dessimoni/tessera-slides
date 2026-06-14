@@ -1,3 +1,129 @@
 /* ============================================================
-   toc.css — placeholder (v1.0 implementation pending)
+   toc.css — standalone TOC slide + inline section TOC
    ============================================================ */
+
+/* ---- Standalone TOC slide ---- */
+.slide-type-toc {
+  padding: 28px 36px 20px;
+}
+
+.slide-toc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.slide-toc-body .toc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slide-toc-body .toc-entry:last-child {
+  border-bottom: none;
+}
+
+.toc-entry-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.toc-entry-link:hover {
+  color: var(--color-accent);
+}
+
+/* Level indentation in standalone TOC */
+.slide-toc-body .toc-level-2 {
+  padding-left: 20px;
+  font-size: 0.85rem;
+}
+
+.slide-toc-body .toc-level-2 .toc-entry-link {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.slide-toc-body .toc-level-3 {
+  padding-left: 36px;
+}
+
+.slide-toc-body .toc-level-3 .toc-entry-link {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+/* ---- Inline TOC on section slides ---- */
+.slide-toc-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+}
+
+.slide-toc-inline .toc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.toc-bullet {
+  font-size: 0.75rem;
+  min-width: 14px;
+  flex-shrink: 0;
+}
+
+.toc-entry-title {
+  font-size: 0.88rem;
+}
+
+/* States */
+.toc-current .toc-entry-title {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.toc-current .toc-bullet {
+  color: var(--color-accent);
+}
+
+.toc-past .toc-entry-title {
+  color: var(--color-text-muted);
+}
+
+.toc-upcoming .toc-entry-title {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+/* Inline TOC level indentation */
+.slide-toc-inline .toc-level-2 {
+  padding-left: 16px;
+}
+
+.slide-toc-inline .toc-level-2 .toc-entry-title {
+  font-size: 0.8rem;
+}
+
+.slide-toc-inline .toc-level-3 {
+  padding-left: 28px;
+}
+
+.slide-toc-inline .toc-level-3 .toc-entry-title {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}

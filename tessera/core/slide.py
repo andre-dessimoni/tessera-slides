@@ -57,7 +57,9 @@ class Slide:
         notes: str,
         cell_defaults: Any,          # CellDefaults — lazy import to avoid circular deps
         plugin_names: frozenset[str],
-        parent: HTMLSlides
+        parent: HTMLSlides,
+        level: int = 1,
+        show_toc: bool = False,
     ) -> None:
         self.slide_id     = slide_id
         self.title        = title
@@ -66,9 +68,12 @@ class Slide:
         self.nrows        = nrows
         self.ncols        = ncols
         self.notes        = notes
+        self.level        = level
+        self.show_toc     = show_toc
         self._cell_defaults = cell_defaults
         self._plugin_names  = plugin_names
         self.parent       = parent
+        self._toc_entries: list[dict] = []  # populated by Assembler at write time
 
         # Size grid
         self.row_heights = _normalize_sizes(row_heights, nrows)

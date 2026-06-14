@@ -92,15 +92,15 @@ def test_add_section_registers_in_sections():
     deck = HTMLSlides(title="X")
     deck.add_section("Intro", level=1)
     deck.add_section("Methods", level=2)
-    assert len(deck._sections) == 2
-    assert deck._sections[0]["title"] == "Intro"
-    assert deck._sections[1]["level"] == 2
+    assert len(deck.sections) == 2
+    assert deck.sections[0]["title"] == "Intro"
+    assert deck.sections[1]["level"] == 2
 
 
 def test_add_section_slide_id_stored():
     deck = HTMLSlides(title="X")
     s = deck.add_section("Sec")
-    assert deck._sections[0]["slide_id"] == s.slide_id
+    assert deck.sections[0]["slide_id"] == s.slide_id
 
 
 # ---------------------------------------------------------------------------
@@ -113,29 +113,32 @@ def test_add_toc_type():
     assert t.slide_type == "toc"
 
 
-def test_add_toc_auto_captures_sections():
+def test_add_toc_auto_captures_sections(tmp_path):
     deck = HTMLSlides(title="X")
     deck.add_section("A")
     deck.add_section("B")
     toc = deck.add_toc(auto=True)
+    deck.write(tmp_path / "out")
     assert len(toc._toc_entries) == 2
     assert toc._toc_entries[0]["title"] == "A"
 
 
-def test_add_toc_auto_false_empty():
+def test_add_toc_auto_false_empty(tmp_path):
     deck = HTMLSlides(title="X")
     deck.add_section("A")
     toc = deck.add_toc(auto=False)
+    deck.write(tmp_path / "out")
     assert toc._toc_entries == []
 
 
-def test_add_toc_only_sections_before_toc():
+def test_add_toc_captures_all_sections(tmp_path):
     deck = HTMLSlides(title="X")
     deck.add_section("Before")
     toc = deck.add_toc(auto=True)
     deck.add_section("After")
-    # toc was created with only "Before"
-    assert len(toc._toc_entries) == 1
+    deck.write(tmp_path / "out")
+    # TOC is populated at write() time — reflects all sections regardless of order
+    assert len(toc._toc_entries) == 2
 
 
 # ---------------------------------------------------------------------------

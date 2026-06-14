@@ -81,13 +81,49 @@ class Assembler:
                     elif isinstance(cell, ImageSliderCell) and not cell.resolved_srcs:
                         cell.resolved_srcs = [str(s) for s in cell.sources]
 
-        # Render cells
+        # Build full TOC from registered sections
+        toc_entries = [
+            {
+                "title":    s["title"],
+                "subtitle": s.get("subtitle", ""),
+                "level":    s["level"],
+                "slide_id": s["slide_id"],
+            }
+            for s in deck._sections
+        ]
+
+        # Render cells + inject TOC entries per slide
         rendered_slides = []
         for slide in deck._slides:
+            entries_for_template: list[dict] = []
+
+            if slide.slide_type == "toc":
+                auto = getattr(slide, "_auto_toc", True)
+                slide._toc_entries = toc_entries if auto else []
+                entries_for_template = list(slide._toc_entries)
+
+            elif slide.slide_type == "section" and slide.show_toc and toc_entries:
+                current_id = slide.slide_id
+                current_idx = next(
+                    (i for i, e in enumerate(toc_entries) if e["slide_id"] == current_id),
+                    -1,
+                )
+                slide._toc_entries = toc_entries
+                entries_for_template = [
+                    {
+                        **e,
+                        "is_current":  i == current_idx,
+                        "is_past":     i < current_idx,
+                        "is_upcoming": i > current_idx,
+                    }
+                    for i, e in enumerate(toc_entries)
+                ]
+
             rendered_cells = [cell.render(self._env) for cell in slide._cells]
             rendered_slides.append({
-                "slide": slide,
+                "slide":          slide,
                 "rendered_cells": rendered_cells,
+                "toc_entries":    entries_for_template,
             })
 
         return self._env.get_template("base.html").render(

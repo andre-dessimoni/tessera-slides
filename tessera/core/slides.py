@@ -188,11 +188,27 @@ class HTMLSlides:
 
     def add_section(
         self,
-        title:    str,
-        subtitle: str = "",
-        level:    int = 1,
+        title:      str,
+        subtitle:   str  = "",
+        level:      int  = 1,
+        add_to_toc: bool = True,
+        show_toc:   bool = True,
     ) -> Slide:
-        """Add a section-divider slide and register it in the automatic TOC."""
+        """Add a section-divider slide.
+
+        Args:
+            title (str): Section heading.
+            subtitle (str): Optional secondary text below the heading.
+            level (int): Hierarchy depth (1 = top-level, 2 = sub-section, …).
+                Higher levels are indented and visually dimmed in the sidebar.
+            add_to_toc (bool): Whether to include this section in TOC slides and
+                inline section TOCs (default ``True``).
+            show_toc (bool): Whether to render an inline TOC on this slide
+                highlighting the current section (default ``True``).
+
+        Returns:
+            The newly created :class:`~tessera.core.slide.Slide`.
+        """
         slide = self._make_slide(
             title=title,
             subtitle=subtitle,
@@ -202,13 +218,16 @@ class HTMLSlides:
             row_heights=None,
             col_widths=None,
             notes="",
+            level=level,
+            show_toc=show_toc,
         )
-        self._sections.append({
-            "title":    title,
-            "subtitle": subtitle,
-            "level":    level,
-            "slide_id": slide.slide_id,
-        })
+        if add_to_toc:
+            self._sections.append({
+                "title":    title,
+                "subtitle": subtitle,
+                "level":    level,
+                "slide_id": slide.slide_id,
+            })
         return slide
 
     def add_toc(
@@ -216,11 +235,19 @@ class HTMLSlides:
         title: str = "Table of Contents",
         auto:  bool = True,
     ) -> Slide:
-        """
-        Add a Table of Contents slide.
+        """Add a Table of Contents slide.
 
-        When ``auto=True``, the content is generated from all
-        ``add_section()`` calls registered so far.
+        The TOC is always populated at ``write()`` time so it reflects all
+        sections in the deck regardless of call order.
+
+        Args:
+            title (str): Slide heading shown in the header bar.
+            auto (bool): When ``True`` (default), the TOC is built automatically
+                from all ``add_section()`` calls.  When ``False`` the slide
+                is rendered with an empty TOC.
+
+        Returns:
+            The newly created :class:`~tessera.core.slide.Slide`.
         """
         slide = self._make_slide(
             title=title,
@@ -232,8 +259,7 @@ class HTMLSlides:
             col_widths=None,
             notes="",
         )
-        # The Assembler reads slide._toc_entries to render the TOC
-        slide._toc_entries = list(self._sections) if auto else []  # type: ignore[attr-defined]
+        slide._auto_toc = auto  # type: ignore[attr-defined]
         return slide
 
     def add_slide(
@@ -355,6 +381,8 @@ class HTMLSlides:
         notes:       str,
         slide_id:    Hashable | None = None,
         cell_defaults: CellDefaults | None = None,
+        level:       int  = 1,
+        show_toc:    bool = False,
     ) -> Slide:
         self._slide_counter += 1
         
@@ -379,6 +407,8 @@ class HTMLSlides:
             cell_defaults = cell_defaults,
             plugin_names  = self._plugin_names,
             parent        = self,
+            level         = level,
+            show_toc      = show_toc,
         )
         self._slides.append(slide)
         self._slide_map[slide_id] = slide
@@ -399,6 +429,11 @@ class HTMLSlides:
     @property
     def slide_map(self) -> dict[Hashable, Slide]:
         return dict(self._slide_map)
+
+    @property
+    def sections(self) -> list[dict]:
+        """Read-only list of TOC-registered section metadata dicts."""
+        return list(self._sections)
 
     def __repr__(self) -> str:
         return (

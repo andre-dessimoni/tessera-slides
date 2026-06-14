@@ -19,7 +19,7 @@
   <ul id="slide-list">
     {% for item in rendered_slides %}
     {% set slide = item.slide %}
-    <li class="sidebar-item sidebar-type-{{ slide.slide_type }}"
+    <li class="sidebar-item sidebar-type-{{ slide.slide_type }}{% if slide.slide_type == 'section' %} sidebar-level-{{ slide.level }}{% endif %}"
         data-target="{{ slide.slide_id }}"
         onclick="goToSlide('{{ slide.slide_id }}')">
       <span class="sidebar-num">{{ loop.index }}</span>
@@ -34,6 +34,67 @@
 <main id="main">
   {% for item in rendered_slides %}
   {% set slide = item.slide %}
+
+  {% if slide.slide_type == 'title' or slide.slide_type == 'section' %}
+  <!-- ── Cover slide (title / section) ── -->
+  <section
+    id="{{ slide.slide_id }}"
+    class="slide slide-type-{{ slide.slide_type }}"
+    data-index="{{ loop.index }}"
+  >
+    <div class="slide-cover">
+      <h1 class="slide-cover-title">{{ slide.title }}</h1>
+      {% if slide.subtitle %}
+      <p class="slide-cover-subtitle">{{ slide.subtitle }}</p>
+      {% endif %}
+      {% if slide.slide_type == 'title' %}
+      <div class="slide-cover-meta">
+        {% if deck.author %}<span>{{ deck.author }}</span>{% endif %}
+        {% if deck.date %}<span>{{ deck.date }}</span>{% endif %}
+        {% if deck.version %}<span>v{{ deck.version }}</span>{% endif %}
+      </div>
+      {% endif %}
+      {% if slide.slide_type == 'section' and slide.show_toc and item.toc_entries %}
+      <nav class="slide-toc-inline">
+        {% for entry in item.toc_entries %}
+        <div class="toc-entry toc-level-{{ entry.level }}{% if entry.is_current %} toc-current{% elif entry.is_past %} toc-past{% else %} toc-upcoming{% endif %}">
+          <span class="toc-bullet">{% if entry.is_current %}&#9658;{% else %}&ndash;{% endif %}</span>
+          <span class="toc-entry-title">{{ entry.title }}</span>
+        </div>
+        {% endfor %}
+      </nav>
+      {% endif %}
+    </div>
+  </section>
+
+  {% elif slide.slide_type == 'toc' %}
+  <!-- ── TOC slide ── -->
+  <section
+    id="{{ slide.slide_id }}"
+    class="slide slide-type-toc"
+    data-index="{{ loop.index }}"
+  >
+    <header class="slide-header">
+      <h1 class="slide-title">{{ slide.title }}</h1>
+      {% if slide.subtitle %}
+      <p class="slide-subtitle">{{ slide.subtitle }}</p>
+      {% endif %}
+    </header>
+    {% if item.toc_entries %}
+    <nav class="slide-toc-body">
+      {% for entry in item.toc_entries %}
+      <div class="toc-entry toc-level-{{ entry.level }}">
+        <a href="#{{ entry.slide_id }}"
+           onclick="goToSlide('{{ entry.slide_id }}'); return false;"
+           class="toc-entry-link">{{ entry.title }}</a>
+      </div>
+      {% endfor %}
+    </nav>
+    {% endif %}
+  </section>
+
+  {% else %}
+  <!-- ── Regular content slide ── -->
   <section
     id="{{ slide.slide_id }}"
     class="slide slide-type-{{ slide.slide_type }}"
@@ -68,6 +129,8 @@
     <aside class="slide-notes">{{ slide.notes }}</aside>
     {% endif %}
   </section>
+  {% endif %}
+
   {% endfor %}
 </main>
 

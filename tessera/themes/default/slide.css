@@ -22,23 +22,63 @@
   margin-top: 4px;
 }
 
-/* Slides especiais */
-.slide-type-title .slide-header,
-.slide-type-section .slide-header {
-  margin: auto;
+/* ---- Cover slides (title & section) ---- */
+.slide-type-title,
+.slide-type-section {
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  border-bottom: none;
+  gap: 14px;
+  max-width: 680px;
+  width: 100%;
+  padding: 0 24px;
 }
 
-.slide-type-title .slide-title {
-  font-size: 2rem;
-  border-bottom: none;
+.slide-cover-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text);
 }
 
-.slide-type-section .slide-title {
-  font-size: 1.8rem;
+.slide-type-title .slide-cover::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  margin-top: 2px;
+}
+
+.slide-cover-subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+}
+
+.slide-cover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.slide-cover-meta span + span::before {
+  content: " · ";
+}
+
+.slide-type-section .slide-cover-title {
+  font-size: 2.2rem;
   color: var(--color-accent);
-  border-bottom: none;
 }
 
 /* ---- Canvas ---- */
