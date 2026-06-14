@@ -30,3 +30,9 @@ def get_static(name: str) -> Path:
 def theme_file_exists(theme: str, filename: str) -> bool:
     p = get_theme_file(theme, filename)
     return p.exists()
+
+def get_available_themes() -> list:
+    return list(filter(
+        lambda f: f.is_dir() and not str(f.name).startswith('_'),
+        Path(str(files("tessera.themes"))).glob('*')
+    ))

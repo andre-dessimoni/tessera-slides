@@ -6,12 +6,12 @@ Resolves and merges CSS files per component following the hierarchy:
   2. user-chosen theme
   3. custom_css provided via Python
 """
-
 from __future__ import annotations
 
 from pathlib import Path
 
-from tessera.utils.resource_loader import get_theme_file, theme_file_exists
+from tessera.utils.resource_loader import (
+    get_theme_file, theme_file_exists, get_available_themes)
 
 #: CSS components recognised by the theme system.
 CSS_COMPONENTS = [
@@ -57,6 +57,8 @@ class ThemeResolver:
                     raise ThemeNotFoundError(
                         f"Theme '{theme}' not found. "
                         f"Expected folder: {theme_dir}"
+                        f"\nAvailable themes:\n-"
+                        + '\n-'.join([f.name for f in get_available_themes()])
                     )
                 if theme_file_exists(theme, filename):
                     parts.append(f"/* --- {theme}/{filename} --- */")
