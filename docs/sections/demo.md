@@ -18,7 +18,7 @@ The code used to generate it is shown in the sequence.
   box-sizing: border-box;
 ">
   <iframe
-    src="_static/example1.html"
+    src="../_static/example1.html"
     style="
       display: block;
       width: 100%;
@@ -36,6 +36,6 @@ The code used to generate it is shown in the sequence.
 
 The code that generated this presentation:
 
-```{literalinclude} examples/example1/example1.py
+```{literalinclude} ../examples/example1/example1.py
 :language: python
 ```

@@ -134,12 +134,15 @@ slide.add_plotly(fig, caption='Example of a Plotly cell displaying an '
 
 # -----------------------------------------------------------------------------
 
-slide.add_text('The iframe and Plotly cells are interactive, allowing you to '
-               'embed live content and interactive visualizations directly '
-               'into your slides.\n\n'
-               'We can also add a table cell to display a DataFrame, as shown below. '
-               'All cells support options to avoid overflow and add an expand button '
-               'to view the full content.')
+slide.add_text(
+    'The **iframe** and **Plotly** cells are interactive, allowing you to '
+    'embed live content and interactive visualizations directly '
+    'into your slides.\n\n'
+    'You can also add a **table cell** to display a DataFrame, as '
+    'shown below. \n\n'
+    'All cells support options to avoid **overflow** and add an '
+    '**expand** button to view the full content.'
+)
 
 slide.add_table(df.query('continent=="Americas"'), 
                 caption='Example of a table cell displaying a DataFrame.'

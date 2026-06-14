@@ -69,10 +69,10 @@ slides.write("report", open_browser=True)
 :caption: Guides
 
 sections/quickstart
-sections/layout-templates
+sections/cell-types
 sections/slide-ids
 sections/live-editing
-sections/cell-types
+sections/layout-templates
 sections/demo
 ```
 

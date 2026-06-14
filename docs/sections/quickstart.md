@@ -16,33 +16,85 @@ pip install "tessera-slides[full]"
 Every slideshow follows the same pattern:
 
 ```python
-from tessera import HTMLSlides, Plugin, SlideDefaults, CellDefaults
+
+import plotly.express as px
+from tessera import HTMLSlides, Plugin
 
 # 1. Create the deck
 slides = HTMLSlides(
-    title="My Report",
+    title="Q2 Report",
     author="A. Dessimoni",
-    date="2026-06-09",
-    theme="default",
-    self_contained=True,           # embed images as base64
-    slide_defaults=SlideDefaults(nrows=2, ncols=2),
-    cell_defaults=CellDefaults(expand_button=True),
     plugins=[Plugin("plotly", "cdn"), Plugin("mermaid", "cdn")],
 )
 
 # 2. Add slides
-slides.add_title("My Report", subtitle="Subtitle here")
-slides.add_section("1 — Introduction")
 
-slide = slides.add_slide("Results")
-slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3)
-slide.add_text("Text with **markdown** and LaTeX: $E = mc^2$")
+slides = HTMLSlides(title="Template Report", autosave='example', 
+                    autosave_level='cell', plugins=[Plugin('mermaid'), Plugin('plotly')])
+
+# Trend chart + breakdown table
+slide = slides.add_slide("Trends", nrows=1, ncols=2)
+
+df = px.data.stocks()
+fig = px.line(df, x="date", y=["GOOG", "AAPL"])
+slide.add_plotly(fig, caption="Weekly close price")
+
+slide.add_table({
+    "Component":  ["Motor A", "Motor B", "Pump C",  "Valve D"],
+    "Status":     ["OK",      "OK",      "Warning", "OK"],
+    "Uptime (%)": [99.1,      97.8,      91.3,      98.6],
+})
+
+
+# KPIs + pipeline diagram
+slide = slides.add_slide("Overview", nrows=2, ncols=3)
+
+slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3, delta_label="vs Q1")
+slide.add_metric(value=142,  label="Incidents",       delta=-18,  lower_is_better=True)
+slide.add_metric(value="4.8 s", label="Avg response time")
+
+slide.add_mermaid("""
+gantt
+    title A Gantt Diagram
+    dateFormat YYYY-MM-DD
+    section Section
+        A task          :a1, 2014-01-01, 30d
+        Another task    :after a1, 20d
+    section Another
+        Task in Another :2014-01-12, 12d
+        another task    :24d
+""", colspan=2, row=2, col=1)
+
 
 # 3. Generate the file
 slides.write("report", open_browser=True)
 ```
 
 This generates `report.html` — a single file with no external dependencies.
+Click on the `Fullscreen (F)` buttom on the bottom toolbar for better visualization.
+
+```{raw} html
+<div style="
+  width: 65vw;
+  position: relative;
+  padding: 0 1rem;
+  box-sizing: border-box;
+">
+  <iframe
+    src="../_static/quick-start-report.html"
+    style="
+      display: block;
+      width: 100%;
+      height: 600px;
+      border: 1px solid var(--color-background-border, #ccc);
+      border-radius: 8px;
+    "
+    loading="lazy"
+    allowfullscreen
+  ></iframe>
+</div>
+```
+
 
 ## Cell grid
 

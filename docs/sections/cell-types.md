@@ -2,15 +2,22 @@
 
 ## TextCell — `add_text()`
 
-Text with Markdown and LaTeX support (via MathJax).
+Text with Markdown and LaTeX support (via MathJax plugin).
 
 ```python
 slide.add_text(
-    "### Title\n\nText with **bold**, *italic*, and LaTeX: $E = mc^2$",
+    "### Title\n\nText with **bold**, *italic*, LaTeX: $E = mc^2$ "
+    "and markdown list:\n\n"
+    "- item 1\n "
+    "- item 2\n "
+    "- item 3\n "
+    "  - item 3.1",
     markdown=True,   # default — False delivers raw HTML
     caption="Source: internal report",
 )
 ```
+
+![Cell-type-text](../_static/img/cell_types/cell_text.png)
 
 ---
 
@@ -26,6 +33,8 @@ slide.add_metric(
     delta_label="vs previous month",
 )
 ```
+
+![Cell-type-metric](../_static/img/cell_types/cell_metric.png)
 
 ---
 
@@ -47,6 +56,8 @@ import pandas as pd
 slide.add_table(pd.read_csv("data.csv"))
 ```
 
+![Cell-type-table](../_static/img/cell_types/cell_table.png)
+
 ---
 
 ## ImageCell — `add_image()`
@@ -63,6 +74,8 @@ slide.add_image(
 
 In `self_contained=True` mode, local images are embedded as base64.
 
+![Cell-type-image](../_static/img/cell_types/cell_image.png)
+
 ---
 
 ## ImageSliderCell — `add_image_slider()`
@@ -76,6 +89,8 @@ slide.add_image_slider(
     caption="Visual inspection — 3 samples",
 )
 ```
+
+![Cell-type-image-slider](../_static/img/cell_types/cell_image_slider.png)
 
 ---
 
@@ -98,6 +113,12 @@ slide.add_list([
 ])
 ```
 
+Although we can create lists using markdown on `Text` cells, the `add_list` method
+may be more straight forward to add items from code data structures, instead of relying
+on string interpolation.
+
+![Cell-type-list](../_static/img/cell_types/cell_list.png)
+
 ---
 
 ## CodeCell — `add_code()`
@@ -113,6 +134,8 @@ slide.add_code(
 )
 ```
 
+![Cell-type-code](../_static/img/cell_types/cell_code.png)
+
 ---
 
 ## PlotlyCell — `add_plotly()`
@@ -127,6 +150,8 @@ fig = px.scatter(px.data.iris(), x="sepal_width", y="sepal_length", color="speci
 slide.add_plotly(fig, caption="Iris Dataset")
 ```
 
+![Cell-type-plotly](../_static/img/cell_types/cell_plotly.png)
+
 ---
 
 ## MermaidCell — `add_mermaid()`
@@ -135,14 +160,54 @@ Declarative diagram (flowchart, sequenceDiagram, gantt, etc.).
 Requires `Plugin("mermaid", "cdn")`.
 
 ```python
+
+slide = slides.add_slide("Example", nrows=2, ncols=2, row_heights=['2fr', '1fr'])
+
 slide.add_mermaid("""
-flowchart LR
-    A[Start] --> B{Decision}
-    B -->|Yes| C[Process A]
-    B -->|No|  D[Process B]
-    C & D --> E[End]
+---
+title: Simple sample
+---
+stateDiagram-v2
+    [*] --> Still
+    Still --> [*]
+
+    Still --> Moving
+    Moving --> Still
+    Moving --> Crash
+    Crash --> [*]
 """)
+
+slide.add_mermaid("""
+---
+config:
+  pie:
+    textPosition: 0.5
+  themeVariables:
+    pieOuterStrokeWidth: "5px"
+---
+pie showData
+    title Key elements in Product X
+    "Calcium" : 42.96
+    "Potassium" : 50.05
+    "Magnesium" : 10.01
+    "Iron" :  5
+""")
+
+slide.add_mermaid("""
+gantt
+    title A Gantt Diagram
+    dateFormat YYYY-MM-DD
+    section Section
+        A task          :a1, 2014-01-01, 30d
+        Another task    :after a1, 20d
+    section Another
+        Task in Another :2014-01-12, 12d
+        another task    :24d
+""", colspan=2, row=2, col=1)
+
 ```
+
+![Cell-type-mermaid](../_static/img/cell_types/cell_mermaid.png)
 
 ---
 
@@ -151,13 +216,43 @@ flowchart LR
 Raw HTML injected without escaping — full styling freedom.
 
 ```python
+slide = slides.add_slide('HTML Cell example', ncols=2, nrows=2)
 slide.add_html("""
-<div style="padding:1rem; background:#f0f4ff; border-radius:8px">
-    <h3>Custom content</h3>
-    <p>Any valid <strong>HTML</strong>.</p>
+<div style="padding:1rem; display:flex; flex-direction:column; gap:0.75rem;
+            font-family:sans-serif;">
+
+  <div style="display:flex; gap:0.75rem; align-items:flex-start; padding:0.85rem 1rem;
+              background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px;">
+    <span style="font-size:1.2rem">&#x2705;</span>
+    <div>
+      <div style="font-weight:600; color:#15803d">Deploy v2.4.1 — successful</div>
+      <div style="font-size:0.82rem; color:#166534">All regions live · 0 errors detected</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.75rem; align-items:flex-start; padding:0.85rem 1rem;
+              background:#fffbeb; border:1px solid #fde68a; border-radius:8px;">
+    <span style="font-size:1.2rem">&#x26A0;&#xFE0F;</span>
+    <div>
+      <div style="font-weight:600; color:#b45309">Node 3 — memory at 87%</div>
+      <div style="font-size:0.82rem; color:#92400e">Consider scaling or restarting</div>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:0.75rem; align-items:flex-start; padding:0.85rem 1rem;
+              background:#fef2f2; border:1px solid #fecaca; border-radius:8px;">
+    <span style="font-size:1.2rem">&#x1F534;</span>
+    <div>
+      <div style="font-weight:600; color:#b91c1c">DB timeout — us-east-1</div>
+      <div style="font-size:0.82rem; color:#991b1b">Failover in progress · ETA 3 min</div>
+    </div>
+  </div>
+
 </div>
 """)
 ```
+
+![Cell-type-html](../_static/img/cell_types/cell_html.png)
 
 ---
 
@@ -172,6 +267,9 @@ slide.add_iframe(
 )
 ```
 
+![Cell-type-iframe](../_static/img/cell_types/cell_iframe.png)
+
+
 ---
 
 ## EmptyCell — `add_empty()`
@@ -184,3 +282,5 @@ slide.add_metric(value=42, label="KPI", rowspan=2)  # col 1, rows 1 and 2
 slide.add_text("Text")                               # col 2, row 1
 slide.add_empty()                                    # col 2, row 2 — empty space
 ```
+
+![Cell-type-empty](../_static/img/cell_types/cell_empty.png)
