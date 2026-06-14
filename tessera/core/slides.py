@@ -295,11 +295,16 @@ class HTMLSlides:
 
     def write(
         self,
-        filename:     str | Path,
+        filename:     str | Path | None = None,
         open_browser: bool = False,
     ) -> Path:
         """Trigger the Assembler, write ``<filename>.html``, and return the Path."""
         from tessera.core.assembler import Assembler
+
+        if (filename is None) and (self.autosave is not None):
+            filename = self.autosave
+        elif (filename is None) and (self.autosave is None):
+            filename = self.title.replace(" ", "-")
 
         path = Path(filename).with_suffix(".html")
         assembler = Assembler(self)
