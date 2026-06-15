@@ -173,6 +173,16 @@ body.sb-no-transition #sidebar-resize-handle {
   transition: left 0.2s ease;
 }
 
+/* ---- Hidden sidebar / toolbar (single-slide / embeddable) ---- */
+.no-sidebar #main,
+.no-sidebar #toolbar {
+  left: 0;
+}
+
+.no-toolbar #main {
+  bottom: 0;
+}
+
 .slide {
   display: none;
   flex-direction: column;

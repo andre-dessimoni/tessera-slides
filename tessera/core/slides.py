@@ -161,6 +161,8 @@ class HTMLSlides:
         size:              tuple[int, int] | None = None,
         scale_up:          bool                   = False,
         keep_aspect_ratio: bool                   = True,
+        show_sidebar:      bool                   = True,
+        show_toolbar:      bool                   = True,
     ) -> None:
         self.title          = title
         self.author         = author
@@ -177,6 +179,8 @@ class HTMLSlides:
         self.size              = size
         self.scale_up          = scale_up
         self.keep_aspect_ratio = keep_aspect_ratio
+        self.show_sidebar      = show_sidebar
+        self.show_toolbar      = show_toolbar
 
         self._slides:   list[Slide] = []
         self._slide_map: dict[Hashable, Slide] = {}
