@@ -127,6 +127,11 @@ class HTMLSlides:
             ``True``). Set to ``False`` for clean single-slide / embeddable files.
         show_toolbar (bool): Render the bottom navigation toolbar (default
             ``True``). Set to ``False`` for clean single-slide / embeddable files.
+        sidebar_collapsed (bool): Start with the sidebar collapsed (default
+            ``False``). The sidebar can still be toggled open via the toolbar
+            button or the ``B`` key. Ignored when ``show_sidebar`` is ``False``.
+            A previously remembered toggle state (from ``localStorage``) takes
+            precedence over this default.
 
     Example::
 
@@ -163,6 +168,7 @@ class HTMLSlides:
         keep_aspect_ratio: bool                   = True,
         show_sidebar:      bool                   = True,
         show_toolbar:      bool                   = True,
+        sidebar_collapsed: bool                   = False,
     ) -> None:
         self.title          = title
         self.author         = author
@@ -181,6 +187,7 @@ class HTMLSlides:
         self.keep_aspect_ratio = keep_aspect_ratio
         self.show_sidebar      = show_sidebar
         self.show_toolbar      = show_toolbar
+        self.sidebar_collapsed = sidebar_collapsed
 
         self._slides:   list[Slide] = []
         self._slide_map: dict[Hashable, Slide] = {}

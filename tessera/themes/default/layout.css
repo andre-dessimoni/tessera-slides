@@ -183,6 +183,12 @@ body.sb-no-transition #sidebar-resize-handle {
   bottom: 0;
 }
 
+/* Collapsed sidebar — drives the width from the body class so a deck can
+   render collapsed with no flash, while JS toggle still works. */
+body.sb-collapsed {
+  --sidebar-width: 0px;
+}
+
 .slide {
   display: none;
   flex-direction: column;

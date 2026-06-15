@@ -392,9 +392,16 @@
         document.documentElement.style.setProperty("--sidebar-width", _savedSidebarWidth);
       }
     }
-    if (localStorage.getItem("tessera-sb-collapsed") === "1") {
+    // Reconcile collapse state. A remembered toggle (localStorage) wins over
+    // the server-rendered default; otherwise the .sb-collapsed body class
+    // (set when sidebar_collapsed=True) governs.
+    var storedCollapsed = localStorage.getItem("tessera-sb-collapsed");
+    if (storedCollapsed === "1") {
       document.documentElement.style.setProperty("--sidebar-width", "0px");
       document.body.classList.add("sb-collapsed");
+    } else if (storedCollapsed === "0") {
+      document.body.classList.remove("sb-collapsed");
+      document.documentElement.style.setProperty("--sidebar-width", _savedSidebarWidth);
     }
 
     var handle = document.getElementById("sidebar-resize-handle");

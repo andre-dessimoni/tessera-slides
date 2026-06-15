@@ -12,7 +12,7 @@
   </style>
 </head>
 <body
-  class="{% if deck.size %}fixed-size {% endif %}{% if not deck.show_sidebar %}no-sidebar {% endif %}{% if not deck.show_toolbar %}no-toolbar{% endif %}"
+  class="{% if deck.size %}fixed-size {% endif %}{% if not deck.show_sidebar %}no-sidebar {% endif %}{% if not deck.show_toolbar %}no-toolbar {% endif %}{% if deck.show_sidebar and deck.sidebar_collapsed %}sb-collapsed{% endif %}"
   {% if deck.size %}
   data-width="{{ deck.size[0] }}"
   data-height="{{ deck.size[1] }}"
