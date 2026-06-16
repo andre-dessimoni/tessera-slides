@@ -129,14 +129,23 @@ class Slide:
             f"Canvas {self.nrows}x{self.ncols} is already full."
         )
 
-    def _register_cell(self, cell: Cell, cell_id: Hashable) -> None:
-        """Mark the positions occupied by the cell on the internal map."""
+    def _register_cell(
+        self, cell: Cell, cell_id: Hashable, index: int | None = None
+    ) -> None:
+        """Mark the positions occupied by the cell on the internal map.
+
+        ``index`` is the original list position to restore when overwriting an
+        existing cell (keeps render/DOM order stable); ``None`` appends.
+        """
         p = cell.params
         for r in range(p.row, p.row + p.rowspan):
             for c in range(p.col, p.col + p.colspan):
                 self._occupied[r - 1][c - 1] = True
-        
-        self._cells.append(cell)
+
+        if index is None:
+            self._cells.append(cell)
+        else:
+            self._cells.insert(index, cell)
         self._cell_map[cell_id] = cell
 
     def remove_cell(

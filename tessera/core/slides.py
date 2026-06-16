@@ -132,6 +132,18 @@ class HTMLSlides:
             button or the ``B`` key. Ignored when ``show_sidebar`` is ``False``.
             A previously remembered toggle state (from ``localStorage``) takes
             precedence over this default.
+        sidebar_search (bool): Render a regex search box at the top of the sidebar
+            that live-filters slides (default ``True``). Ignored when
+            ``show_sidebar`` is ``False``.
+        sidebar_search_scope (Literal['title', 'title_subtitle', 'content']):
+            What the search regex matches against (default ``'title'``).
+            ``'title'`` matches the sidebar title only; ``'title_subtitle'`` also
+            matches the slide subtitle; ``'content'`` searches the slide's full
+            rendered text. Note: with ``'content'``, Plotly/Mermaid bodies are not
+            searchable until they have rendered in the browser.
+        sidebar_collapsible_sections (bool): Show a caret on section items that
+            folds/unfolds the slides under that section (default ``True``).
+            Ignored when ``show_sidebar`` is ``False``.
 
     Example::
 
@@ -169,6 +181,9 @@ class HTMLSlides:
         show_sidebar:      bool                   = True,
         show_toolbar:      bool                   = True,
         sidebar_collapsed: bool                   = False,
+        sidebar_search:    bool                   = True,
+        sidebar_search_scope: Literal['title', 'title_subtitle', 'content'] = 'title',
+        sidebar_collapsible_sections: bool        = True,
     ) -> None:
         self.title          = title
         self.author         = author
@@ -188,6 +203,9 @@ class HTMLSlides:
         self.show_sidebar      = show_sidebar
         self.show_toolbar      = show_toolbar
         self.sidebar_collapsed = sidebar_collapsed
+        self.sidebar_search        = sidebar_search
+        self.sidebar_search_scope  = sidebar_search_scope
+        self.sidebar_collapsible_sections = sidebar_collapsible_sections
 
         self._slides:   list[Slide] = []
         self._slide_map: dict[Hashable, Slide] = {}
@@ -206,8 +224,21 @@ class HTMLSlides:
         title:    str,
         subtitle: str = "",
         notes:    str = "",
+        title_id: Hashable | None = None,
     ) -> Slide:
-        """Add the cover/title slide."""
+        """Add the cover/title slide.
+
+        Args:
+            title (str): Main heading.
+            subtitle (str): Optional secondary text.
+            notes (str): Presenter notes (not rendered on the slide).
+            title_id: Stable identifier, like ``slide_id`` on ``add_slide``.
+                Re-running with the same ``title_id`` replaces the title slide
+                in place instead of appending a duplicate — useful in notebooks.
+
+        Returns:
+            The newly created :class:`~tessera.core.slide.Slide`.
+        """
         return self._make_slide(
             title=title,
             subtitle=subtitle,
@@ -217,6 +248,7 @@ class HTMLSlides:
             row_heights=None,
             col_widths=None,
             notes=notes,
+            slide_id=title_id,
         )
 
     def add_section(
@@ -226,6 +258,7 @@ class HTMLSlides:
         level:      int  = 1,
         add_to_toc: bool = True,
         show_toc:   bool = True,
+        section_id: Hashable | None = None,
     ) -> Slide:
         """Add a section-divider slide.
 
@@ -238,6 +271,9 @@ class HTMLSlides:
                 inline section TOCs (default ``True``).
             show_toc (bool): Whether to render an inline TOC on this slide
                 highlighting the current section (default ``True``).
+            section_id: Stable identifier, like ``slide_id`` on ``add_slide``.
+                Re-running with the same ``section_id`` replaces the section (and
+                its TOC entry) in place instead of appending a duplicate.
 
         Returns:
             The newly created :class:`~tessera.core.slide.Slide`.
@@ -251,22 +287,38 @@ class HTMLSlides:
             row_heights=None,
             col_widths=None,
             notes="",
+            slide_id=section_id,
             level=level,
             show_toc=show_toc,
         )
         if add_to_toc:
-            self._sections.append({
+            entry = {
                 "title":    title,
                 "subtitle": subtitle,
                 "level":    level,
                 "slide_id": slide.slide_id,
-            })
+            }
+            idx = next(
+                (i for i, s in enumerate(self._sections)
+                 if s["slide_id"] == slide.slide_id),
+                None,
+            )
+            if idx is None:
+                self._sections.append(entry)
+            else:
+                self._sections[idx] = entry   # replace in place, preserve TOC order
+        else:
+            # A re-run that flips add_to_toc to False must drop any prior entry.
+            self._sections = [
+                s for s in self._sections if s["slide_id"] != slide.slide_id
+            ]
         return slide
 
     def add_toc(
         self,
         title: str = "Table of Contents",
         auto:  bool = True,
+        toc_id: Hashable | None = None,
     ) -> Slide:
         """Add a Table of Contents slide.
 
@@ -278,6 +330,9 @@ class HTMLSlides:
             auto (bool): When ``True`` (default), the TOC is built automatically
                 from all ``add_section()`` calls.  When ``False`` the slide
                 is rendered with an empty TOC.
+            toc_id: Stable identifier, like ``slide_id`` on ``add_slide``.
+                Re-running with the same ``toc_id`` replaces the TOC slide in
+                place instead of appending a duplicate.
 
         Returns:
             The newly created :class:`~tessera.core.slide.Slide`.
@@ -291,6 +346,7 @@ class HTMLSlides:
             row_heights=None,
             col_widths=None,
             notes="",
+            slide_id=toc_id,
         )
         slide._auto_toc = auto  # type: ignore[attr-defined]
         return slide
@@ -384,6 +440,8 @@ class HTMLSlides:
             raise KeyError(f"No slide found with ID: {slide_id}")
         slide = self._slide_map.pop(slide_id)
         self._slides.remove(slide)
+        # Drop any TOC registration so a removed section leaves the TOC too.
+        self._sections = [s for s in self._sections if s["slide_id"] != slide_id]
 
 
     def get_slide(
@@ -418,15 +476,10 @@ class HTMLSlides:
         show_toc:    bool = False,
     ) -> Slide:
         self._slide_counter += 1
-        
+
         if slide_id is None:
             slide_id = f"_slide-{self._slide_counter}"
-        else:
-            slide_id = slide_id
-        
-        if slide_id in self._slide_map:
-            self.remove_slide(slide_id)
-        
+
         slide = Slide(
             slide_id      = slide_id,
             title         = title,
@@ -443,7 +496,12 @@ class HTMLSlides:
             level         = level,
             show_toc      = show_toc,
         )
-        self._slides.append(slide)
+        # Overwrite an existing id in place (keep deck position); else append.
+        if slide_id in self._slide_map:
+            old = self._slide_map[slide_id]
+            self._slides[self._slides.index(old)] = slide
+        else:
+            self._slides.append(slide)
         self._slide_map[slide_id] = slide
 
         if self.autosave:

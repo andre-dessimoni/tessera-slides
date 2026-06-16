@@ -337,6 +337,32 @@ body.sb-no-transition #sidebar-resize-handle {
   letter-spacing: 0.05em;
 }
 
+/* ---- Sidebar search box ---- */
+#sidebar-search-wrap {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-search {
+  width: 100%;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+
+#sidebar-search::placeholder { color: var(--color-text-muted); }
+#sidebar-search:focus { border-color: var(--color-accent); }
+#sidebar-search.sidebar-search-error {
+  border-color: var(--color-accent);
+  background: rgba(233, 69, 96, 0.12);
+}
+
 #slide-list {
   list-style: none;
   padding: 8px 0;
@@ -363,7 +389,7 @@ body.sb-no-transition #sidebar-resize-handle {
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 7px 12px;
   cursor: pointer;
   font-size: 0.8rem;
@@ -371,6 +397,29 @@ body.sb-no-transition #sidebar-resize-handle {
   transition: background 0.15s, color 0.15s;
   border-left: 3px solid transparent;
 }
+
+.sidebar-item.sidebar-hidden { display: none; }
+
+/* Section fold caret (and a matching spacer so titles align) */
+.sidebar-caret,
+.sidebar-caret-spacer {
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.sidebar-caret {
+  text-align: center;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transform: rotate(90deg);          /* expanded rest state — points down */
+  transition: transform 0.12s ease, color 0.12s;
+}
+
+.sidebar-caret.collapsed { transform: rotate(0deg); }   /* points right */
+.sidebar-caret:hover { color: var(--color-text); }
+.sidebar-caret.sidebar-caret-empty { visibility: hidden; cursor: default; }
 
 .sidebar-item:hover {
   background: var(--color-surface2);
@@ -1158,6 +1207,7 @@ body.sb-collapsed {
 </head>
 <body
   class="fixed-size sb-collapsed"
+  data-sb-search-scope="title"
   data-width="1280"
   data-height="720"
   data-scale-up="true"
@@ -1168,34 +1218,60 @@ body.sb-collapsed {
 <!-- ===================== SIDEBAR ===================== -->
 <nav id="sidebar">
   <div id="sidebar-header">Layout</div>
+  <div id="sidebar-search-wrap">
+    <input id="sidebar-search" type="text" placeholder="Filter slides… (regex)"
+           autocomplete="off" spellcheck="false"
+           oninput="filterSidebar(this.value)"
+           onkeydown="if(event.key==='Escape'){this.value='';filterSidebar('');this.blur();}" />
+  </div>
   <ul id="slide-list">
     <li class="sidebar-item sidebar-type-slide"
         data-target="grid-basic"
+        data-type="slide"
+        data-level="0"
+        data-subtitle="Cells fill the grid left-to-right, top-to-bottom"
         onclick="goToSlide('grid-basic')">
+      <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">1</span>
       <span class="sidebar-title">Auto-placement</span>
     </li>
     <li class="sidebar-item sidebar-type-slide"
         data-target="grid-sizing"
+        data-type="slide"
+        data-level="0"
+        data-subtitle="col_widths=[&#34;2fr&#34;, &#34;1fr&#34;], row_heights=[&#34;120px&#34;, &#34;1fr&#34;]"
         onclick="goToSlide('grid-sizing')">
+      <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">2</span>
       <span class="sidebar-title">Column widths & row heights</span>
     </li>
     <li class="sidebar-item sidebar-type-slide"
         data-target="grid-spanning"
+        data-type="slide"
+        data-level="0"
+        data-subtitle="colspan / rowspan stretch a cell across the grid"
         onclick="goToSlide('grid-spanning')">
+      <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">3</span>
       <span class="sidebar-title">Spanning cells</span>
     </li>
     <li class="sidebar-item sidebar-type-slide"
         data-target="templates-results"
+        data-type="slide"
+        data-level="0"
+        data-subtitle="slide_2x2 + centered cell template"
         onclick="goToSlide('templates-results')">
+      <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">4</span>
       <span class="sidebar-title">Results</span>
     </li>
     <li class="sidebar-item sidebar-type-slide"
         data-target="templates-summary"
+        data-type="slide"
+        data-level="0"
+        data-subtitle="slide_2x1 — cell defaults fall back to global (left-aligned)"
         onclick="goToSlide('templates-summary')">
+      <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">5</span>
       <span class="sidebar-title">Summary</span>
     </li>
@@ -1698,6 +1774,7 @@ cell-overflow  cell-halign-left cell-valign-top"
     initSliders();
     initLightbox();
     initSidebar();
+    initSidebarSections();
     initStage();
   }
 
@@ -1760,6 +1837,7 @@ cell-overflow  cell-halign-left cell-valign-top"
 
     resizePlotlyInSlide(slides[current]);
     renderMermaidInSlide(slides[current]);
+    revealActiveSidebarItem();
   }
 
   function navigate(delta) {
@@ -2117,6 +2195,168 @@ cell-overflow  cell-halign-left cell-valign-top"
     localStorage.setItem("tessera-sb-collapsed", collapsed ? "1" : "0");
   }
 
+  // -- Sidebar search & collapsible sections --------------
+  var _collapsedSections = new Set();
+  var _searchActive = false;
+  var _searchRe = null;
+  var _ancestors = new Map();      // item el -> [ancestor section id, ...] (outermost first)
+  var _sectionGroups = new Map();  // section id -> [descendant item els]
+  var _searchTimer = null;
+  var SB_COLLAPSED_KEY = "tessera-sb-collapsed-sections";
+
+  function initSidebarSections() {
+    if (!document.getElementById("slide-list")) return;   // chromeless / no sidebar
+    buildSectionTree();
+    hideEmptyCarets();
+    restoreCollapsed();
+    applySidebarVisibility();
+  }
+
+  // Walk the flat item list with a level stack to derive each item's ancestor
+  // sections. A section records its ancestors before pushing itself, so it is
+  // never its own ancestor; popping while top.level >= level means a level-1
+  // section's group spans nested level-2 subsections (level-based nesting).
+  function buildSectionTree() {
+    var items = Array.from(document.querySelectorAll(".sidebar-item"));
+    var stack = [];  // [{id, level}]
+    items.forEach(function (el) {
+      var type = el.dataset.type;
+      var level = parseInt(el.dataset.level, 10) || 0;
+      if (type === "section") {
+        while (stack.length && stack[stack.length - 1].level >= level) stack.pop();
+      }
+      var anc = stack.map(function (s) { return s.id; });
+      _ancestors.set(el, anc);
+      anc.forEach(function (id) {
+        if (!_sectionGroups.has(id)) _sectionGroups.set(id, []);
+        _sectionGroups.get(id).push(el);
+      });
+      if (type === "section") stack.push({ id: el.dataset.target, level: level });
+    });
+  }
+
+  function hideEmptyCarets() {
+    document.querySelectorAll('.sidebar-item[data-type="section"]').forEach(function (el) {
+      var group = _sectionGroups.get(el.dataset.target);
+      var caret = el.querySelector(".sidebar-caret");
+      if (caret && (!group || group.length === 0)) caret.classList.add("sidebar-caret-empty");
+    });
+  }
+
+  // -- Search --------------------------------------------
+  function filterSidebar(value) {
+    // Debounce so content-scope search stays responsive on large decks.
+    if (_searchTimer) clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function () { _applyFilter(value); }, 120);
+  }
+
+  function _applyFilter(value) {
+    var input = document.getElementById("sidebar-search");
+    value = (value || "").trim();
+    if (value === "") {
+      _searchActive = false; _searchRe = null;
+      if (input) input.classList.remove("sidebar-search-error");
+    } else {
+      try {
+        _searchRe = new RegExp(value, "i");
+        _searchActive = true;
+        if (input) input.classList.remove("sidebar-search-error");
+      } catch (e) {
+        _searchRe = null; _searchActive = false;   // invalid regex -> no filter
+        if (input) input.classList.add("sidebar-search-error");
+      }
+    }
+    applySidebarVisibility();
+  }
+
+  function getSearchHaystack(el) {
+    var scope = document.body.dataset.sbSearchScope || "title";
+    var t = el.querySelector(".sidebar-title");
+    var title = t ? t.textContent : "";
+    if (scope === "title_subtitle") return title + " " + (el.dataset.subtitle || "");
+    if (scope === "content") {
+      var slide = document.getElementById(el.dataset.target);
+      return title + " " + (slide ? slide.textContent : "");
+    }
+    return title;
+  }
+
+  function matchesSearch(el) {
+    if (!_searchActive || !_searchRe) return true;
+    return _searchRe.test(getSearchHaystack(el));
+  }
+
+  // -- Collapse ------------------------------------------
+  function toggleSection(event, sectionId) {
+    if (event) event.stopPropagation();
+    if (_collapsedSections.has(sectionId)) _collapsedSections.delete(sectionId);
+    else _collapsedSections.add(sectionId);
+    persistCollapsed();
+    syncCaret(sectionId);
+    applySidebarVisibility();
+  }
+
+  function syncCaret(sectionId) {
+    var sec = document.querySelector('.sidebar-item[data-target="' + cssEscape(sectionId) + '"]');
+    var caret = sec && sec.querySelector(".sidebar-caret");
+    if (caret) caret.classList.toggle("collapsed", _collapsedSections.has(sectionId));
+  }
+
+  function cssEscape(s) {
+    return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
+  }
+
+  function persistCollapsed() {
+    try {
+      localStorage.setItem(SB_COLLAPSED_KEY, JSON.stringify(Array.from(_collapsedSections)));
+    } catch (e) {}
+  }
+
+  function restoreCollapsed() {
+    try {
+      var raw = localStorage.getItem(SB_COLLAPSED_KEY);
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr)) arr.forEach(function (id) { _collapsedSections.add(id); });
+      }
+    } catch (e) {}
+    _collapsedSections.forEach(function (id) { syncCaret(id); });
+  }
+
+  function hasCollapsedAncestor(el) {
+    var anc = _ancestors.get(el) || [];
+    for (var i = 0; i < anc.length; i++) if (_collapsedSections.has(anc[i])) return true;
+    return false;
+  }
+
+  // Single source of truth: search overrides collapse while a query is active.
+  function applySidebarVisibility() {
+    var items = document.querySelectorAll(".sidebar-item");
+    if (!items.length) return;
+    items.forEach(function (el) {
+      var visible = _searchActive ? matchesSearch(el) : !hasCollapsedAncestor(el);
+      el.classList.toggle("sidebar-hidden", !visible);
+    });
+  }
+
+  // Auto-expand collapsed ancestors of the active item so keyboard/arrow nav
+  // into a folded section reveals it. Called at the end of goTo().
+  function revealActiveSidebarItem() {
+    var items = document.querySelectorAll(".sidebar-item");
+    var el = items[current];
+    if (!el) return;
+    var anc = _ancestors.get(el) || [];
+    var changed = false;
+    anc.forEach(function (id) {
+      if (_collapsedSections.has(id)) { _collapsedSections.delete(id); syncCaret(id); changed = true; }
+    });
+    if (changed) {
+      persistCollapsed();
+      if (!_searchActive) applySidebarVisibility();
+      el.scrollIntoView({ block: "nearest" });   // re-scroll now that it is shown
+    }
+  }
+
   // -- Copy -----------------------------------------------
   function copyCell(btn) {
     var cell = btn.closest(".cell");
@@ -2191,6 +2431,8 @@ cell-overflow  cell-halign-left cell-valign-top"
   window.lbResetZoom           = lbResetZoom;
   window.copyCell              = copyCell;
   window.sliderNav             = sliderNav;
+  window.filterSidebar         = filterSidebar;
+  window.toggleSection         = toggleSection;
 
   // -- Boot -----------------------------------------------
   if (document.readyState === "loading") {

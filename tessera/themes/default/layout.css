@@ -86,6 +86,32 @@ body.sb-no-transition #sidebar-resize-handle {
   letter-spacing: 0.05em;
 }
 
+/* ---- Sidebar search box ---- */
+#sidebar-search-wrap {
+  flex-shrink: 0;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-search {
+  width: 100%;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+
+#sidebar-search::placeholder { color: var(--color-text-muted); }
+#sidebar-search:focus { border-color: var(--color-accent); }
+#sidebar-search.sidebar-search-error {
+  border-color: var(--color-accent);
+  background: rgba(233, 69, 96, 0.12);
+}
+
 #slide-list {
   list-style: none;
   padding: 8px 0;
@@ -112,7 +138,7 @@ body.sb-no-transition #sidebar-resize-handle {
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   padding: 7px 12px;
   cursor: pointer;
   font-size: 0.8rem;
@@ -120,6 +146,29 @@ body.sb-no-transition #sidebar-resize-handle {
   transition: background 0.15s, color 0.15s;
   border-left: 3px solid transparent;
 }
+
+.sidebar-item.sidebar-hidden { display: none; }
+
+/* Section fold caret (and a matching spacer so titles align) */
+.sidebar-caret,
+.sidebar-caret-spacer {
+  flex-shrink: 0;
+  width: 12px;
+}
+
+.sidebar-caret {
+  text-align: center;
+  font-size: 0.6rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transform: rotate(90deg);          /* expanded rest state — points down */
+  transition: transform 0.12s ease, color 0.12s;
+}
+
+.sidebar-caret.collapsed { transform: rotate(0deg); }   /* points right */
+.sidebar-caret:hover { color: var(--color-text); }
+.sidebar-caret.sidebar-caret-empty { visibility: hidden; cursor: default; }
 
 .sidebar-item:hover {
   background: var(--color-surface2);

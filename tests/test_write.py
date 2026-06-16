@@ -202,3 +202,59 @@ def test_plotly_cell_in_output(tmp_path):
     html = out.read_text(encoding="utf-8")
     # Plotly embeds JSON with the figure data
     assert "Scatter XYZ" in html
+
+
+# ---------------------------------------------------------------------------
+# Sidebar search & collapsible sections
+# ---------------------------------------------------------------------------
+
+def test_sidebar_feature_defaults():
+    deck = HTMLSlides(title="T")
+    assert deck.sidebar_search is True
+    assert deck.sidebar_search_scope == "title"
+    assert deck.sidebar_collapsible_sections is True
+
+
+def test_sidebar_search_and_caret_in_output(tmp_path):
+    deck = minimal_deck()
+    deck.add_section("Intro")
+    s = deck.add_slide("Data", nrows=1, ncols=1)
+    s.add_text("x")
+    html = deck.write(tmp_path / "out", open_browser=False).read_text(encoding="utf-8")
+    assert 'id="sidebar-search"' in html
+    assert "filterSidebar(" in html
+    assert 'data-sb-search-scope="title"' in html
+    assert "sidebar-caret" in html
+    assert 'onclick="toggleSection(event' in html
+    assert 'data-type="section"' in html
+
+
+def test_sidebar_search_scope_content(tmp_path):
+    deck = minimal_deck(sidebar_search_scope="content")
+    deck.add_title("X")
+    html = deck.write(tmp_path / "out", open_browser=False).read_text(encoding="utf-8")
+    assert 'data-sb-search-scope="content"' in html
+
+
+def test_sidebar_search_disabled(tmp_path):
+    deck = minimal_deck(sidebar_search=False)
+    deck.add_title("X")
+    html = deck.write(tmp_path / "out", open_browser=False).read_text(encoding="utf-8")
+    assert 'id="sidebar-search"' not in html
+
+
+def test_sidebar_collapsible_sections_disabled(tmp_path):
+    deck = minimal_deck(sidebar_collapsible_sections=False)
+    deck.add_section("Intro")
+    html = deck.write(tmp_path / "out", open_browser=False).read_text(encoding="utf-8")
+    # The inline caret onclick must be gone (the JS function definition remains).
+    assert 'onclick="toggleSection(event' not in html
+    assert "sidebar-caret-spacer" in html   # section falls back to the spacer
+
+
+def test_sidebar_search_absent_when_no_sidebar(tmp_path):
+    deck = minimal_deck(show_sidebar=False)
+    deck.add_title("X")
+    html = deck.write(tmp_path / "out", open_browser=False).read_text(encoding="utf-8")
+    assert 'id="sidebar-search"' not in html
+    assert '<nav id="sidebar">' not in html

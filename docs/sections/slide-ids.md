@@ -35,6 +35,20 @@ The screen recording below show how to use ids to help updating content.
 
 ![VSCode-workflow](../_static/img/live-editing/animation.webp)
 
+### Title, section, and TOC slides
+
+The structural slide methods take the same kind of stable identifier, so their
+cells can be re-run without piling up duplicates:
+
+```python
+presentation.add_title("Report",   title_id="cover")
+presentation.add_toc(               toc_id="toc")
+presentation.add_section("Methods", section_id="methods")
+```
+
+Re-running an `add_section(..., section_id=...)` cell also updates its entry in
+the table of contents in place — it won't add a second TOC row.
+
 
 ## Retrieving and editing slides
 

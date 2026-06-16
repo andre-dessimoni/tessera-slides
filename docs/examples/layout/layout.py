@@ -12,6 +12,7 @@ slides = HTMLSlides(
     size=(1280, 720),
     scale_up=True,
     sidebar_collapsed=True,
+    sidebar_collapsible_sections=True, sidebar_search=True,
 )
 
 # -- Auto-placement (grid-basic) -------------------------------------------

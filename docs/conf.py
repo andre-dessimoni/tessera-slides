@@ -27,6 +27,7 @@ _SLIDE_GENERATORS = [
     _HERE / "examples" / "quickstart" / "quickstart.py",
     _HERE / "examples" / "layout"     / "layout.py",
     _HERE / "examples" / "cell_types" / "cell_types.py",
+    _HERE / "examples" / "structure"  / "structure.py",
 ]
 
 

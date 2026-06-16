@@ -162,8 +162,10 @@ def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
 
         # --- 3. Resolve position ---
         # If cell_id already exists, we treat this as an update to an existing cell,
-        # so we keep the same position and just replace the content.
+        # so we keep the same grid position AND list position, replacing the content.
+        _overwrite_idx = None
         if cell_id in slide.cell_map:
+            _overwrite_idx = slide._cells.index(slide.cell_map[cell_id])
             slide.remove_cell(cell_id=cell_id, _caller_is_cell_method=True)
 
         col, row = slide._resolve_position(col, row, colspan, rowspan)
@@ -192,7 +194,7 @@ def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
                 f"but returned {type(cell).__name__}"
             )
 
-        slide._register_cell(cell, cell_id=cell_id)
+        slide._register_cell(cell, cell_id=cell_id, index=_overwrite_idx)
 
         # --- 10. Autosave if level cell
         if slide.parent.autosave and slide.parent.autosave_level == 'cell':

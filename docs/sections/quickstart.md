@@ -195,3 +195,31 @@ hiding it — it can still be toggled open with the toolbar button or the `B` ke
 ```python
 slides = HTMLSlides(title="Report", sidebar_collapsed=True)
 ```
+
+## Sidebar navigation
+
+For longer decks the sidebar has two navigation aids, both on by default:
+
+- A **regex search box** at the top that live-filters slides as you type.
+- **Collapsible sections** — a caret on each section item folds/unfolds the
+  slides under it. Nested sub-sections fold with their parent, and the
+  collapsed state is remembered across reloads.
+
+```python
+slides = HTMLSlides(
+    title="Report",
+    sidebar_search=True,                 # show the filter box (default)
+    sidebar_search_scope="title",        # "title" | "title_subtitle" | "content"
+    sidebar_collapsible_sections=True,   # show section carets (default)
+)
+```
+
+| Option | Effect |
+|---|---|
+| `sidebar_search` | Show/hide the search box |
+| `sidebar_search_scope` | What the regex matches: the title, title + subtitle, or the slide's full rendered text (`"content"`) |
+| `sidebar_collapsible_sections` | Show/hide the fold carets on section items |
+
+The search is case-insensitive and accepts full JavaScript regex (e.g.
+`^Intro|results$`); an invalid pattern simply leaves the list unfiltered. While a
+search is active it overrides collapsed sections, so a match is never hidden.

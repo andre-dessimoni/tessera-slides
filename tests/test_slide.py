@@ -78,6 +78,22 @@ def test_rowspan_marks_cells_occupied(slide_2x2):
 
 
 # ---------------------------------------------------------------------------
+# Cell overwrite by cell_id — position preserved, no duplicate
+# ---------------------------------------------------------------------------
+
+def test_cell_overwrite_preserves_list_position(slide_1x3):
+    slide_1x3.add_text("X", cell_id="x")
+    slide_1x3.add_text("Y", cell_id="y")
+    slide_1x3.add_text("Z", cell_id="z")
+    # Re-run the first cell's code.
+    slide_1x3.add_text("X updated", cell_id="x")
+    ids = [c.params.cell_id for c in slide_1x3._cells]
+    assert ids == ["x", "y", "z"]           # order kept, not moved to end
+    assert len(slide_1x3._cells) == 3       # no duplicate
+    assert slide_1x3._cell_map["x"].content == "X updated"
+
+
+# ---------------------------------------------------------------------------
 # Manual positioning
 # ---------------------------------------------------------------------------
 
@@ -148,5 +164,5 @@ def test_canvas_full_raises(slide_2x2):
 def test_slide_repr(slide_2x2):
     r = repr(slide_2x2)
     assert "Test Slide" in r
-    assert "2×2" in r
+    assert "2x2" in r
     assert "slide" in r

@@ -13,6 +13,7 @@
 </head>
 <body
   class="{% if deck.size %}fixed-size {% endif %}{% if not deck.show_sidebar %}no-sidebar {% endif %}{% if not deck.show_toolbar %}no-toolbar {% endif %}{% if deck.show_sidebar and deck.sidebar_collapsed %}sb-collapsed{% endif %}"
+  data-sb-search-scope="{{ deck.sidebar_search_scope }}"
   {% if deck.size %}
   data-width="{{ deck.size[0] }}"
   data-height="{{ deck.size[1] }}"
@@ -26,12 +27,28 @@
 <!-- ===================== SIDEBAR ===================== -->
 <nav id="sidebar">
   <div id="sidebar-header">{{ deck.title }}</div>
+  {% if deck.sidebar_search %}
+  <div id="sidebar-search-wrap">
+    <input id="sidebar-search" type="text" placeholder="Filter slides… (regex)"
+           autocomplete="off" spellcheck="false"
+           oninput="filterSidebar(this.value)"
+           onkeydown="if(event.key==='Escape'){this.value='';filterSidebar('');this.blur();}" />
+  </div>
+  {% endif %}
   <ul id="slide-list">
     {% for item in rendered_slides %}
     {% set slide = item.slide %}
     <li class="sidebar-item sidebar-type-{{ slide.slide_type }}{% if slide.slide_type == 'section' %} sidebar-level-{{ slide.level }}{% endif %}"
         data-target="{{ slide.slide_id }}"
+        data-type="{{ slide.slide_type }}"
+        data-level="{% if slide.slide_type == 'section' %}{{ slide.level }}{% else %}0{% endif %}"
+        data-subtitle="{{ slide.subtitle | e }}"
         onclick="goToSlide('{{ slide.slide_id }}')">
+      {% if slide.slide_type == 'section' and deck.sidebar_collapsible_sections %}
+      <span class="sidebar-caret" onclick="toggleSection(event, '{{ slide.slide_id }}')">&#9656;</span>
+      {% else %}
+      <span class="sidebar-caret-spacer"></span>
+      {% endif %}
       <span class="sidebar-num">{{ loop.index }}</span>
       <span class="sidebar-title">{{ slide.title }}</span>
     </li>
