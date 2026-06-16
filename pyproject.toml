@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tessera-slides"
-version = "0.1.1"
+version = "0.3.0"
 description = "Generate self-contained HTML slideshows for technical documents"
 readme = "README.md"
 license = "MIT"
