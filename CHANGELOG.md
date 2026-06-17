@@ -4,6 +4,25 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- `_repr_html_` on `HTMLSlides`, `Slide`, and `Cell` for inline previews in
+  Jupyter notebooks: return a deck, slide, or cell as a cell's last expression to
+  render it in a sandboxed iframe (slide/cell previews are chrome-free and reuse
+  the deck's theme and plugins).
+- Sidebar fold toolbar: Collapse all / Expand all / Collapse level / Expand level
+  buttons (shown when `sidebar_collapsible_sections` is on). The level buttons
+  fold/unfold one nesting layer per click.
+- Sidebar search regex toggle (literal matching by default; click `.*` to switch
+  to regex), with a hover tooltip of common regex patterns while in regex mode.
+  The chosen mode is remembered across reloads.
+
+### Changed
+
+- Sidebar arrow-key / prev-next navigation now steps only over *visible* items,
+  skipping slides hidden by an active search filter or a collapsed section.
+- Slightly enlarged the section fold caret for legibility.
+
 ## [0.3.0] - 2026-06-15
 
 ### Added

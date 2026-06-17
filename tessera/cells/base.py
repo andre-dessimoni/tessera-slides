@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import functools
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Any, Callable, Literal, Hashable
 
 # Importing jinja2 and Slide only for type annotations, to avoid circular 
@@ -80,11 +80,59 @@ class Cell(ABC):
 
     def __init__(self, params: CellParams) -> None:
         self.params = params
+        self._slide: "Slide | None" = None   # set by Slide._register_cell
 
     @abstractmethod
     def render(self, env: "jinja2.Environment") -> str:
         """Renders and returns the cell's HTML fragment."""
         ...
+
+    def _repr_html_(self) -> str:
+        """Render an inline preview of this single cell for Jupyter notebooks.
+
+        The cell is rendered on its own 1x1 chrome-free canvas. When the cell is
+        attached to a deck its theme and plugins are reused; otherwise a default
+        deck with all plugins is used so any cell type renders correctly.
+        """
+        from tessera.core.assembler import Assembler
+        from tessera.core.slide import Slide
+        from tessera.utils.notebook import (
+            CELL_PREVIEW_HEIGHT, iframe_srcdoc, preview_error,
+        )
+        try:
+            src = getattr(self._slide, "parent", None)
+            if src is not None:
+                deck = src._preview_clone([])
+            else:
+                from tessera.core.slides import HTMLSlides, Plugin
+                deck = HTMLSlides(
+                    title="cell",
+                    plugins=[Plugin(n, "cdn") for n in
+                             ("plotly", "mermaid", "highlight", "mathjax")],
+                    show_sidebar=False,
+                    show_toolbar=False,
+                )
+
+            slide = Slide(
+                slide_id="_preview", title="", subtitle="", slide_type="slide",
+                nrows=1, ncols=1, row_heights=None, col_widths=None, notes="",
+                cell_defaults=deck.cell_defaults, plugin_names=deck._plugin_names,
+                parent=deck,
+            )
+            # Render this very cell at (1,1) so it fills the 1x1 preview canvas.
+            saved = self.params
+            self.params = replace(saved, col=1, row=1, colspan=1, rowspan=1)
+            try:
+                slide._cells = [self]
+                slide._cell_map = {self.params.cell_id: self}
+                deck._slides = [slide]
+                deck._slide_map = {slide.slide_id: slide}
+                html = Assembler(deck)._render()
+            finally:
+                self.params = saved
+            return iframe_srcdoc(html, height=CELL_PREVIEW_HEIGHT)
+        except Exception as exc:   # never break the notebook on a preview failure
+            return preview_error(self, exc)
 
     @property
     def col(self) -> int:

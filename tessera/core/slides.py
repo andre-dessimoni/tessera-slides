@@ -407,7 +407,14 @@ class HTMLSlides:
             slide_id=slide_id,
             cell_defaults=cell_defaults if cell_defaults is not None else self.cell_defaults,
         )
+    
 
+    def render(self):
+        from tessera.core.assembler import Assembler
+
+        assembler = Assembler(self)
+        return assembler._render()
+    
     def write(
         self,
         filename:     str | Path | None = None,
@@ -531,3 +538,60 @@ class HTMLSlides:
             f"HTMLSlides(title={self.title!r}, slides={len(self._slides)}, "
             f"theme={self.theme!r})"
         )
+
+    # ------------------------------------------------------------------
+    # Jupyter preview
+    # ------------------------------------------------------------------
+
+    def _preview_clone(
+        self,
+        slides: list[Slide],
+        sections: list[dict[str, Any]] | None = None,
+    ) -> "HTMLSlides":
+        """Build a chrome-free deck cloning this deck's visual configuration.
+
+        Used to render single-slide / single-cell previews through the normal
+        pipeline (same theme, plugins, and stage settings) without the
+        navigation sidebar or toolbar.
+
+        Args:
+            slides: Slide objects to place in the temporary deck.
+            sections: Optional TOC section registry to carry over (for fidelity
+                of section/TOC slide previews).
+
+        Returns:
+            A throwaway :class:`HTMLSlides` ready to pass to the Assembler.
+        """
+        clone = HTMLSlides(
+            title=self.title,
+            author=self.author,
+            date=self.date,
+            version=self.version,
+            theme=self.theme,
+            custom_css=self.custom_css,
+            self_contained=self.self_contained,
+            plugins=self.plugins,
+            slide_defaults=self.slide_defaults,
+            cell_defaults=self.cell_defaults,
+            size=self.size,
+            scale_up=self.scale_up,
+            keep_aspect_ratio=self.keep_aspect_ratio,
+            show_sidebar=False,
+            show_toolbar=False,
+        )
+        clone._slides = list(slides)
+        clone._slide_map = {s.slide_id: s for s in slides}
+        clone._sections = list(sections) if sections else []
+        return clone
+
+    def _repr_html_(self) -> str:
+        """Render an inline preview of the whole deck for Jupyter notebooks."""
+        from tessera.core.assembler import Assembler
+        from tessera.utils.notebook import (
+            DECK_PREVIEW_HEIGHT, iframe_srcdoc, preview_error,
+        )
+        try:
+            html = Assembler(self)._render()
+            return iframe_srcdoc(html, height=DECK_PREVIEW_HEIGHT)
+        except Exception as exc:   # never break the notebook on a preview failure
+            return preview_error(self, exc)

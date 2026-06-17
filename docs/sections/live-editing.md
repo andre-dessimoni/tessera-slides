@@ -1,5 +1,26 @@
 # Live editing
 
+## Notebook preview
+
+In Jupyter (or any frontend that honours `_repr_html_`), returning a deck, a
+slide, or a single cell as the last expression in a cell renders an inline,
+sandboxed preview — no need to write a file or open a browser:
+
+```python
+slides = HTMLSlides(title="Q3 Report", plugins=[Plugin("plotly", "cdn")])
+slides.add_title("Q3 Report")
+slide = slides.add_slide("KPIs", nrows=1, ncols=2)
+cell  = slide.add_metric(value=98.7, label="Efficiency")
+
+slides   # full deck preview (with sidebar / toolbar)
+slide    # just this slide, chrome-free
+cell     # just this cell
+```
+
+Each preview is embedded in an isolated `<iframe>` so the deck's styling and
+scripts never leak into the notebook. Slide and cell previews reuse the deck's
+theme and plugins.
+
 ## Autosave
 
 Pass `autosave` with a filename to have tessera write the HTML file automatically

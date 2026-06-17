@@ -142,6 +142,8 @@ class Slide:
             for c in range(p.col, p.col + p.colspan):
                 self._occupied[r - 1][c - 1] = True
 
+        cell._slide = self   # back-reference; used by Cell._repr_html_ previews
+
         if index is None:
             self._cells.append(cell)
         else:
@@ -462,7 +464,20 @@ class Slide:
             f"Slide(id={self.slide_id!r}, type={self.slide_type!r}, "
             f"title={self.title!r}, grid={self.nrows}x{self.ncols})"
         )
-    
+
+    def _repr_html_(self) -> str:
+        """Render an inline, chrome-free preview of this slide for Jupyter."""
+        from tessera.core.assembler import Assembler
+        from tessera.utils.notebook import (
+            SLIDE_PREVIEW_HEIGHT, iframe_srcdoc, preview_error,
+        )
+        try:
+            deck = self.parent._preview_clone([self], sections=self.parent._sections)
+            html = Assembler(deck)._render()
+            return iframe_srcdoc(html, height=SLIDE_PREVIEW_HEIGHT)
+        except Exception as exc:   # never break the notebook on a preview failure
+            return preview_error(self, exc)
+
     # ------------------------------------------------------------------
     # Properties
     # ------------------------------------------------------------------
