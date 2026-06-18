@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# ---------------------------------------------------------------------------
+# Deprecation shim for the OLD distribution name `tessera-slides`.
+#
+# This is a SEPARATE, standalone project — build and upload it on its own,
+# after `tessera-report` is published. It simply depends on `tessera-report`,
+# so `pip install tessera-slides` keeps working and forwards to the new
+# package. `import tessera` is unchanged (provided by `tessera-report`).
+#
+# Build/publish (run from this directory):
+#   python -m build && twine upload dist/*
+# ---------------------------------------------------------------------------
+
+[project]
+name = "tessera-slides"
+version = "0.3.2"
+description = "Deprecated — renamed to 'tessera-report'. Installs tessera-report and keeps 'import tessera' working."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "André Rezende Dessimoni Carvalho", email = "andre.rdc@outlook.com" },
+]
+keywords = ["deprecated", "tessera", "tessera-report"]
+classifiers = [
+    "Development Status :: 7 - Inactive",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+]
+dependencies = [
+    "tessera-report>=0.4.0",
+]
+
+[project.urls]
+Homepage      = "https://github.com/andre-dessimoni/tessera-report"
+Documentation = "https://tessera-report.readthedocs.io/"
+
+[tool.setuptools]
+py-modules = ["tessera_slides"]
