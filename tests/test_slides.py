@@ -1,6 +1,7 @@
 """Tests for Deck, Plugin, SlideDefaults, CellDefaults."""
 
 import datetime
+import re
 
 import pytest
 
@@ -286,6 +287,20 @@ def test_fluid_default_has_no_stage(tmp_path):
     out = deck.write(tmp_path / "out")
     html = out.read_text(encoding="utf-8")
     assert 'class="fixed-size"' not in html
+
+
+def test_cover_centers_independent_of_flex_parent(tmp_path):
+    # Regression: in fixed-size mode the flex container is .stage (the .slide is
+    # display:block), so cover centering must live on .slide-cover itself
+    # (margin:auto), not on the parent's align/justify. Otherwise section/title
+    # cover slides render top-left when `size=` is set.
+    deck = Deck(title="X", size=(1280, 720))
+    deck.add_section("My Section")
+    out = deck.write(tmp_path / "out")
+    html = out.read_text(encoding="utf-8")
+    block = re.search(r"\.slide-cover\s*\{[^}]*\}", html)
+    assert block is not None
+    assert "margin: auto" in block.group(0)
 
 
 # ---------------------------------------------------------------------------

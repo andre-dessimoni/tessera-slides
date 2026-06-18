@@ -38,6 +38,11 @@
   max-width: 680px;
   width: 100%;
   padding: 0 24px;
+  /* Center the cover within its flex parent on both axes. This works whether
+     the parent is .slide (fluid mode, where .stage is display:contents) or
+     .stage (fixed-size mode, where .slide is display:block) - relying on the
+     parent's align-items/justify-content breaks in fixed-size mode. */
+  margin: auto;
 }
 
 .slide-cover-title {

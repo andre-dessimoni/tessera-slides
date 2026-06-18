@@ -35,6 +35,13 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   expanding it) instead of skipping over it; search-filtered slides are still
   skipped.
 
+### Fixed
+
+- Title and section cover slides are now centered in fixed-size (`size=`) mode.
+  The centering had relied on the `.slide` being the flex container, but in
+  fixed-size mode that role moved to `.stage`, so covers rendered top-left;
+  the cover now centers itself via `margin:auto`, working in both modes.
+
 ### Changed (breaking)
 
 - **Renamed the PyPI distribution `tessera-slides` → `tessera-report`.** The
