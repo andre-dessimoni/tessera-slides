@@ -1,13 +1,13 @@
-"""Generates docs/_static/slides/layout.html — the embedded previews for the
+"""Generates docs/_static/deck/layout.html — the embedded previews for the
 "Layout" documentation section. Each slide has a stable slide_id so the docs can
 deep-link to it from an <iframe src="...layout.html#grid-sizing"> block.
 
-Run via `make.bat slides` (or any docs build). See docs/conf.py.
+Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
-from tessera import CellDefaults, HTMLSlides, SlideDefaults
+from tessera import CellDefaults, Deck, SlideDefaults
 
-slides = HTMLSlides(
+deck = Deck(
     title="Layout",
     size=(1280, 720),
     scale_up=True,
@@ -16,7 +16,7 @@ slides = HTMLSlides(
 )
 
 # -- Auto-placement (grid-basic) -------------------------------------------
-s = slides.add_slide(
+s = deck.add_slide(
     "Auto-placement",
     subtitle="Cells fill the grid left-to-right, top-to-bottom",
     nrows=2, ncols=3,
@@ -28,7 +28,7 @@ for label in ["A", "B", "C", "D", "E"]:
 s.add_text("### F", row=2, col=3)
 
 # -- Column widths & row heights (grid-sizing) -----------------------------
-s = slides.add_slide(
+s = deck.add_slide(
     "Column widths & row heights",
     subtitle='col_widths=["2fr", "1fr"], row_heights=["120px", "1fr"]',
     nrows=2, ncols=2,
@@ -43,7 +43,7 @@ s.add_text("### 2fr × 1fr")
 s.add_text("### 1fr × 1fr")
 
 # -- Spanning cells (grid-spanning) ----------------------------------------
-s = slides.add_slide(
+s = deck.add_slide(
     "Spanning cells",
     subtitle="colspan / rowspan stretch a cell across the grid",
     nrows=2, ncols=3,
@@ -63,7 +63,7 @@ slide_2x2 = SlideDefaults(ncols=2, nrows=2)
 slide_2x1 = SlideDefaults(ncols=2, nrows=1)
 centered  = CellDefaults(halign="center", valign="middle")
 
-s = slides.add_slide(
+s = deck.add_slide(
     "Results", subtitle="slide_2x2 + centered cell template",
     slide_defaults=slide_2x2, cell_defaults=centered,
     slide_id="templates-results",
@@ -71,7 +71,7 @@ s = slides.add_slide(
 for i in range(s.nrows * s.ncols):
     s.add_text(f"### Cell {i}")
 
-s = slides.add_slide(
+s = deck.add_slide(
     "Summary", subtitle="slide_2x1 — cell defaults fall back to global (left-aligned)",
     slide_defaults=slide_2x1,
     slide_id="templates-summary",
@@ -79,5 +79,5 @@ s = slides.add_slide(
 for i in range(s.nrows * s.ncols):
     s.add_text(f"Cell {i}")
 
-slides.write("../../_static/slides/layout.html")
+deck.write("../../_static/deck/layout.html")
 print("layout.html written")

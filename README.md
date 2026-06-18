@@ -1,42 +1,60 @@
 # téssera
 
-Python library for generating self-contained HTML slideshows for technical 
-documents.
+Build **self-contained, interactive HTML reports** from Python — one file you
+can email, commit, or serve, with no runtime and no dependencies on the viewer's
+machine. Designed for **batch-generated data and ML output**: loop over your
+experiments, runs, or segments and emit a report per iteration.
 
-## Documentation:
+Content is laid out on a grid of typed cells (charts, tables, metrics, code,
+images, diagrams), and the whole deck embeds into a single `.html`.
 
-https://tessera-slides.readthedocs.io/
+## Documentation
+
+https://tessera-report.readthedocs.io/
 
 ## Installation
 
 ```bash
-pip install tessera-slides
+pip install tessera-report
 
 # With Plotly, Pandas and Markdown support:
-pip install "tessera-slides[full]"
+pip install "tessera-report[full]"
 ```
 
 
 ## Quick start
 
 ```python
-from tessera import HTMLSlides, Plugin, SlideDefaults, CellDefaults
+from tessera import Deck, Plugin, SlideDefaults, CellDefaults
 
-slides = HTMLSlides(
+deck = Deck(
     title="My Report",
     slide_defaults=SlideDefaults(nrows=2, ncols=2),
     cell_defaults=CellDefaults(expand_button=True),
     plugins=[Plugin("plotly", "cdn"), Plugin("mermaid", "cdn")],
 )
 
-slides.add_title("My Report", subtitle="Subtitle here")
-slides.add_section("1 — Introduction")
+deck.add_title("My Report", subtitle="Subtitle here")
+deck.add_section("1 — Introduction")
 
-slide = slides.add_slide("Results")
+slide = deck.add_slide("Results")
 slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3)
 slide.add_text("Text with **markdown** and LaTeX: $E = mc^2$")
 
-slides.write("report", open_browser=True)
+deck.write("report", open_browser=True)
+```
+
+## Batch generation
+
+The core use case — one report per run, generated in a loop:
+
+```python
+for run in experiment_runs:
+    deck = Deck(title=f"Run {run.id}")
+    slide = deck.add_slide("Metrics", nrows=1, ncols=3)
+    slide.add_metric(value=run.accuracy, label="Accuracy", delta=run.delta)
+    slide.add_plotly(run.loss_curve)
+    deck.write(f"reports/run-{run.id}")
 ```
 
 

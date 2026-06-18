@@ -4,9 +4,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 
-from tessera import HTMLSlides, Plugin
+from tessera import Deck, Plugin
 
-slides = HTMLSlides(
+deck = Deck(
     title="My Report",
     author="André Dessimoni",
     plugins=[
@@ -24,7 +24,7 @@ slides = HTMLSlides(
 # Example of grid and basic cell types
 # -----------------------------------------------------------------------------
 
-slide = slides.add_slide(
+slide = deck.add_slide(
     'Grid of cells', subtitle="Example of grid and basic cell types",
     nrows=3, ncols=4, 
     row_heights=['40%', '40%', '20%'],
@@ -72,7 +72,7 @@ slide.add_text(
 # Example of looping to create multiple similar cells
 # -----------------------------------------------------------------------------
 
-slide = slides.add_slide('Matplotlib and code cells', nrows=2, ncols=3)
+slide = deck.add_slide('Matplotlib and code cells', nrows=2, ncols=3)
 
 slide.add_text('Looping is a good way to automate the creation of multiple similar cells. '
     'The figures were created using the code snippet below '
@@ -120,7 +120,7 @@ plt.close()
 # Example of Iframe and Plotly cells
 # -----------------------------------------------------------------------------
 
-slide = slides.add_slide('Iframes, Plotly and Tables', nrows=2, ncols=2, 
+slide = deck.add_slide('Iframes, Plotly and Tables', nrows=2, ncols=2, 
                          row_heights=['70%', '30%'])
 slide.add_iframe(
     "https://www.openstreetmap.org/export/embed.html?bbox=-46.504440307617195%2C-23.414107280167556%2C-45.62690734863281%2C-22.986841807912054&amp;layer=mapnik",
@@ -140,7 +140,7 @@ slide.add_plotly(fig, caption='Example of a Plotly cell displaying an '
 slide.add_text(
     'The **iframe** and **Plotly** cells are interactive, allowing you to '
     'embed live content and interactive visualizations directly '
-    'into your slides.\n\n'
+    'into your deck.\n\n'
     'You can also add a **table cell** to display a DataFrame, as '
     'shown below. \n\n'
     'All cells support options to avoid **overflow** and add an '
@@ -153,5 +153,5 @@ slide.add_table(df.query('continent=="Americas"'),
                 expand_button=True, overflow=False)
 
 # -----------------------------------------------------------------------------
-slides.write('../../_static/example1.html')
+deck.write('../../_static/example1.html')
 print('done')

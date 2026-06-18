@@ -185,7 +185,7 @@ Requires `Plugin("mermaid", "cdn")`.
 
 ```python
 
-slide = slides.add_slide("Example", nrows=2, ncols=2, row_heights=['2fr', '1fr'])
+slide = deck.add_slide("Example", nrows=2, ncols=2, row_heights=['2fr', '1fr'])
 
 slide.add_mermaid("""
 ---
@@ -243,7 +243,7 @@ gantt
 Raw HTML injected without escaping — full styling freedom.
 
 ```python
-slide = slides.add_slide('HTML Cell example', ncols=2, nrows=2)
+slide = deck.add_slide('HTML Cell example', ncols=2, nrows=2)
 slide.add_html("""
 <style>
 @keyframes tsa-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.18);opacity:.6} }
@@ -321,7 +321,7 @@ slide.add_iframe(
 Reserves grid space without rendering any content. Useful for asymmetric layouts.
 
 ```python
-slide = slides.add_slide("Example", nrows=2, ncols=2)
+slide = deck.add_slide("Example", nrows=2, ncols=2)
 slide.add_metric(value=42, label="KPI", rowspan=2)  # col 1, rows 1 and 2
 slide.add_text("Text")                               # col 2, row 1
 slide.add_empty()                                    # col 2, row 2 — empty space

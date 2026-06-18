@@ -2,14 +2,14 @@
 "Basic structure" example in the Quick start docs. Kept in sync (by hand) with the
 illustrative code block in docs/sections/quickstart.md.
 
-Run via `make.bat slides` (or any docs build). See docs/conf.py.
+Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
 import plotly.express as px
 
-from tessera import HTMLSlides, Plugin
+from tessera import Deck, Plugin
 
-slides = HTMLSlides(
+deck = Deck(
     title="Q2 Report",
     author="A. Dessimoni",
     plugins=[Plugin("plotly", "cdn"), Plugin("mermaid", "cdn")],
@@ -19,7 +19,7 @@ slides = HTMLSlides(
 )
 
 # -- KPIs + pipeline diagram -----------------------------------------------
-slide = slides.add_slide("Overview", nrows=2, ncols=3)
+slide = deck.add_slide("Overview", nrows=2, ncols=3)
 slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3, delta_label="vs Q1")
 slide.add_metric(value=142, label="Incidents", delta=-18, lower_is_better=True)
 slide.add_metric(value="4.8 s", label="Avg response time")
@@ -36,7 +36,7 @@ gantt
 """, colspan=2, row=2, col=1)
 
 # -- Trend chart + breakdown table -----------------------------------------
-slide = slides.add_slide("Trends", nrows=1, ncols=2)
+slide = deck.add_slide("Trends", nrows=1, ncols=2)
 
 df = px.data.stocks()
 fig = px.line(df, x="date", y=["GOOG", "AAPL"])
@@ -48,5 +48,5 @@ slide.add_table({
     "Uptime (%)": [99.1,      97.8,      91.3,      98.6],
 })
 
-slides.write("../../_static/quick-start-report.html")
+deck.write("../../_static/quick-start-report.html")
 print("quick-start-report.html written")

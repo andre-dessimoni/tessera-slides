@@ -9,7 +9,7 @@ Use `col` and `row` to place a cell at a specific position (1-indexed) instead
 of the next available slot.
 
 ```python
-slide = slides.add_slide("Example", nrows=2, ncols=3)
+slide = deck.add_slide("Example", nrows=2, ncols=3)
 
 slide.add_text("A")   # row 1, col 1
 slide.add_text("B")   # row 1, col 2
@@ -32,7 +32,7 @@ By default the grid distributes space evenly. Use `col_widths` and `row_heights`
 to set explicit sizes using any valid CSS length (`px`, `%`, `fr`, etc.).
 
 ```python
-slide = slides.add_slide(
+slide = deck.add_slide(
     "Custom sizing",
     nrows=2,
     ncols=2,
@@ -58,7 +58,7 @@ Use `col` and `row` to place a cell at a specific position (1-indexed) instead
 of the next available slot.
 
 ```python
-slide = slides.add_slide("Spanning", nrows=2, ncols=3)
+slide = deck.add_slide("Spanning", nrows=2, ncols=3)
 
 # Spans columns 1 and 2 of row 1
 slide.add_text("Wide header", colspan=2)
@@ -87,12 +87,12 @@ slide.add_image("photo.png", col=2, row=1, rowspan=2)
 `SlideDefaults` and `CellDefaults` can be instantiated independently and passed
 per-slide via `slide_defaults` and `cell_defaults`. This lets you define reusable
 layout templates and apply them selectively, without changing the global defaults
-set on `HTMLSlides`.
+set on `Deck`.
 
 ```python
-from tessera import HTMLSlides, SlideDefaults, CellDefaults
+from tessera import Deck, SlideDefaults, CellDefaults
 
-slides = HTMLSlides(title="Template Report")
+deck = Deck(title="Template Report")
 
 # Define reusable templates
 slide_2x2     = SlideDefaults(ncols=2, nrows=2)
@@ -100,23 +100,23 @@ slide_2x1     = SlideDefaults(ncols=2, nrows=1)
 centered_cell = CellDefaults(halign="center", valign="middle")
 
 # Apply a layout template and a cell template together
-s = slides.add_slide("Results", slide_defaults=slide_2x2, cell_defaults=centered_cell)
+s = deck.add_slide("Results", slide_defaults=slide_2x2, cell_defaults=centered_cell)
 for i in range(s.nrows * s.ncols):
     s.add_text(f"Cell {i}")
 
 # Apply only a layout template; cell defaults fall back to the global ones
-s = slides.add_slide("Summary", slide_defaults=slide_2x1)
+s = deck.add_slide("Summary", slide_defaults=slide_2x1)
 for i in range(s.nrows * s.ncols):
     s.add_text(f"Cell {i}")
 
-slides.write("template_report", open_browser=True)
+deck.write("template_report", open_browser=True)
 ```
 
 The priority order for each parameter is:
 
 1. **Explicit argument** — value passed directly to `add_slide()` or `add_*()`.
 2. **Per-call default** — `slide_defaults` / `cell_defaults` argument on `add_slide()`.
-3. **Global default** — `slide_defaults` / `cell_defaults` set on `HTMLSlides`.
+3. **Global default** — `slide_defaults` / `cell_defaults` set on `Deck`.
 
 ```{raw} html
 <iframe class="tessera-embed" src="../_static/slides/layout.html#templates-results"

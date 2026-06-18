@@ -120,7 +120,7 @@ html_logo  = "_static/tessera-logo.png"
 html_theme_options = {
     "sidebar_hide_name":    False,
     "navigation_with_keys": True,
-    "source_repository":    "https://github.com/andre-dessimoni/tessera-slides/",
+    "source_repository":    "https://github.com/andre-dessimoni/tessera-report/",
     "source_branch":        "main",
     "source_directory":     "docs/",
 }

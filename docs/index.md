@@ -1,21 +1,26 @@
 # téssera
 
-**téssera** is a Python library for generating self-contained HTML slideshows 
-— ideal for technical reports, dashboards, and engineering presentations.
+**téssera** is a Python library for generating **self-contained, interactive
+HTML reports** from data — a single `.html` file with no runtime, ideal for
+batch-generated ML and analytics output, dashboards, and technical reports.
+
+Content lives on a grid of typed cells (charts, tables, metrics, code, images,
+diagrams). Build a report programmatically, then `write()` it to one portable
+file you can email, commit, or serve.
 
 
 ```bash
 # Core only
-pip install tessera-slides
+pip install tessera-report
 
 
 # Full support (Plotly, Pandas, Markdown)
-pip install "tessera-slides[full]"
+pip install "tessera-report[full]"
 ```
 
 ## Live demo
 
-The presentaion below is an example of the capabilities of téssera.
+The report below is an example of the capabilities of téssera.
 
 For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom toolbar.
 
@@ -27,22 +32,22 @@ For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom tool
 ## Example of use:
 
 ```python
-from tessera import HTMLSlides, Plugin, SlideDefaults
+from tessera import Deck, Plugin, SlideDefaults
 
-slides = HTMLSlides(
+deck = Deck(
     title="Report",
     plugins=[Plugin("plotly", "cdn"), Plugin("mermaid", "cdn")],
 )
 
-slides.add_title("Report", subtitle="Production Engineering")
+deck.add_title("Report", subtitle="Production Engineering")
 
-slide = slides.add_slide("KPIs", nrows=1, ncols=3)
+slide = deck.add_slide("KPIs", nrows=1, ncols=3)
 
 slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3)
 slide.add_metric(value=142,  label="Defects", delta=-18)
 slide.add_metric(value="4.8", label="NPS")
 
-slides.write("report", open_browser=True)
+deck.write("report", open_browser=True)
 ```
 
 ---

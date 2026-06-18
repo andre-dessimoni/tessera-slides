@@ -4,24 +4,24 @@
 
 ```bash
 # Core only
-pip install tessera-slides
+pip install tessera-report
 
 
 # Full support (Plotly, Pandas, Markdown)
-pip install "tessera-slides[full]"
+pip install "tessera-report[full]"
 ```
 
 ## Basic structure
 
-Every slideshow follows the same pattern:
+Every report follows the same pattern:
 
 ```python
 
 import plotly.express as px
-from tessera import HTMLSlides, Plugin
+from tessera import Deck, Plugin
 
 # 1. Create the deck
-slides = HTMLSlides(
+deck = Deck(
     title="Q2 Report",
     author="A. Dessimoni",
     plugins=[Plugin("plotly", "cdn"), Plugin("mermaid", "cdn")],
@@ -29,11 +29,11 @@ slides = HTMLSlides(
 
 # 2. Add slides
 
-slides = HTMLSlides(title="Template Report", autosave='example', 
+deck = Deck(title="Template Report", autosave='example', 
                     autosave_level='cell', plugins=[Plugin('mermaid'), Plugin('plotly')])
 
 # Trend chart + breakdown table
-slide = slides.add_slide("Trends", nrows=1, ncols=2)
+slide = deck.add_slide("Trends", nrows=1, ncols=2)
 
 df = px.data.stocks()
 fig = px.line(df, x="date", y=["GOOG", "AAPL"])
@@ -47,7 +47,7 @@ slide.add_table({
 
 
 # KPIs + pipeline diagram
-slide = slides.add_slide("Overview", nrows=2, ncols=3)
+slide = deck.add_slide("Overview", nrows=2, ncols=3)
 
 slide.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3, delta_label="vs Q1")
 slide.add_metric(value=142,  label="Incidents",       delta=-18,  lower_is_better=True)
@@ -67,7 +67,7 @@ gantt
 
 
 # 3. Generate the file
-slides.write("report", open_browser=True)
+deck.write("report", open_browser=True)
 ```
 
 This generates `report.html` — a single file with no external dependencies.
@@ -86,7 +86,7 @@ Each slide has a CSS Grid canvas of `nrows x ncols`. Cells are positioned
 automatically from left to right, top to bottom.
 
 ```python
-slide = slides.add_slide("Example", nrows=2, ncols=3)
+slide = deck.add_slide("Example", nrows=2, ncols=3)
 
 # Spans columns 1 and 2 of row 1
 slide.add_text("Wide text", colspan=2)
@@ -121,7 +121,7 @@ See [Live editing](live-editing.md) for more.
 
 ## Plugins
 
-Some cell types require a plugin declared on `HTMLSlides`:
+Some cell types require a plugin declared on `Deck`:
 
 | Plugin | Cells |
 |---|---|
@@ -150,7 +150,7 @@ All `add_*` methods accept:
 Use `CellDefaults` and `SlideDefaults` to avoid repetition:
 
 ```python
-slides = HTMLSlides(
+deck = Deck(
     title="...",
     slide_defaults=SlideDefaults(nrows=2, ncols=2),
     cell_defaults=CellDefaults(
@@ -169,7 +169,7 @@ is scaled with a CSS transform to fit the available space — fonts, images, and
 layout all scale together, so the result behaves like a static PDF page.
 
 ```python
-slides = HTMLSlides(
+deck = Deck(
     title="Report",
     size=(1366, 768),          # 16:9 stage in pixels
     scale_up=False,            # don't grow past 1:1 on large screens (default)
@@ -192,13 +192,13 @@ For a clean, minimal file — such as the slides embedded throughout this
 documentation — hide the navigation sidebar and/or the bottom toolbar:
 
 ```python
-slides = HTMLSlides(
+deck = Deck(
     title="Demo",
     size=(960, 540),
     show_sidebar=False,
     show_toolbar=False,
 )
-slides.add_slide("Just this slide").add_text("No chrome around me.")
+deck.add_slide("Just this slide").add_text("No chrome around me.")
 ```
 
 With both hidden the slide fills the whole frame. Combine with `size` for a
@@ -208,7 +208,7 @@ To keep the sidebar available but out of the way, start it collapsed instead of
 hiding it — it can still be toggled open with the toolbar button or the `B` key:
 
 ```python
-slides = HTMLSlides(title="Report", sidebar_collapsed=True)
+deck = Deck(title="Report", sidebar_collapsed=True)
 ```
 
 ## Sidebar navigation
@@ -221,7 +221,7 @@ For longer decks the sidebar has two navigation aids, both on by default:
   collapsed state is remembered across reloads.
 
 ```python
-slides = HTMLSlides(
+deck = Deck(
     title="Report",
     sidebar_search=True,                 # show the filter box (default)
     sidebar_search_scope="title",        # "title" | "title_subtitle" | "content"

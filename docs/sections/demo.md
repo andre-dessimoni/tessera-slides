@@ -1,6 +1,6 @@
 # Live demo
 
-The presentaion below is an example of the capabilities of téssera.
+The report below is an example of the capabilities of téssera.
 
 For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom toolbar.
 
@@ -17,7 +17,7 @@ The code used to generate it is shown in the sequence.
 
 ---
 
-The code that generated this presentation:
+The code that generated this report:
 
 ```{literalinclude} ../examples/example1/example1.py
 :language: python

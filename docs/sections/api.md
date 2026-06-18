@@ -1,9 +1,9 @@
 # API Reference
 
-## Deck — `HTMLSlides`
+## Deck — `Deck`
 
 ```{eval-rst}
-.. autoclass:: tessera.HTMLSlides
+.. autoclass:: tessera.Deck
    :members: add_title, add_section, add_toc, add_slide, write
    :undoc-members: False
 ```

@@ -1,16 +1,16 @@
-"""Generates docs/_static/slides/cell_types.html — one slide per cell type for
+"""Generates docs/_static/deck/cell_types.html — one slide per cell type for
 the "Cell types" documentation section. Each slide has a stable slide_id so the
 docs deep-link to it (e.g. <iframe src="...cell_types.html#metric">). The slide
 content mirrors the code snippets shown next to each iframe in cell-types.md.
 
-Run via `make.bat slides` (or any docs build). See docs/conf.py.
+Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
 import plotly.express as px
 
-from tessera import HTMLSlides, Plugin
+from tessera import Deck, Plugin
 
-slides = HTMLSlides(
+deck = Deck(
     title="Cell types",
     plugins=[
         Plugin("mathjax", "cdn"),
@@ -24,7 +24,7 @@ slides = HTMLSlides(
 )
 
 # -- TextCell --------------------------------------------------------------
-s = slides.add_slide("TextCell — add_text()", slide_id="text")
+s = deck.add_slide("TextCell — add_text()", slide_id="text")
 s.add_text(
     "### Title\n\nText with **bold**, *italic*, LaTeX: $E = mc^2$ "
     "and markdown list:\n\n"
@@ -34,7 +34,7 @@ s.add_text(
 )
 
 # -- MetricCell ------------------------------------------------------------
-s = slides.add_slide("MetricCell — add_metric()", slide_id="metric", ncols=3)
+s = deck.add_slide("MetricCell — add_metric()", slide_id="metric", ncols=3)
 s.add_metric(value=98.7, label="Efficiency (%)", delta=+2.3,
              delta_label="vs previous month")
 s.add_metric(value=142, label="Incidents", delta=-18, lower_is_better=True,
@@ -42,14 +42,14 @@ s.add_metric(value=142, label="Incidents", delta=-18, lower_is_better=True,
 s.add_metric(value="4.8", label="NPS")
 
 # -- TableCell -------------------------------------------------------------
-s = slides.add_slide("TableCell — add_table()", slide_id="table")
+s = deck.add_slide("TableCell — add_table()", slide_id="table")
 s.add_table("""Component,Jan,Feb,Mar
 Motor A,98.1,97.8,98.7
 Motor B,94.3,95.1,96.2
 Pump C,91.0,90.4,91.3""")
 
 # -- ImageCell -------------------------------------------------------------
-s = slides.add_slide("ImageCell — add_image()", slide_id="image")
+s = deck.add_slide("ImageCell — add_image()", slide_id="image")
 s.add_image(
     "../example1/figs/s05c-isoq10-iso.webp",
     lightbox=True,
@@ -57,7 +57,7 @@ s.add_image(
 )
 
 # -- ImageSliderCell -------------------------------------------------------
-s = slides.add_slide("ImageSliderCell — add_image_slider()", slide_id="image-slider")
+s = deck.add_slide("ImageSliderCell — add_image_slider()", slide_id="image-slider")
 s.add_image_slider(
     [
         "../example1/figs/c08c-isoq10-iso.webp",
@@ -69,7 +69,7 @@ s.add_image_slider(
 )
 
 # -- ListCell --------------------------------------------------------------
-s = slides.add_slide("ListCell — add_list()", slide_id="list", ncols=2)
+s = deck.add_slide("ListCell — add_list()", slide_id="list", ncols=2)
 s.add_list(
     ["Analysis", "Design", "Implementation", "Testing"],
     ordered=True,
@@ -81,7 +81,7 @@ s.add_list(
 )
 
 # -- CodeCell --------------------------------------------------------------
-s = slides.add_slide("CodeCell — add_code()", slide_id="code")
+s = deck.add_slide("CodeCell — add_code()", slide_id="code")
 s.add_code(
     "def hello():\n    return 'world'\n\n\nif __name__ == '__main__':\n"
     "    print(hello())",
@@ -90,12 +90,12 @@ s.add_code(
 )
 
 # -- PlotlyCell ------------------------------------------------------------
-s = slides.add_slide("PlotlyCell — add_plotly()", slide_id="plotly")
+s = deck.add_slide("PlotlyCell — add_plotly()", slide_id="plotly")
 fig = px.scatter(px.data.iris(), x="sepal_width", y="sepal_length", color="species")
 s.add_plotly(fig, caption="Iris Dataset (interactive)")
 
 # -- MermaidCell -----------------------------------------------------------
-s = slides.add_slide("MermaidCell — add_mermaid()", slide_id="mermaid",
+s = deck.add_slide("MermaidCell — add_mermaid()", slide_id="mermaid",
                      nrows=2, ncols=2, row_heights=["2fr", "1fr"])
 s.add_mermaid("""
 ---
@@ -130,7 +130,7 @@ gantt
 """, colspan=2, row=2, col=1)
 
 # -- HtmlCell --------------------------------------------------------------
-s = slides.add_slide("HtmlCell — add_html()", slide_id="html")
+s = deck.add_slide("HtmlCell — add_html()", slide_id="html")
 s.add_html("""
 <style>
 @keyframes tsa-pulse { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.18);opacity:.6} }
@@ -173,17 +173,17 @@ s.add_html("""
 """)
 
 # -- IframeCell ------------------------------------------------------------
-s = slides.add_slide("IframeCell — add_iframe()", slide_id="iframe")
+s = deck.add_slide("IframeCell — add_iframe()", slide_id="iframe")
 s.add_iframe(
     "https://www.openstreetmap.org/export/embed.html?bbox=-46.50%2C-23.41%2C-45.63%2C-22.99&layer=mapnik",
     caption="Embedded interactive map (requires an internet connection)",
 )
 
 # -- EmptyCell -------------------------------------------------------------
-s = slides.add_slide("EmptyCell — add_empty()", slide_id="empty", nrows=2, ncols=2)
+s = deck.add_slide("EmptyCell — add_empty()", slide_id="empty", nrows=2, ncols=2)
 s.add_metric(value=42, label="KPI", rowspan=2)   # col 1, rows 1-2
 s.add_text("Text")                               # col 2, row 1
 s.add_empty()                                    # col 2, row 2 — reserved space
 
-slides.write("../../_static/slides/cell_types.html")
+deck.write("../../_static/deck/cell_types.html")
 print("cell_types.html written")

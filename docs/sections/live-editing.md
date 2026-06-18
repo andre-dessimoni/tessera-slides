@@ -7,12 +7,12 @@ slide, or a single cell as the last expression in a cell renders an inline,
 sandboxed preview — no need to write a file or open a browser:
 
 ```python
-slides = HTMLSlides(title="Q3 Report", plugins=[Plugin("plotly", "cdn")])
-slides.add_title("Q3 Report")
-slide = slides.add_slide("KPIs", nrows=1, ncols=2)
+deck = Deck(title="Q3 Report", plugins=[Plugin("plotly", "cdn")])
+deck.add_title("Q3 Report")
+slide = deck.add_slide("KPIs", nrows=1, ncols=2)
 cell  = slide.add_metric(value=98.7, label="Efficiency")
 
-slides   # full deck preview (with sidebar / toolbar)
+deck     # full deck preview (with sidebar / toolbar)
 slide    # just this slide, chrome-free
 cell     # just this cell
 ```
@@ -29,9 +29,9 @@ its grid, and return it as the cell's last expression. No file is written:
 
 ```python
 import plotly.express as px
-from tessera import HTMLSlides, Plugin
+from tessera import Deck, Plugin
 
-deck  = HTMLSlides(title="scratch", plugins=[Plugin("plotly", "cdn")])
+deck  = Deck(title="scratch", plugins=[Plugin("plotly", "cdn")])
 slide = deck.add_slide("Run 42", nrows=1, ncols=3)
 
 slide.add_metric(value=0.94, label="Accuracy", delta=+0.02)
@@ -51,7 +51,7 @@ after each change, so you can live-preview in a browser while building the deck.
 
 
 ```python
-presentation = HTMLSlides(
+deck = Deck(
     title="Live Report",
     autosave="report",        # writes report.html after each trigger
     autosave_level="cell",    # trigger: "slide" (default) or "cell"
@@ -62,11 +62,11 @@ presentation = HTMLSlides(
 
 | Level | Trigger | Recommended when |
 |---|---|---|
-| `"slide"` | After each `add_slide()` | Large presentations with many cells |
+| `"slide"` | After each `add_slide()` | Large reports with many cells |
 | `"cell"` | After each `add_*()` cell call | Small decks or iterative Jupyter workflows |
 
 :::{note}
-For large presentations prefer `autosave_level="slide"` to avoid redundant
+For large reports prefer `autosave_level="slide"` to avoid redundant
 writes on every cell addition, or keep autosave disabled, manually saving with `.write()` when needed.
 :::
 
@@ -77,6 +77,6 @@ A convenient way to use autosave is alongside the
 extension in VSCode. Open the generated `.html` file with **Live Preview** (right-click
 the file → *Show Preview*) and it will automatically refresh whenever tessera
 rewrites it. This gives you an instant side-by-side view — code on the left,
-slides on the right — without leaving the editor, as shown below:
+the rendered report on the right — without leaving the editor, as shown below:
 
 ![VSCode-workflow](../_static/img/live-editing/animation.webp)
