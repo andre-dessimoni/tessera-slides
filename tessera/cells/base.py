@@ -130,7 +130,7 @@ class Cell(ABC):
                 html = Assembler(deck)._render()
             finally:
                 self.params = saved
-            return iframe_srcdoc(html, height=CELL_PREVIEW_HEIGHT)
+            return iframe_srcdoc(html, height=deck.preview_height or CELL_PREVIEW_HEIGHT)
         except Exception as exc:   # never break the notebook on a preview failure
             return preview_error(self, exc)
 
@@ -187,11 +187,20 @@ def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
         transparent   = kwargs.pop("transparent",   _UNSET)
         halign        = kwargs.pop("halign",        _UNSET)
         valign        = kwargs.pop("valign",        _UNSET)
-        cell_id       = kwargs.pop("cell_id",       _UNSET)
+        cell_id         = kwargs.pop("cell_id",         _UNSET)
+        notebook_unique = kwargs.pop("notebook_unique", False)
 
+        # An explicit cell_id always wins. Otherwise, notebook_unique derives a
+        # stable id from the Jupyter cell (so re-running replaces in place);
+        # failing that, fall back to the per-slide auto-counter.
         if cell_id is _UNSET:
-            cell_id = f'_cell-{slide._next_cell_id}'
-            slide._next_cell_id += 1
+            cell_id = None
+            if notebook_unique:
+                from tessera.utils.notebook import notebook_unique_id
+                cell_id = notebook_unique_id(slide._nb_cell_state, "_nbcell")
+            if cell_id is None:
+                cell_id = f'_cell-{slide._next_cell_id}'
+                slide._next_cell_id += 1
 
         # --- 2. Merge with CellDefaults ---
         cd = slide._cell_defaults

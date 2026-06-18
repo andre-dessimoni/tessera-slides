@@ -23,9 +23,15 @@ class ImageCell(Cell):
         source: str | Path,
         lightbox: bool,
         params: CellParams,
+        to_webp: bool = False,
+        webp_quality: int | None = None,
+        save_source: bool = False,
     ) -> None:
         super().__init__(params)
         self.lightbox = lightbox
+        self.to_webp = to_webp
+        self.webp_quality = webp_quality
+        self.save_source = save_source
         # Resolve relative path against the caller's cwd immediately,
         # before the cwd can change. URLs and base64 strings are left as-is.
         s = str(source)

@@ -15,14 +15,14 @@
     {% if cell.lightbox %}
     <img
       class="cell-img lightbox-trigger"
-      src="{{ cell.src }}"
+      src="{{ cell.resolved_src or cell.src }}"
       alt="{{ cell.params.caption }}"
       onclick="openLightbox(this)"
     />
     {% else %}
     <img
       class="cell-img"
-      src="{{ cell.src }}"
+      src="{{ cell.resolved_src or cell.src }}"
       alt="{{ cell.params.caption }}"
     />
     {% endif %}

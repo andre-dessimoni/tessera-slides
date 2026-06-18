@@ -18,9 +18,11 @@ class PlotlyCell(Cell):
     Requires Plugin('plotly').
     """
 
-    def __init__(self, fig: "go.Figure", params: CellParams) -> None:
+    def __init__(self, fig: "go.Figure", params: CellParams,
+                 save_source: bool = False) -> None:
         super().__init__(params)
         self.fig      = fig
+        self.save_source = save_source
         self.fig_json = self._serialize(fig)
 
     def _serialize(self, fig: "go.Figure") -> str:

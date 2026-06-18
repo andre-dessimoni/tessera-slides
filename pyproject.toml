@@ -39,7 +39,8 @@ dependencies = [
 markdown = ["markdown-it-py>=3.0"]
 plotly   = ["plotly>=5.0"]
 pandas   = ["pandas>=1.5"]
-full     = ["markdown-it-py>=3.0", "plotly>=5.0", "pandas>=1.5"]
+image    = ["pillow>=9.0"]
+full     = ["markdown-it-py>=3.0", "plotly>=5.0", "pandas>=1.5", "pillow>=9.0"]
 dev      = ["pytest>=8.0", "pytest-cov", "ruff>=0.4", "mypy>=1.10", "build", "twine"]
 
 [project.urls]

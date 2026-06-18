@@ -87,7 +87,9 @@ class Slide:
         # Cells registered in insertion order
         self._cells: list[Cell] = []
         self._cell_map: dict[Hashable, Cell] = {}
-        self._next_cell_id = 1 
+        self._next_cell_id = 1
+        # Per-Jupyter-cell counters for notebook_unique cell ids (see cell_method).
+        self._nb_cell_state: dict = {}
 
     # ------------------------------------------------------------------
     # Internals — used by @cell_method
@@ -202,9 +204,12 @@ class Slide:
     @cell_method
     def add_image(
         self,
-        source: "str | Any",       # str | Path
+        source: "str | Any",       # str | Path | matplotlib Figure
         *,
         lightbox:      bool        = True,
+        to_webp:       bool        = False,
+        webp_quality:  int | None  = None,
+        save_source:   bool        = False,
         col:           int | None  = None,
         row:           int | None  = None,
         colspan:       int         = 1,
@@ -214,8 +219,20 @@ class Slide:
         copy_button:   bool        = _UNSET,  # type: ignore[assignment]
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
-    ) -> ImageCell:
-        return ImageCell(source=source, lightbox=lightbox, params=_params)
+    ) -> "ImageCell | MatplotlibCell":
+        # A matplotlib Figure routes through the matplotlib pipeline (coherent
+        # with add_image_slider). Duck-typed so matplotlib stays an optional dep.
+        if hasattr(source, "savefig"):
+            return MatplotlibCell(
+                fig=source, dpi=150,
+                fmt="webp" if to_webp else "svg",
+                lightbox=lightbox, params=_params,
+                webp_quality=webp_quality, save_source=save_source,
+            )
+        return ImageCell(
+            source=source, lightbox=lightbox, params=_params,
+            to_webp=to_webp, webp_quality=webp_quality, save_source=save_source,
+        )
 
     @cell_method
     def add_table(
@@ -259,6 +276,7 @@ class Slide:
         self,
         fig: "go.Figure",
         *,
+        save_source:   bool        = False,
         col:           int | None  = None,
         row:           int | None  = None,
         colspan:       int         = 1,
@@ -270,7 +288,7 @@ class Slide:
         _params: Any               = None,
     ) -> PlotlyCell:
         self._require_plugin("plotly", "add_plotly")
-        return PlotlyCell(fig=fig, params=_params)
+        return PlotlyCell(fig=fig, params=_params, save_source=save_source)
 
     @cell_method
     def add_matplotlib(
@@ -278,7 +296,10 @@ class Slide:
         fig: "matplotlib.figure.Figure",
         *,
         dpi:           int         = 150,
-        fmt:           str         = "png",
+        fmt:           str         = "svg",
+        to_webp:       bool        = False,
+        webp_quality:  int | None  = None,
+        save_source:   bool        = False,
         lightbox:      bool        = True,
         col:           int | None  = None,
         row:           int | None  = None,
@@ -293,7 +314,12 @@ class Slide:
         valign:        str         = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> MatplotlibCell:
-        return MatplotlibCell(fig=fig, dpi=dpi, fmt=fmt, lightbox=lightbox, params=_params)
+        if to_webp:
+            fmt = "webp"
+        return MatplotlibCell(
+            fig=fig, dpi=dpi, fmt=fmt, lightbox=lightbox, params=_params,
+            webp_quality=webp_quality, save_source=save_source,
+        )
 
     @cell_method
     def add_code(
@@ -425,6 +451,9 @@ class Slide:
         sources: "list",
         *,
         captions:      "list | None" = None,
+        to_webp:       bool        = False,
+        webp_quality:  int | None  = None,
+        save_source:   bool        = False,
         col:           int | None  = None,
         row:           int | None  = None,
         colspan:       int         = 1,
@@ -439,13 +468,19 @@ class Slide:
         import re
         resolved = []
         for s in sources:
+            if hasattr(s, "savefig"):       # matplotlib Figure — keep, encode at write
+                resolved.append(s)
+                continue
             sv = str(s)
             if not sv.startswith(("http://", "https://", "data:")) and not (len(sv) > 64 and bool(re.fullmatch(r"[A-Za-z0-9+/=\n]+", sv))):
                 resolved.append(Path(sv).resolve())
             else:
                 resolved.append(sv)
         img_captions = captions or [""] * len(sources)
-        return ImageSliderCell(sources=resolved, captions=img_captions, params=_params)
+        return ImageSliderCell(
+            sources=resolved, captions=img_captions, params=_params,
+            to_webp=to_webp, webp_quality=webp_quality, save_source=save_source,
+        )
 
     # ------------------------------------------------------------------
     # Internal utilities
@@ -474,7 +509,7 @@ class Slide:
         try:
             deck = self.parent._preview_clone([self], sections=self.parent._sections)
             html = Assembler(deck)._render()
-            return iframe_srcdoc(html, height=SLIDE_PREVIEW_HEIGHT)
+            return iframe_srcdoc(html, height=self.parent.preview_height or SLIDE_PREVIEW_HEIGHT)
         except Exception as exc:   # never break the notebook on a preview failure
             return preview_error(self, exc)
 

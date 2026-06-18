@@ -184,6 +184,8 @@ class Deck:
         sidebar_search:    bool                   = True,
         sidebar_search_scope: Literal['title', 'title_subtitle', 'content'] = 'title',
         sidebar_collapsible_sections: bool        = True,
+        preview_height:    int | None             = None,
+        contents_folder:   str | Path | None      = None,
     ) -> None:
         self.title          = title
         self.author         = author
@@ -206,11 +208,15 @@ class Deck:
         self.sidebar_search        = sidebar_search
         self.sidebar_search_scope  = sidebar_search_scope
         self.sidebar_collapsible_sections = sidebar_collapsible_sections
+        self.preview_height  = preview_height
+        self.contents_folder = contents_folder
 
         self._slides:   list[Slide] = []
         self._slide_map: dict[Hashable, Slide] = {}
         self._sections: list[dict[str, Any]] = []   # for the automatic TOC
         self._slide_counter = 0
+        # Per-Jupyter-cell counters for notebook_unique slide ids.
+        self._nb_slide_state: dict = {}
 
         # Plugin name set for fast membership checks
         self._plugin_names: frozenset[str] = frozenset(p.name for p in self.plugins)
@@ -225,6 +231,7 @@ class Deck:
         subtitle: str = "",
         notes:    str = "",
         title_id: Hashable | None = None,
+        notebook_unique: bool = False,
     ) -> Slide:
         """Add the cover/title slide.
 
@@ -249,6 +256,7 @@ class Deck:
             col_widths=None,
             notes=notes,
             slide_id=title_id,
+            notebook_unique=notebook_unique,
         )
 
     def add_section(
@@ -259,6 +267,7 @@ class Deck:
         add_to_toc: bool = True,
         show_toc:   bool = True,
         section_id: Hashable | None = None,
+        notebook_unique: bool = False,
     ) -> Slide:
         """Add a section-divider slide.
 
@@ -290,6 +299,7 @@ class Deck:
             slide_id=section_id,
             level=level,
             show_toc=show_toc,
+            notebook_unique=notebook_unique,
         )
         if add_to_toc:
             entry = {
@@ -319,6 +329,7 @@ class Deck:
         title: str = "Table of Contents",
         auto:  bool = True,
         toc_id: Hashable | None = None,
+        notebook_unique: bool = False,
     ) -> Slide:
         """Add a Table of Contents slide.
 
@@ -347,6 +358,7 @@ class Deck:
             col_widths=None,
             notes="",
             slide_id=toc_id,
+            notebook_unique=notebook_unique,
         )
         slide._auto_toc = auto  # type: ignore[attr-defined]
         return slide
@@ -363,6 +375,7 @@ class Deck:
         slide_id:       Hashable | None          = None,
         slide_defaults: SlideDefaults | None     = None,
         cell_defaults:  CellDefaults | None      = None,
+        notebook_unique: bool                    = False,
     ) -> Slide:
         """Add a standard content slide with an ``nrows x ncols`` cell canvas.
 
@@ -406,8 +419,9 @@ class Deck:
             notes=notes,
             slide_id=slide_id,
             cell_defaults=cell_defaults if cell_defaults is not None else self.cell_defaults,
+            notebook_unique=notebook_unique,
         )
-    
+
 
     def render(self):
         from tessera.core.assembler import Assembler
@@ -481,9 +495,16 @@ class Deck:
         cell_defaults: CellDefaults | None = None,
         level:       int  = 1,
         show_toc:    bool = False,
+        notebook_unique: bool = False,
     ) -> Slide:
         self._slide_counter += 1
 
+        # An explicit id always wins. Otherwise notebook_unique derives a stable
+        # id from the Jupyter cell (re-running replaces in place); failing that,
+        # fall back to the auto-counter.
+        if slide_id is None and notebook_unique:
+            from tessera.utils.notebook import notebook_unique_id
+            slide_id = notebook_unique_id(self._nb_slide_state, "_nbslide")
         if slide_id is None:
             slide_id = f"_slide-{self._slide_counter}"
 
@@ -578,6 +599,8 @@ class Deck:
             keep_aspect_ratio=self.keep_aspect_ratio,
             show_sidebar=False,
             show_toolbar=False,
+            preview_height=self.preview_height,
+            contents_folder=self.contents_folder,
         )
         clone._slides = list(slides)
         clone._slide_map = {s.slide_id: s for s in slides}
@@ -592,6 +615,6 @@ class Deck:
         )
         try:
             html = Assembler(self)._render()
-            return iframe_srcdoc(html, height=DECK_PREVIEW_HEIGHT)
+            return iframe_srcdoc(html, height=self.preview_height or DECK_PREVIEW_HEIGHT)
         except Exception as exc:   # never break the notebook on a preview failure
             return preview_error(self, exc)

@@ -25,10 +25,16 @@ class ImageSliderCell(Cell):
         sources: list,
         captions: list[str],
         params: CellParams,
+        to_webp: bool = False,
+        webp_quality: int | None = None,
+        save_source: bool = False,
     ) -> None:
         super().__init__(params)
-        self.sources = sources
+        self.sources = sources            # paths / urls / base64 / matplotlib Figures
         self.captions = captions
+        self.to_webp = to_webp
+        self.webp_quality = webp_quality
+        self.save_source = save_source
         self.resolved_srcs: list[str] = []  # filled by Assembler
 
     def render(self, env: "jinja2.Environment") -> str:
