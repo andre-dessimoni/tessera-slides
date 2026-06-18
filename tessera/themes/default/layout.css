@@ -449,7 +449,7 @@ body.sb-collapsed {
 
 /* Hide the credit once the toolbar gets too narrow (e.g. a wide sidebar), so
    the centred controls never collide with it. */
-@container (max-width: 540px) {
+@container (max-width: 620px) {
   #toolbar-credit { display: none; }
 }
 
