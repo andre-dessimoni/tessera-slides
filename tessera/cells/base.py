@@ -10,13 +10,22 @@ from __future__ import annotations
 import functools
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, replace
-from typing import TYPE_CHECKING, Any, Callable, Literal, Hashable
+from typing import TYPE_CHECKING, Any, Callable, Literal, Hashable, cast
 
-# Importing jinja2 and Slide only for type annotations, to avoid circular 
+# Importing jinja2 and Slide only for type annotations, to avoid circular
 # imports and heavy dependencies at runtime
 if TYPE_CHECKING:
     import jinja2
+    from typing import ParamSpec, TypeVar
     from tessera.core.slide import Slide
+
+    # Lets @cell_method preserve each add_* method's real signature (parameters
+    # and concrete return type) for type checkers / editors, instead of
+    # collapsing them to ``(...) -> Cell``. Type-checking only; under
+    # ``from __future__ import annotations`` the annotations are never evaluated
+    # at runtime, so ParamSpec is not needed on Python 3.9.
+    _P = ParamSpec("_P")
+    _R = TypeVar("_R", bound="Cell")
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +164,7 @@ class Cell(ABC):
 # @cell_method — decorator
 # ---------------------------------------------------------------------------
 
-def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
+def cell_method(fn: "Callable[_P, _R]") -> "Callable[_P, _R]":
     """
     Decorator applied to all ``add_*`` methods of ``Slide``.
 
@@ -242,7 +251,7 @@ def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
             halign=halign,
             valign=valign,
         )
-        cell = fn(slide, *args, **kwargs)
+        cell = cast("Callable[..., Cell]", fn)(slide, *args, **kwargs)
 
         # --- 8-9. Register and validate return ---
         if not isinstance(cell, Cell):
@@ -259,7 +268,10 @@ def cell_method(fn: Callable[..., Cell]) -> Callable[..., Cell]:
 
         return cell
 
-    return wrapper
+    # The wrapper deliberately reshapes the signature (it consumes the cell
+    # kwargs and injects _params), so cast it back to fn's signature so callers
+    # and editors see each add_* method's real parameters and return type.
+    return cast("Callable[_P, _R]", wrapper)
 
 
 def _validate_placement(

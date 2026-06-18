@@ -37,6 +37,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Fixed
 
+- `add_*` cell methods now expose their real signatures to type checkers and
+  editors (Pylance/pyright) instead of collapsing to `(...) -> Cell`. The
+  `@cell_method` decorator is now signature-preserving (`ParamSpec`/`TypeVar`),
+  so parameters and concrete return types show up in autocomplete and hovers.
 - Title and section cover slides are now centered in fixed-size (`size=`) mode.
   The centering had relied on the `.slide` being the flex container, but in
   fixed-size mode that role moved to `.stage`, so covers rendered top-left;
