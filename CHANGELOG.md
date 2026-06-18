@@ -4,6 +4,37 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Added
+
+- `notebook_unique=True` on `add_slide`/`add_title`/`add_section`/`add_toc` and
+  every cell `add_*`: re-running the *same* Jupyter cell replaces the items it
+  created instead of duplicating them — no manual id needed. Keys off the Jupyter
+  cell id; warns (and falls back) in a script, errors in an interactive session
+  that can't supply one.
+- `Deck(preview_height=...)` to set the notebook `_repr_html_` iframe height,
+  propagated to slide and cell previews.
+- WebP support for images and figures: `to_webp=True` / `webp_quality=` on
+  `add_image`, `add_matplotlib`, `add_image_slider` (requires the new optional
+  `pillow` dependency: `pip install 'tessera-report[image]'`).
+- Contents folder: `Deck(contents_folder=...)` plus `save_source=True` on the
+  media `add_*` (incl. `add_plotly`, which exports a standalone HTML). Saves
+  assets to `_<report>_contents/` (created lazily). When the deck is
+  self-contained the asset is still embedded *and* saved; otherwise the cell
+  references the saved file.
+- `add_image` and `add_image_slider` now accept matplotlib `Figure` objects
+  (routed through the matplotlib pipeline).
+
+### Changed
+
+- **`add_matplotlib` now defaults to `fmt="svg"`** (was `"png"`) — crisp, vector,
+  infinitely zoomable. Use `fmt="webp"`/`to_webp=True` for dense plots where SVG
+  gets large.
+- Plotly charts now read the active theme's CSS variables for text/grid colours,
+  fixing invisible chart text on light themes.
+- Arrow-key / prev-next navigation now steps into a collapsed section (auto-
+  expanding it) instead of skipping over it; search-filtered slides are still
+  skipped.
+
 ### Changed (breaking)
 
 - **Renamed the PyPI distribution `tessera-slides` → `tessera-report`.** The
