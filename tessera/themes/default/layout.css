@@ -369,6 +369,7 @@ body.sb-collapsed {
   justify-content: center;
   gap: 12px;
   z-index: 100;
+  container-type: inline-size;   /* enables the width query for the credit */
 }
 
 #toolbar button {
@@ -411,6 +412,12 @@ body.sb-collapsed {
 
 #toolbar-credit span { font-weight: 600; }
 #toolbar-credit:hover { color: var(--color-accent); }
+
+/* Hide the credit once the toolbar gets too narrow (e.g. a wide sidebar), so
+   the centred controls never collide with it. */
+@container (max-width: 540px) {
+  #toolbar-credit { display: none; }
+}
 
 #slide-input {
   width: 44px;
