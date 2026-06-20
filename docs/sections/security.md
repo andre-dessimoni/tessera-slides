@@ -1,5 +1,9 @@
 # Security & offline use
 
+:::{warning}
+**Scope of these measures:** The security options below govern how tessera loads its own JavaScript plugins — CDN integrity checks, CSP, offline guarantees. They say nothing about the trustworthiness of the report itself. An HTML file is editable by anyone; **never open a .html file from a source you don't trust**, regardless of what it claims to be made with.
+:::
+
 tessera's purpose is a report that transfers **no data** and works **fully
 offline**. A generated `.html` embeds its own styling, scripts, and (when
 `self_contained`) its images and libraries, so it can be opened by double-clicking
