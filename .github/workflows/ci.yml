@@ -1,0 +1,46 @@
+# GitHub Actions CI — runs automatically on every push and pull request.
+# It installs the package, checks the vendored plugin libraries are in sync with
+# the manifest, and runs the test suite across the supported Python versions.
+#
+# Results show up as a green check / red X on each commit and pull request.
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Don't cancel the other jobs if one fails — we want all results.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.9", "3.11", "3.13"]   # min, mid, latest supported
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      # `dev` pulls the test tools plus plotly/pandas/matplotlib so every cell
+      # type is exercised; `full` adds tessera's own optional deps (markdown, pillow).
+      - name: Install tessera-report and test dependencies
+        run: pip install -e ".[full,dev]"
+
+      # Fails if a vendored library is missing, stale (SRI hash drifted), or a
+      # LICENSE file is absent — i.e. someone bumped manifest.json but forgot to
+      # run update_vendor.py. Keeps the offline bundles and their attribution honest.
+      - name: Check vendored libraries and licenses are in sync
+        run: python scripts/update_vendor.py --check
+
+      - name: Run the test suite
+        run: pytest -q
