@@ -32,6 +32,7 @@
 .. autoclass:: tessera.Mermaid
 .. autoclass:: tessera.Highlight
 .. autoclass:: tessera.MathJax
+.. autoclass:: tessera.Tabulator
 ```
 
 ---

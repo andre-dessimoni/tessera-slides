@@ -23,6 +23,7 @@ deck = Deck(
 | `Plugins.Mermaid()` | `add_mermaid()` | Mermaid |
 | `Plugins.Highlight()` | `add_code()` | highlight.js |
 | `Plugins.MathJax()` | LaTeX in `add_text()` | MathJax |
+| `Plugins.Tabulator()` | `add_tabulator()` | Tabulator |
 
 Using a cell without its plugin raises `PluginNotDeclaredError` with the exact
 line to add.
@@ -70,6 +71,7 @@ Each plugin carries its own options:
 Plugins.Mermaid(theme="forest")        # mermaid theme
 Plugins.Highlight(style="github")      # highlight.js stylesheet
 Plugins.MathJax(output="svg")          # "svg" (offline-friendly) or "chtml"
+Plugins.Tabulator(theme="auto")        # "auto" (follow deck), "light" or "dark"
 ```
 
 `MathJax(output="svg")` (the default) embeds the glyphs, so a bundled deck stays
@@ -112,7 +114,8 @@ the integrity hashes, prunes anything no longer referenced, and logs the run in
 ### Licensing
 
 The vendored libraries are third-party software under permissive licenses —
-Plotly and Mermaid (MIT), highlight.js (BSD-3-Clause), MathJax (Apache-2.0). Each
+Plotly, Mermaid, and Tabulator (MIT), highlight.js (BSD-3-Clause), MathJax
+(Apache-2.0). Each
 library's license text is shipped next to its code in `vendor/<library>/`. This
 matters whenever the libraries are redistributed — including in a `bundled`
 report you share — so the attribution travels with them.

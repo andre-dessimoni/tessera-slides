@@ -1,0 +1,2905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), usb=(), payment=(), interest-cohort=()">
+  <meta name="author"  content="">
+  <meta name="version" content="">
+  <meta name="date"    content="2026-06-21">
+  <title>Interactive tables</title>
+  <style>
+/* --- default/image.css --- */
+/* ============================================================
+   image.css — Imagens, lightbox (zoom/pan/thumbs), slider
+   ============================================================ */
+
+.image-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.cell-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+.lightbox-trigger {
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+.lightbox-trigger:hover { opacity: 0.88; }
+
+/* ----------------------------------------------------------
+   LIGHTBOX — overlay com zoom/pan e thumbnails
+   ---------------------------------------------------------- */
+#lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.93);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 400;
+  cursor: zoom-out;
+}
+#lightbox.hidden { display: none; }
+
+#lightbox-inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  cursor: default;
+  gap: 0;
+}
+
+#lightbox-img-wrap {
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+#lightbox-img {
+  max-width: 88vw;
+  max-height: 74vh;
+  object-fit: contain;
+  border-radius: var(--radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+  cursor: grab;
+  user-select: none;
+  transform-origin: center center;
+  transition: none;
+  will-change: transform;
+}
+#lightbox-img:active { cursor: grabbing; }
+
+/* Controles flutuantes */
+#lightbox-close,
+#lightbox-reset-zoom,
+#lightbox-prev,
+#lightbox-next {
+  position: absolute;
+  background: rgba(255,255,255,0.10);
+  border: none;
+  color: #fff;
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.4rem;
+  height: 2.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.7;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 10;
+  padding: 0;
+}
+#lightbox-close:hover,
+#lightbox-reset-zoom:hover,
+#lightbox-prev:hover,
+#lightbox-next:hover {
+  opacity: 1;
+  background: rgba(255,255,255,0.22);
+}
+
+#lightbox-close       { top: 16px; right: 20px; font-size: 1.2rem; }
+#lightbox-reset-zoom  { top: 16px; right: 62px; font-size: 1.0rem; }
+#lightbox-prev        { left: 18px; top: 50%; transform: translateY(-50%); font-size: 2rem; width: 2.8rem; height: 2.8rem; border-radius: 50%; }
+#lightbox-next        { right: 18px; top: 50%; transform: translateY(-50%); font-size: 2rem; width: 2.8rem; height: 2.8rem; border-radius: 50%; }
+
+/* Thumbnails */
+#lightbox-thumbs {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  overflow-x: auto;
+  max-width: 90vw;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.3) transparent;
+  flex-shrink: 0;
+  align-items: center;
+}
+#lightbox-thumbs::-webkit-scrollbar { height: 4px; }
+#lightbox-thumbs::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 2px; }
+
+.lb-thumb {
+  width: 60px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.5;
+  border: 2px solid transparent;
+  transition: opacity 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.lb-thumb:hover { opacity: 0.85; }
+.lb-thumb.lb-thumb-active {
+  opacity: 1;
+  border-color: var(--accent, #58a6ff);
+}
+
+/* ----------------------------------------------------------
+   IMAGE SLIDER
+   ---------------------------------------------------------- */
+.cell-image-slider {
+  position: relative;
+}
+
+.slider-body {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.slider-track {
+  display: contents;
+}
+
+.slider-slide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.slider-img {
+  max-width: 100%;
+  max-height: calc(100% - 28px);
+  object-fit: contain;
+  border-radius: var(--radius);
+  cursor: zoom-in;
+  transition: opacity 0.15s;
+}
+.slider-img:hover { opacity: 0.88; }
+
+.slider-caption {
+  font-size: 0.75rem;
+  color: var(--text-muted, #8b949e);
+  margin: 4px 0 0;
+  text-align: center;
+}
+
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.45);
+  border: none;
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.6;
+  transition: opacity 0.15s, background 0.15s;
+  z-index: 5;
+  padding: 0;
+}
+.slider-btn:hover {
+  opacity: 1;
+  background: rgba(0,0,0,0.7);
+}
+.slider-prev { left: 6px; }
+.slider-next { right: 6px; }
+
+.slider-dots {
+  position: absolute;
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 5px;
+  z-index: 5;
+}
+.slider-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.35);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.slider-dot.active { background: rgba(255,255,255,0.9); }
+
+/* --- default/layout.css --- */
+/* ============================================================
+   layout.css — estrutura geral da página
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --sidebar-width: 220px;
+  --toolbar-height: 44px;
+  --color-bg: #1a1a2e;
+  --color-surface: #16213e;
+  --color-surface2: #0f3460;
+  --color-accent: #e94560;
+  --color-text: #eaeaea;
+  --color-text-muted: #8892a4;
+  --color-border: #2a2a4a;
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Fira Code", "Cascadia Code", monospace;
+  --radius: 6px;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ---- Sidebar ---- */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100% - var(--toolbar-height));
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  transition: width 0.2s ease;
+}
+
+/* ---- Sidebar resize handle ---- */
+#sidebar-resize-handle {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  transform: translateX(-50%);
+  width: 6px;
+  height: calc(100% - var(--toolbar-height));
+  cursor: col-resize;
+  z-index: 101;
+  border-radius: 3px;
+  transition: left 0.2s ease, background 0.15s;
+}
+
+#sidebar-resize-handle:hover,
+#sidebar-resize-handle.dragging {
+  background: var(--color-accent);
+  opacity: 0.4;
+}
+
+/* Disable transitions while dragging for immediate feedback */
+body.sb-no-transition #sidebar,
+body.sb-no-transition #main,
+body.sb-no-transition #toolbar,
+body.sb-no-transition #sidebar-resize-handle {
+  transition: none !important;
+}
+
+#sidebar-header {
+  flex-shrink: 0;
+  padding: 16px 12px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Sidebar search box ---- */
+#sidebar-search-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-search {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+
+#sidebar-search::placeholder { color: var(--color-text-muted); }
+#sidebar-search:focus { border-color: var(--color-accent); }
+#sidebar-search.sidebar-search-error {
+  border-color: var(--color-accent);
+  background: rgba(233, 69, 96, 0.12);
+}
+
+/* Regex-mode toggle */
+#sidebar-regex-toggle {
+  flex-shrink: 0;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius);
+  padding: 4px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#sidebar-regex-toggle:hover { color: var(--color-text); }
+#sidebar-regex-toggle.active {
+  color: #fff;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Common-patterns tooltip — shown only in regex mode on hover/focus */
+#sidebar-regex-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 10px;
+  right: 10px;
+  z-index: 120;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+#sidebar-regex-tip code {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  background: var(--color-surface);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+#sidebar-search-wrap.regex-on:hover #sidebar-regex-tip,
+#sidebar-search-wrap.regex-on:focus-within #sidebar-regex-tip {
+  display: block;
+}
+
+/* ---- Fold toolbar (collapse/expand all / by level) ---- */
+#sidebar-fold-bar {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-fold-bar button {
+  flex: 1;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius);
+  padding: 3px 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+#sidebar-fold-bar button:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+#slide-list {
+  list-style: none;
+  padding: 8px 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+#slide-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#slide-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+#slide-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item.sidebar-hidden { display: none; }
+
+/* Section fold caret (and a matching spacer so titles align) */
+.sidebar-caret,
+.sidebar-caret-spacer {
+  flex-shrink: 0;
+  width: 14px;
+}
+
+.sidebar-caret {
+  text-align: center;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transform: rotate(90deg);          /* expanded rest state — points down */
+  transition: transform 0.12s ease, color 0.12s;
+}
+
+.sidebar-caret.collapsed { transform: rotate(0deg); }   /* points right */
+.sidebar-caret:hover { color: var(--color-text); }
+.sidebar-caret.sidebar-caret-empty { visibility: hidden; cursor: default; }
+
+.sidebar-item:hover {
+  background: var(--color-surface2);
+  color: var(--color-text);
+}
+
+.sidebar-item.active {
+  color: var(--color-text);
+  border-left-color: var(--color-accent);
+  background: var(--color-surface2);
+}
+
+.sidebar-item.sidebar-type-title,
+.sidebar-item.sidebar-type-section {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+
+/* Section hierarchy — indent and dim deeper levels */
+.sidebar-item.sidebar-type-section.sidebar-level-2 {
+  padding-left: 20px;
+  font-size: 0.77rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.sidebar-item.sidebar-type-section.sidebar-level-3 {
+  padding-left: 28px;
+  font-size: 0.73rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  opacity: 0.65;
+}
+
+.sidebar-num {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ---- Main ---- */
+#main {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: var(--toolbar-height);
+  overflow: auto;   /* scrollbars appear when the deck is zoomed in (fluid mode) */
+  transition: left 0.2s ease;
+}
+
+/* The .stage wrapper is transparent in fluid mode (children flow into .slide as
+   before); in fixed-size mode it becomes the native-size, transform-scaled stage
+   inside a layout-sized .slide (see the .fixed-size rules below). */
+.stage { display: contents; }
+
+/* Deck-area zoom (toolbar control). Fluid slides scale via CSS zoom so the
+   layout reflows and #main shows scrollbars when zoomed in. Fixed-size stages
+   scale through the transform fit instead (see main.js fitStage). */
+body:not(.fixed-size) .slide {
+  zoom: var(--deck-zoom, 1);
+}
+
+/* ---- Hidden sidebar / toolbar (single-slide / embeddable) ---- */
+.no-sidebar #main,
+.no-sidebar #toolbar {
+  left: 0;
+}
+
+.no-toolbar #main {
+  bottom: 0;
+}
+
+/* Collapsed sidebar — drives the width from the body class so a deck can
+   render collapsed with no flash, while JS toggle still works. */
+body.sb-collapsed {
+  --sidebar-width: 0px;
+}
+
+.slide {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px 24px 12px;
+}
+
+.slide.active {
+  display: flex;
+}
+
+/* ---- Fixed-size (scaled stage) mode ---- */
+/* The active slide becomes a fixed-dimension canvas scaled with a CSS
+   transform to fit #main. Everything inside scales together, like a PDF.
+   Modal & lightbox live outside #main, so they stay unscaled. */
+.fixed-size #main {
+  display: flex;
+  /* `safe` keeps the stage reachable (scrollable to the top-left) when it is
+     zoomed larger than the viewport, instead of clipping the start. */
+  align-items: safe center;
+  justify-content: safe center;
+  overflow: auto;
+}
+
+/* Fixed-size: the .slide is an outer box whose *layout* size equals the scaled
+   stage, so #main shows scrollbars / pans when zoomed in. The inner .stage keeps
+   its native pixel size and is scaled with a transform (same crisp rendering as
+   before — content lays out at native size, then scales). */
+.fixed-size .slide {
+  width:  calc(var(--stage-w) * var(--stage-sx, 1));
+  height: calc(var(--stage-h) * var(--stage-sy, 1));
+  flex: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.fixed-size .slide.active { display: block; }
+
+.fixed-size .stage {
+  display: flex;
+  flex-direction: column;
+  width:  var(--stage-w);
+  height: var(--stage-h);
+  padding: 20px 24px 12px;   /* matches the base .slide padding, scaled with the stage */
+  transform: scale(var(--stage-sx, 1), var(--stage-sy, 1));
+  transform-origin: top left;
+}
+
+.fixed-size #main.can-pan { cursor: grab; }
+.fixed-size #main.panning { cursor: grabbing; }
+.fixed-size #main.panning .stage { cursor: grabbing; }
+
+/* ---- Toolbar ---- */
+#toolbar {
+  position: fixed;
+  bottom: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  height: var(--toolbar-height);
+  transition: left 0.2s ease;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  container-type: inline-size;   /* enables the width query for the credit */
+}
+
+#toolbar button {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+#toolbar button:hover {
+  background: var(--color-surface2);
+}
+
+#slide-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* "Made with tessera" credit, pinned to the right of the toolbar. Absolutely
+   positioned (relative to the fixed #toolbar) so it is out of the flex flow and
+   the navigation controls keep their centred layout. */
+#toolbar-credit {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+#toolbar-credit span { font-weight: 600; }
+#toolbar-credit:hover { color: var(--color-accent); }
+
+/* Hide the credit once the toolbar gets too narrow (e.g. a wide sidebar), so
+   the centred controls never collide with it. */
+@container (max-width: 620px) {
+  #toolbar-credit { display: none; }
+}
+
+/* Zoom controls (− 🔍100% +) */
+#zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#btn-zoom-reset {
+  min-width: 4.6em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;   /* steady width as the % changes */
+}
+
+#zoom-level { display: inline-block; }
+
+#slide-input {
+  width: 44px;
+  text-align: center;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 2px 4px;
+  font-size: 0.85rem;
+}
+
+/* ---- Overview ---- */
+#overview {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 32px;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+#overview.hidden { display: none; }
+
+.overview-thumb {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overview-thumb:hover { border-color: var(--color-accent); }
+
+.overview-num {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.overview-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---- Modal ---- */
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+#modal.hidden { display: none; }
+
+#modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow: auto;
+  position: relative;
+  min-width: 320px;
+}
+
+#modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* ---- Print ---- */
+@media print {
+  #sidebar, #toolbar, #overview, #modal, .cell-actions { display: none !important; }
+  #main {
+    position: static;
+    left: 0;
+  }
+  .slide {
+    display: flex !important;
+    page-break-after: always;
+    height: 100vh;
+  }
+  .slide-notes {
+    display: block !important;
+  }
+}
+
+/* --- default/slide.css --- */
+/* ============================================================
+   slide.css — slide, header, canvas e células
+   ============================================================ */
+
+.slide-header {
+  margin-bottom: 12px;
+  flex-shrink: 0;
+}
+
+.slide-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  border-bottom: 2px solid var(--color-accent);
+  padding-bottom: 6px;
+  display: inline-block;
+}
+
+.slide-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+}
+
+/* ---- Cover slides (title & section) ---- */
+.slide-type-title,
+.slide-type-section {
+  align-items: center;
+  justify-content: center;
+}
+
+.slide-cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 680px;
+  width: 100%;
+  padding: 0 24px;
+  /* Center the cover within its flex parent on both axes. This works whether
+     the parent is .slide (fluid mode, where .stage is display:contents) or
+     .stage (fixed-size mode, where .slide is display:block) - relying on the
+     parent's align-items/justify-content breaks in fixed-size mode. */
+  margin: auto;
+}
+
+.slide-cover-title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text);
+}
+
+.slide-type-title .slide-cover::after {
+  content: "";
+  display: block;
+  width: 64px;
+  height: 3px;
+  background: var(--color-accent);
+  border-radius: 2px;
+  margin-top: 2px;
+}
+
+.slide-cover-subtitle {
+  font-size: 1.05rem;
+  color: var(--color-text-muted);
+}
+
+.slide-cover-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 0;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.slide-cover-meta span + span::before {
+  content: " · ";
+}
+
+.slide-type-section .slide-cover-title {
+  font-size: 2.2rem;
+  color: var(--color-accent);
+}
+
+/* ---- Canvas ---- */
+.slide-canvas {
+  display: grid;
+  flex: 1;
+  gap: 12px;
+  overflow: hidden;
+}
+
+/* ---- Células base ---- */
+.cell {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cell-overflow .cell-body { overflow: auto; }
+.cell-clip    .cell-body { overflow: hidden; }
+
+.cell-body {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.cell-caption {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 6px;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+/* ---- Botões de ação ---- */
+.cell-actions {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.btn-action {
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.15s;
+}
+
+.btn-action:hover { opacity: 1; }
+
+/* ---- Célula transparente ---- */
+.cell-transparent {
+  background: transparent !important;
+  border-color: transparent !important;
+}
+
+/* ---- Alignment ---- */
+.cell-valign-middle .cell-body { display: flex; flex-direction: column; justify-content: center; }
+.cell-valign-bottom .cell-body { display: flex; flex-direction: column; justify-content: flex-end; }
+
+.cell-halign-center .cell-body { text-align: center; }
+.cell-halign-right  .cell-body { text-align: right; }
+
+/* ---- Markdown body (TextCell) ---- */
+.markdown-body { font-size: 0.9rem; line-height: 1.65; color: var(--color-text); }
+.markdown-body p  { margin-bottom: 0.6em; }
+.markdown-body ul,
+.markdown-body ol { padding-left: 1.5rem; margin-bottom: 0.6em; }
+.markdown-body li { margin-bottom: 0.2em; }
+.markdown-body li::marker { color: var(--color-accent); }
+.markdown-body ul ul,
+.markdown-body ol ol,
+.markdown-body ul ol,
+.markdown-body ol ul { font-size: 0.9em; color: var(--color-text-muted); margin-top: 0.2em; margin-bottom: 0; }
+.markdown-body h1 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5em; border-bottom: 1px solid var(--color-border); padding-bottom: 4px; }
+.markdown-body h2 { font-size: 1rem;    font-weight: 700; margin-bottom: 0.4em; }
+.markdown-body h3 { font-size: 0.9rem;  font-weight: 600; margin-bottom: 0.3em; }
+.markdown-body code { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 1px 4px; border-radius: 3px; }
+.markdown-body pre  { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 8px; border-radius: var(--radius); overflow: auto; margin-bottom: 0.6em; }
+.markdown-body blockquote { border-left: 3px solid var(--color-accent); padding-left: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.6em; }
+.markdown-body a { color: var(--color-accent); }
+.markdown-body strong { font-weight: 700; }
+.markdown-body em     { font-style: italic; }
+.markdown-body p:last-child,
+.markdown-body ul:last-child,
+.markdown-body ol:last-child { margin-bottom: 0; }
+
+/* ---- Notas ---- */
+.slide-notes {
+  display: none;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  margin-top: 10px;
+  padding-top: 6px;
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+/* --- default/table.css --- */
+/* ============================================================
+   table.css
+   ============================================================ */
+
+.table-body {
+  overflow: auto;
+}
+
+.hs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.hs-table thead th {
+  background: var(--color-surface2);
+  color: var(--color-text);
+  font-weight: 600;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--color-accent);
+  white-space: nowrap;
+}
+
+.hs-table tbody td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  vertical-align: top;
+}
+
+.hs-table tbody tr.row-even {
+  background: rgba(255,255,255,0.03);
+}
+
+.hs-table tbody tr:hover {
+  background: var(--color-surface2);
+}
+
+/* --- default/tabulator.css --- */
+/* ============================================================
+   tabulator.css
+   Thin skin over the bundled Tabulator stock theme so interactive
+   tables track the active tessera theme. Scoped under .cell-tabulator
+   (specificity 0,2,0) so it wins over Tabulator's own `.tabulator…`
+   rules regardless of stylesheet order, and driven by --color-*
+   variables so one file works for the dark, light, and custom themes.
+   ============================================================ */
+
+.cell-tabulator .tabulator {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+}
+
+.cell-tabulator .tabulator .tabulator-header,
+.cell-tabulator .tabulator .tabulator-header .tabulator-col {
+  background: var(--color-surface2);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator .tabulator-header .tabulator-col {
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.cell-tabulator .tabulator .tabulator-col-title {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.cell-tabulator .tabulator-header-filter input,
+.cell-tabulator .tabulator-header-filter select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+}
+
+.cell-tabulator .tabulator-row {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator-row.tabulator-row-even {
+  background: rgba(127, 127, 127, 0.06);
+}
+
+.cell-tabulator .tabulator-row:hover,
+.cell-tabulator .tabulator-row.tabulator-row-even:hover {
+  background: var(--color-surface2);
+}
+
+.cell-tabulator .tabulator-row.tabulator-selected,
+.cell-tabulator .tabulator-row.tabulator-selected:hover {
+  background: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
+}
+
+.cell-tabulator .tabulator-row .tabulator-cell {
+  border-right: 1px solid var(--color-border);
+}
+
+.cell-tabulator .tabulator-row .tabulator-cell.tabulator-editing {
+  border: 1px solid var(--color-accent);
+}
+
+/* Group headers + calculation rows */
+.cell-tabulator .tabulator-row.tabulator-group,
+.cell-tabulator .tabulator .tabulator-calcs-holder,
+.cell-tabulator .tabulator-row.tabulator-calcs {
+  background: var(--color-surface2);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* Pagination footer */
+.cell-tabulator .tabulator .tabulator-footer {
+  background: var(--color-surface2);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page:disabled {
+  opacity: 0.5;
+}
+
+/* Download buttons reuse the .btn-action chrome; keep them legible */
+.cell-tabulator .cell-actions .btn-action[data-tab-download] {
+  font-size: 0.7rem;
+}
+
+/* --- default/list.css --- */
+/* ============================================================
+   list.css — ListCell (bullet e numerada)
+   ============================================================ */
+
+.list-body {
+  overflow: auto;
+}
+
+.hs-list {
+  padding-left: 1.5rem;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+.hs-list li {
+  margin-bottom: 0.25rem;
+}
+
+.hs-list li::marker {
+  color: var(--color-accent);
+}
+
+/* Subníveis */
+.hs-list .hs-list {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* --- default/toc.css --- */
+/* ============================================================
+   toc.css — standalone TOC slide + inline section TOC
+   ============================================================ */
+
+/* ---- Standalone TOC slide ---- */
+.slide-type-toc {
+  padding: 28px 36px 20px;
+}
+
+.slide-toc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.slide-toc-body .toc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.slide-toc-body .toc-entry:last-child {
+  border-bottom: none;
+}
+
+.toc-entry-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.toc-entry-link:hover {
+  color: var(--color-accent);
+}
+
+/* Level indentation in standalone TOC */
+.slide-toc-body .toc-level-2 {
+  padding-left: 20px;
+  font-size: 0.85rem;
+}
+
+.slide-toc-body .toc-level-2 .toc-entry-link {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+}
+
+.slide-toc-body .toc-level-3 {
+  padding-left: 36px;
+}
+
+.slide-toc-body .toc-level-3 .toc-entry-link {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+/* ---- Inline TOC on section slides ---- */
+.slide-toc-inline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 420px;
+  text-align: left;
+}
+
+.slide-toc-inline .toc-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.toc-bullet {
+  font-size: 0.75rem;
+  min-width: 14px;
+  flex-shrink: 0;
+}
+
+.toc-entry-title {
+  font-size: 0.88rem;
+}
+
+/* States */
+.toc-current .toc-entry-title {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.toc-current .toc-bullet {
+  color: var(--color-accent);
+}
+
+.toc-past .toc-entry-title {
+  color: var(--color-text-muted);
+}
+
+.toc-upcoming .toc-entry-title {
+  color: var(--color-text-muted);
+  opacity: 0.6;
+}
+
+/* Inline TOC level indentation */
+.slide-toc-inline .toc-level-2 {
+  padding-left: 16px;
+}
+
+.slide-toc-inline .toc-level-2 .toc-entry-title {
+  font-size: 0.8rem;
+}
+
+.slide-toc-inline .toc-level-3 {
+  padding-left: 28px;
+}
+
+.slide-toc-inline .toc-level-3 .toc-entry-title {
+  font-size: 0.75rem;
+  opacity: 0.75;
+}
+
+/* --- default/code.css --- */
+/* ============================================================
+   code.css — CodeCell, MermaidCell, HtmlCell, IframeCell, PlotlyCell
+   ============================================================ */
+
+/* -- CodeCell -- */
+.code-body {
+  overflow: auto;
+  height: 100%;
+}
+
+.hs-pre {
+  margin: 0;
+  height: 100%;
+  overflow: auto;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  border-radius: var(--radius);
+}
+
+/* Fallback quando highlight.js não está disponível */
+.hs-pre code {
+  display: block;
+  padding: 1rem;
+  background: #0d1117;
+  color: #c9d1d9;
+  border-radius: var(--radius);
+  white-space: pre;
+  overflow: auto;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Normaliza o tema do highlight.js para preencher a célula */
+.hs-pre .hljs {
+  height: 100%;
+  border-radius: var(--radius);
+  padding: 1rem;
+}
+
+/* -- MermaidCell -- */
+.mermaid-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  height: 100%;
+}
+
+.mermaid-body .mermaid {
+  width: 100%;
+  text-align: center;
+}
+
+.mermaid-body svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+/* -- HtmlCell -- */
+.html-body {
+  overflow: auto;
+  height: 100%;
+}
+
+/* -- IframeCell -- */
+.iframe-body {
+  overflow: hidden;
+  height: 100%;
+}
+
+.hs-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--color-surface2);
+}
+
+/* -- PlotlyCell -- */
+.plotly-body {
+  overflow: hidden;
+  height: 100%;
+}
+
+.plotly-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* --- default/metric.css --- */
+/* ============================================================
+   metric.css — KPI cards
+   ============================================================ */
+
+.cell-metric {
+  justify-content: center;
+  align-items: center;
+}
+
+.metric-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.metric-value {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.metric-delta {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.delta-positive { color: #4ade80; }   /* fallback if inline style absent */
+.delta-negative { color: #f87171; }
+.delta-neutral  { color: var(--color-text-muted); }
+
+/* --- default/toolbar.css --- */
+/* ============================================================
+   toolbar.css — placeholder (v1.0 implementation pending)
+   ============================================================ */
+
+  </style>
+</head>
+<body
+  class="fixed-size sb-collapsed"
+  data-sb-search-scope="title"
+  data-width="1280"
+  data-height="720"
+  data-scale-up="true"
+  data-keep-aspect="true"
+  style="--stage-w: 1280px; --stage-h: 720px;"
+>
+
+<!-- ===================== SIDEBAR ===================== -->
+<nav id="sidebar">
+  <div id="sidebar-header">Interactive tables</div>
+  <div id="sidebar-search-wrap">
+    <input id="sidebar-search" type="text" placeholder="Filter slides…"
+           autocomplete="off" spellcheck="false"
+           oninput="filterSidebar(this.value)"
+           onkeydown="if(event.key==='Escape'){this.value='';filterSidebar('');this.blur();}" />
+    <button id="sidebar-regex-toggle" type="button" title="Toggle regex mode"
+            onclick="toggleRegexMode()">.*</button>
+    <div id="sidebar-regex-tip" role="tooltip">
+      <b>Regex</b> &middot; <code>^start</code> &middot; <code>end$</code> &middot;
+      <code>a|b</code> &middot; <code>.</code> any &middot; <code>.*</code> seq &middot;
+      <code>\d</code> digit &middot; <code>[abc]</code> set
+    </div>
+  </div>
+  <div id="sidebar-fold-bar">
+    <button type="button" title="Collapse all"       onclick="collapseAllSections()">&#8862;</button>
+    <button type="button" title="Expand all"         onclick="expandAllSections()">&#8863;</button>
+    <button type="button" title="Collapse one level" onclick="collapseLevel()">&#8743;</button>
+    <button type="button" title="Expand one level"   onclick="expandLevel()">&#8744;</button>
+  </div>
+  <ul id="slide-list">
+    <li class="sidebar-item sidebar-type-slide"
+        data-target="tabulator"
+        data-type="slide"
+        data-level="0"
+        data-subtitle=""
+        onclick="goToSlide('tabulator')">
+      <span class="sidebar-caret-spacer"></span>
+      <span class="sidebar-num">1</span>
+      <span class="sidebar-title">TabulatorCell â€” add_tabulator()</span>
+    </li>
+    <li class="sidebar-item sidebar-type-slide"
+        data-target="formatters"
+        data-type="slide"
+        data-level="0"
+        data-subtitle=""
+        onclick="goToSlide('formatters')">
+      <span class="sidebar-caret-spacer"></span>
+      <span class="sidebar-num">2</span>
+      <span class="sidebar-title">Formatters & calculations</span>
+    </li>
+    <li class="sidebar-item sidebar-type-slide"
+        data-target="grouping"
+        data-type="slide"
+        data-level="0"
+        data-subtitle=""
+        onclick="goToSlide('grouping')">
+      <span class="sidebar-caret-spacer"></span>
+      <span class="sidebar-num">3</span>
+      <span class="sidebar-title">Grouping & pagination</span>
+    </li>
+    <li class="sidebar-item sidebar-type-slide"
+        data-target="editing"
+        data-type="slide"
+        data-level="0"
+        data-subtitle=""
+        onclick="goToSlide('editing')">
+      <span class="sidebar-caret-spacer"></span>
+      <span class="sidebar-num">4</span>
+      <span class="sidebar-title">Editing & selection</span>
+    </li>
+    <li class="sidebar-item sidebar-type-slide"
+        data-target="download"
+        data-type="slide"
+        data-level="0"
+        data-subtitle=""
+        onclick="goToSlide('download')">
+      <span class="sidebar-caret-spacer"></span>
+      <span class="sidebar-num">5</span>
+      <span class="sidebar-title">Download</span>
+    </li>
+  </ul>
+</nav>
+<div id="sidebar-resize-handle"></div>
+
+<!-- ===================== MAIN AREA ===================== -->
+<main id="main">
+
+  <!-- ── Regular content slide ── -->
+  <section
+    id="tabulator"
+    class="slide slide-type-slide"
+    data-index="1"
+    style="
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+    "
+  >
+    <div class="stage">
+    <!-- Slide header -->
+    <header class="slide-header">
+      <h1 class="slide-title">TabulatorCell â€” add_tabulator()</h1>
+    </header>
+
+    <!-- Canvas: rendered cells -->
+    <div class="slide-canvas"
+      style="
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+      "
+    >
+      <div class="cell cell-tabulator cell-overflow  cell-halign-left cell-valign-top"
+  style="
+    grid-column: 1 / span 1;
+    grid-row:    1 / span 1;
+  "
+>
+
+  <div class="cell-body">
+    <div id="tab-tabulator-_cell-1" class="tessera-tabulator"></div>
+    <script type="application/json" id="tab-tabulator-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product", "headerFilter": "input"}, {"title": "Category", "field": "Category", "headerFilter": "input"}, {"title": "Revenue", "field": "Revenue", "headerFilter": "input"}, {"title": "Margin", "field": "Margin", "headerFilter": "input"}, {"title": "Rating", "field": "Rating", "headerFilter": "input"}, {"title": "Reviewed", "field": "Reviewed", "headerFilter": "input"}], "responsiveLayout": "collapse"}</script>
+  </div>
+
+  <p class="cell-caption">Click a header to sort; type in a header to filter</p>
+</div>
+    </div>
+
+    <!-- Presenter notes -->
+    </div>
+  </section>
+
+
+  <!-- ── Regular content slide ── -->
+  <section
+    id="formatters"
+    class="slide slide-type-slide"
+    data-index="2"
+    style="
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+    "
+  >
+    <div class="stage">
+    <!-- Slide header -->
+    <header class="slide-header">
+      <h1 class="slide-title">Formatters & calculations</h1>
+    </header>
+
+    <!-- Canvas: rendered cells -->
+    <div class="slide-canvas"
+      style="
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+      "
+    >
+      <div class="cell cell-tabulator cell-overflow  cell-halign-left cell-valign-top"
+  style="
+    grid-column: 1 / span 1;
+    grid-row:    1 / span 1;
+  "
+>
+
+  <div class="cell-body">
+    <div id="tab-formatters-_cell-1" class="tessera-tabulator"></div>
+    <script type="application/json" id="tab-formatters-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}, "bottomCalc": "sum"}, {"title": "Margin", "field": "Margin", "formatter": "progress", "formatterParams": {"min": 0, "max": 100, "legend": true}, "bottomCalc": "avg"}, {"title": "Rating", "field": "Rating", "formatter": "star", "formatterParams": {"stars": 5}}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross"}], "responsiveLayout": "collapse"}</script>
+  </div>
+
+  <p class="cell-caption">money / progress / star / tickCross formatters, with sum & avg calcs</p>
+</div>
+    </div>
+
+    <!-- Presenter notes -->
+    </div>
+  </section>
+
+
+  <!-- ── Regular content slide ── -->
+  <section
+    id="grouping"
+    class="slide slide-type-slide"
+    data-index="3"
+    style="
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+    "
+  >
+    <div class="stage">
+    <!-- Slide header -->
+    <header class="slide-header">
+      <h1 class="slide-title">Grouping & pagination</h1>
+    </header>
+
+    <!-- Canvas: rendered cells -->
+    <div class="slide-canvas"
+      style="
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+      "
+    >
+      <div class="cell cell-tabulator cell-overflow  cell-halign-left cell-valign-top"
+  style="
+    grid-column: 1 / span 1;
+    grid-row:    1 / span 1;
+  "
+>
+
+  <div class="cell-body">
+    <div id="tab-grouping-_cell-1" class="tessera-tabulator"></div>
+    <script type="application/json" id="tab-grouping-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}], "responsiveLayout": "collapse", "pagination": true, "paginationSize": 4, "paginationCounter": "rows", "groupBy": "Category"}</script>
+  </div>
+
+  <p class="cell-caption">Grouped by Category, 4 rows per page</p>
+</div>
+    </div>
+
+    <!-- Presenter notes -->
+    </div>
+  </section>
+
+
+  <!-- ── Regular content slide ── -->
+  <section
+    id="editing"
+    class="slide slide-type-slide"
+    data-index="4"
+    style="
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+    "
+  >
+    <div class="stage">
+    <!-- Slide header -->
+    <header class="slide-header">
+      <h1 class="slide-title">Editing & selection</h1>
+    </header>
+
+    <!-- Canvas: rendered cells -->
+    <div class="slide-canvas"
+      style="
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+      "
+    >
+      <div class="cell cell-tabulator cell-overflow  cell-halign-left cell-valign-top"
+  style="
+    grid-column: 1 / span 1;
+    grid-row:    1 / span 1;
+  "
+>
+
+  <div class="cell-body">
+    <div id="tab-editing-_cell-1" class="tessera-tabulator"></div>
+    <script type="application/json" id="tab-editing-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin", "editor": "number"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross", "editor": true}], "responsiveLayout": "collapse", "selectableRows": true}</script>
+  </div>
+
+  <p class="cell-caption">Tick 'Reviewed' or edit 'Margin' inline; click rows to select</p>
+</div>
+    </div>
+
+    <!-- Presenter notes -->
+    </div>
+  </section>
+
+
+  <!-- ── Regular content slide ── -->
+  <section
+    id="download"
+    class="slide slide-type-slide"
+    data-index="5"
+    style="
+      grid-template-rows: 1fr;
+      grid-template-columns: 1fr;
+    "
+  >
+    <div class="stage">
+    <!-- Slide header -->
+    <header class="slide-header">
+      <h1 class="slide-title">Download</h1>
+    </header>
+
+    <!-- Canvas: rendered cells -->
+    <div class="slide-canvas"
+      style="
+        grid-template-rows: 1fr;
+        grid-template-columns: 1fr;
+      "
+    >
+      <div class="cell cell-tabulator cell-overflow  cell-halign-left cell-valign-top"
+  style="
+    grid-column: 1 / span 1;
+    grid-row:    1 / span 1;
+  "
+>
+  <div class="cell-actions">
+    <button class="btn-action" data-tab-download="csv" title="Download CSV">&#11015;CSV</button>
+    <button class="btn-action" data-tab-download="json" title="Download JSON">&#11015;JSON</button>
+  </div>
+
+  <div class="cell-body">
+    <div id="tab-download-_cell-1" class="tessera-tabulator"></div>
+    <script type="application/json" id="tab-download-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}], "responsiveLayout": "collapse"}</script>
+  </div>
+
+  <p class="cell-caption">Use the download buttons (top-right) to export CSV / JSON</p>
+</div>
+    </div>
+
+    <!-- Presenter notes -->
+    </div>
+  </section>
+
+</main>
+
+<!-- ===================== BOTTOM TOOLBAR ===================== -->
+<footer id="toolbar">
+  <button id="btn-sidebar" onclick="toggleSidebar()" title="Toggle sidebar (B)">&#9776;</button>
+  <button id="btn-prev" onclick="navigate(-1)" title="Previous slide (←)">&#9664;</button>
+  <span id="slide-counter">
+    <input id="slide-input" type="number" min="1" max="5" value="1"
+           onchange="goToIndex(parseInt(this.value))" />
+    <span>/ 5</span>
+  </span>
+  <button id="btn-next" onclick="navigate(1)" title="Next slide (→)">&#9654;</button>
+  <span id="zoom-controls">
+    <button id="btn-zoom-out" onclick="deckZoom(-1)" title="Zoom out (−)">&minus;</button>
+    <button id="btn-zoom-reset" onclick="deckZoomReset()" title="Reset zoom (0)">🔍︎&#8201;<span id="zoom-level">100%</span></button>
+    <button id="btn-zoom-in" onclick="deckZoom(1)" title="Zoom in (+)">&plus;</button>
+  </span>
+  <button id="btn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen (F)">&#x26F6;</button>
+  <a id="toolbar-credit" href="https://tessera-report.readthedocs.io/"
+     target="_blank" rel="noopener" title="Built with tessera">Made with <span>tessera</span></a>
+</footer>
+
+<!-- ===================== OVERVIEW ===================== -->
+<div id="overview" class="hidden">
+  <div class="overview-thumb" onclick="goToSlide('tabulator'); toggleOverview()">
+    <span class="overview-num">1</span>
+    <span class="overview-title">TabulatorCell â€” add_tabulator()</span>
+  </div>
+  <div class="overview-thumb" onclick="goToSlide('formatters'); toggleOverview()">
+    <span class="overview-num">2</span>
+    <span class="overview-title">Formatters & calculations</span>
+  </div>
+  <div class="overview-thumb" onclick="goToSlide('grouping'); toggleOverview()">
+    <span class="overview-num">3</span>
+    <span class="overview-title">Grouping & pagination</span>
+  </div>
+  <div class="overview-thumb" onclick="goToSlide('editing'); toggleOverview()">
+    <span class="overview-num">4</span>
+    <span class="overview-title">Editing & selection</span>
+  </div>
+  <div class="overview-thumb" onclick="goToSlide('download'); toggleOverview()">
+    <span class="overview-num">5</span>
+    <span class="overview-title">Download</span>
+  </div>
+</div>
+
+<!-- ===================== MODAL (expand) ===================== -->
+<div id="modal" class="hidden" onclick="closeModal()">
+  <div id="modal-content" onclick="event.stopPropagation()">
+    <button id="modal-close" onclick="closeModal()">&#10005;</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ===================== LIGHTBOX ===================== -->
+<div id="lightbox" class="hidden" onclick="closeLightbox()">
+  <div id="lightbox-inner" onclick="event.stopPropagation()">
+    <button id="lightbox-close" onclick="closeLightbox()" title="Close">&#10005;</button>
+    <button id="lightbox-reset-zoom" onclick="lbResetZoom()" title="Reset zoom">&#x2B55;</button>
+    <button id="lightbox-prev" onclick="lbNavThumb(-1)" title="Previous">&#8249;</button>
+    <button id="lightbox-next" onclick="lbNavThumb(1)" title="Next">&#8250;</button>
+    <div id="lightbox-img-wrap">
+      <img id="lightbox-img" src="" alt="" draggable="false" />
+    </div>
+    <div id="lightbox-thumbs"></div>
+  </div>
+</div>
+
+<!-- ===================== PLUGINS ===================== -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/css/tabulator_midnight.min.css" integrity="sha384-vBqRsRIPXb03PYCog2z5jjcEBrrvg3yilshFbdVOmFtVX27t9rYeO7lXit0xIcou" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@6.3.1/dist/js/tabulator.min.js" integrity="sha384-SKSq3cuuVWdfrjtLz9wNlqE0bMc903yMS5zGnFtwvfddplgxa1hywtiLyw1CbSHO" crossorigin="anonymous" charset="utf-8"></script>
+
+
+<!-- ===================== JS ===================== -->
+<script>
+﻿/* tessera — main.js
+   Navigation, fullscreen, overview, modal, lightbox (zoom/pan/thumbnails),
+   image slider, plotly / tabulator init.
+   No external dependencies (Plotly / Tabulator are initialised if present).
+*/
+
+(function () {
+  "use strict";
+
+  // -- State -----------------------------------------------
+  const slides = Array.from(document.querySelectorAll(".slide"));
+  let current = 0;
+  var _savedSidebarWidth = "220px";
+
+  // Deck-area zoom (toolbar +/- controls). Scales only the slide content, not
+  // the sidebar/toolbar. 1 = 100%.
+  var _deckZoom = 1;
+  var ZOOM_MIN = 0.25, ZOOM_MAX = 4, ZOOM_STEP = 1.25;
+
+  // -- Initialisation -------------------------------------
+  function init() {
+    if (slides.length === 0) return;
+
+    // Deep link via hash (#slide-3)
+    const hash = window.location.hash.slice(1);
+    const fromHash = slides.findIndex((s) => s.id === hash);
+    goTo(fromHash >= 0 ? fromHash : 0, false);
+
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("hashchange", onHashChange);
+
+    initPlotlyCharts();
+    initSliders();
+    initLightbox();
+    initSidebar();
+    initSidebarSections();
+    initStage();
+    applyDeckZoom();
+  }
+
+  // -- Fixed-size stage (scale-to-fit) --------------------
+  function fitStage() {
+    var body = document.body;
+    if (!body.classList.contains("fixed-size")) return;
+    var main = document.getElementById("main");
+    if (!main) return;
+
+    var W = parseFloat(body.dataset.width) || 1366;
+    var H = parseFloat(body.dataset.height) || 768;
+    var scaleUp = body.dataset.scaleUp === "true";
+    var keepAspect = body.dataset.keepAspect !== "false";
+
+    var sx = main.clientWidth / W;
+    var sy = main.clientHeight / H;
+    if (!scaleUp) { sx = Math.min(1, sx); sy = Math.min(1, sy); }
+    if (keepAspect) { sx = sy = Math.min(sx, sy); }
+
+    // Deck-area zoom multiplies the fit (fixed-size stages scale via transform).
+    sx *= _deckZoom; sy *= _deckZoom;
+
+    body.style.setProperty("--stage-sx", sx);
+    body.style.setProperty("--stage-sy", sy);
+
+    // When the scaled stage is larger than the viewport, #main scrolls — flag it
+    // so the cursor shows it is grab-pannable.
+    var over = (W * sx > main.clientWidth + 1) || (H * sy > main.clientHeight + 1);
+    main.classList.toggle("can-pan", over);
+  }
+
+  // Drag-to-pan the zoomed stage. Native scrollbars/wheel also work; this adds
+  // grab-panning from empty (non-interactive) areas without hijacking clicks on
+  // cells, links, inputs, or Plotly charts.
+  function initStagePan() {
+    var main = document.getElementById("main");
+    if (!main) return;
+    var dragging = false, startX, startY, startL, startT;
+    main.addEventListener("mousedown", function (e) {
+      if (e.button !== 0 || !main.classList.contains("can-pan")) return;
+      if (e.target.closest(".cell, a, button, input, textarea, select, .plotly-container")) return;
+      dragging = true;
+      startX = e.clientX; startY = e.clientY;
+      startL = main.scrollLeft; startT = main.scrollTop;
+      main.classList.add("panning");
+      e.preventDefault();
+    });
+    document.addEventListener("mousemove", function (e) {
+      if (!dragging) return;
+      main.scrollLeft = startL - (e.clientX - startX);
+      main.scrollTop  = startT - (e.clientY - startY);
+    });
+    document.addEventListener("mouseup", function () {
+      if (dragging) { dragging = false; main.classList.remove("panning"); }
+    });
+  }
+
+  function initStage() {
+    if (!document.body.classList.contains("fixed-size")) return;
+    fitStage();
+    var main = document.getElementById("main");
+    // Recompute the stage scale, then redraw the visible tables so Tabulator
+    // re-measures against the new transform.
+    var onFit = function() { fitStage(); renderTabulatorsInSlide(slides[current]); };
+    // ResizeObserver on #main captures window resizes (it is pinned to the
+    // window edges) and sidebar toggle/resize (which shifts its left edge).
+    if (main && "ResizeObserver" in window) {
+      new ResizeObserver(onFit).observe(main);
+    } else {
+      window.addEventListener("resize", onFit);
+    }
+    initStagePan();
+  }
+
+  // -- Deck-area zoom (toolbar) ---------------------------
+  function applyDeckZoom() {
+    document.body.style.setProperty("--deck-zoom", _deckZoom);
+    var lvl = document.getElementById("zoom-level");
+    if (lvl) lvl.textContent = Math.round(_deckZoom * 100) + "%";
+    // Fixed-size stages scale through the transform fit; recompute it.
+    if (document.body.classList.contains("fixed-size")) fitStage();
+    renderTabulatorsInSlide(slides[current]);
+  }
+
+  function deckZoom(dir) {
+    var z = dir > 0 ? _deckZoom * ZOOM_STEP : _deckZoom / ZOOM_STEP;
+    _deckZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, Math.round(z * 100) / 100));
+    applyDeckZoom();
+  }
+
+  function deckZoomReset() {
+    _deckZoom = 1;
+    applyDeckZoom();
+  }
+
+  // -- Navigation -----------------------------------------
+  function goTo(index, pushHash) {
+    if (pushHash === undefined) pushHash = true;
+    if (index < 0 || index >= slides.length) return;
+
+    slides[current].classList.remove("active");
+    var sidebarItems = document.querySelectorAll(".sidebar-item");
+    if (sidebarItems[current]) sidebarItems[current].classList.remove("active");
+
+    current = index;
+    slides[current].classList.add("active");
+    if (sidebarItems[current]) sidebarItems[current].classList.add("active");
+
+    var input = document.getElementById("slide-input");
+    if (input) input.value = current + 1;
+
+    var sidebarItem = sidebarItems[current];
+    if (sidebarItem) sidebarItem.scrollIntoView({ block: "nearest" });
+
+    if (pushHash) {
+      history.replaceState(null, "", "#" + slides[current].id);
+    }
+
+    resizePlotlyInSlide(slides[current]);
+    renderMermaidInSlide(slides[current]);
+    renderTabulatorsInSlide(slides[current]);
+    revealActiveSidebarItem();
+  }
+
+  // Step in the direction of delta. While a search filter is active, skip
+  // non-matching (hidden) items. Otherwise step to the immediate neighbour even
+  // if it sits inside a collapsed section — goTo() -> revealActiveSidebarItem()
+  // expands its ancestors so arrow keys can move into and unfold a folded node.
+  function navigate(delta) {
+    var step = delta < 0 ? -1 : 1;
+    if (!_searchActive) {
+      goTo(current + step);
+      return;
+    }
+    var items = document.querySelectorAll(".sidebar-item");
+    var i = current + step;
+    while (i >= 0 && i < slides.length) {
+      var it = items[i];
+      if (!it || !it.classList.contains("sidebar-hidden")) { goTo(i); return; }
+      i += step;
+    }
+    // no visible slide in that direction -> stay put
+  }
+
+  function goToSlide(slideId) {
+    var idx = slides.findIndex(function(s) { return s.id === slideId; });
+    if (idx >= 0) goTo(idx);
+  }
+
+  function goToIndex(n) {
+    goTo(Math.max(1, Math.min(n, slides.length)) - 1);
+  }
+
+  function onHashChange() {
+    var id = window.location.hash.slice(1);
+    var idx = slides.findIndex(function(s) { return s.id === id; });
+    if (idx >= 0) goTo(idx, false);
+  }
+
+  // -- Keyboard --------------------------------------------
+  function onKey(e) {
+    if (e.target.tagName === "INPUT") return;
+    var lb = document.getElementById("lightbox");
+    var lbOpen = lb && !lb.classList.contains("hidden");
+    if (lbOpen) {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") { lbNavThumb(1); return; }
+      if (e.key === "ArrowLeft"  || e.key === "ArrowUp")   { lbNavThumb(-1); return; }
+      if (e.key === "Escape") { closeLightbox(); return; }
+      return;
+    }
+    switch (e.key) {
+      case "ArrowRight": case "ArrowDown":  navigate(1);  break;
+      case "ArrowLeft":  case "ArrowUp":    navigate(-1); break;
+      case "f": case "F": toggleFullscreen(); break;
+      case "g": case "G": toggleOverview(); break;
+      case "b": case "B": toggleSidebar(); break;
+      case "+": case "=": deckZoom(1);  break;
+      case "-": case "_": deckZoom(-1); break;
+      case "0": deckZoomReset(); break;
+    }
+  }
+
+  // -- Fullscreen ------------------------------------------
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(function() {});
+    } else {
+      document.exitFullscreen().catch(function() {});
+    }
+  }
+
+  // -- Overview --------------------------------------------
+  function toggleOverview() {
+    var ov = document.getElementById("overview");
+    if (ov) ov.classList.toggle("hidden");
+  }
+
+  // -- Modal (expand) -------------------------------------
+  function expandCell(btn) {
+    var cell = btn.closest(".cell");
+    var body = cell && cell.querySelector(".cell-body");
+    if (!body) return;
+    var modal = document.getElementById("modal");
+    var modalBody = document.getElementById("modal-body");
+    if (!modal || !modalBody) return;
+    modalBody.innerHTML = body.innerHTML;
+    modal.classList.remove("hidden");
+  }
+
+  function closeModal() {
+    var modal = document.getElementById("modal");
+    if (modal) modal.classList.add("hidden");
+  }
+
+  // -- Lightbox (zoom/pan + thumbnails) -----------------------
+  // Internal lightbox state
+  var _lb = {
+    images: [],      // [{src, alt}]
+    index: 0,
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    dragging: false,
+    startX: 0,
+    startY: 0,
+    lastPanX: 0,
+    lastPanY: 0,
+  };
+
+  function initLightbox() {
+    var lb = document.getElementById("lightbox");
+    if (!lb) return;
+
+    var lbImg = document.getElementById("lightbox-img");
+
+    // Zoom via mouse wheel
+    lb.addEventListener("wheel", function(e) {
+      if (lb.classList.contains("hidden")) return;
+      e.preventDefault();
+      var delta = e.deltaY > 0 ? -0.15 : 0.15;
+      _lb.zoom = Math.max(0.3, Math.min(8, _lb.zoom + delta));
+      applyLbTransform();
+    }, { passive: false });
+
+    // Pan via drag
+    lbImg && lbImg.addEventListener("mousedown", function(e) {
+      if (e.button !== 0) return;
+      _lb.dragging = true;
+      _lb.startX = e.clientX - _lb.panX;
+      _lb.startY = e.clientY - _lb.panY;
+      lbImg.style.cursor = "grabbing";
+      e.preventDefault();
+    });
+    document.addEventListener("mousemove", function(e) {
+      if (!_lb.dragging) return;
+      _lb.panX = e.clientX - _lb.startX;
+      _lb.panY = e.clientY - _lb.startY;
+      applyLbTransform();
+    });
+    document.addEventListener("mouseup", function() {
+      if (_lb.dragging) {
+        _lb.dragging = false;
+        var lbImg2 = document.getElementById("lightbox-img");
+        if (lbImg2) lbImg2.style.cursor = "grab";
+      }
+    });
+
+    // Touch pan
+    lbImg && lbImg.addEventListener("touchstart", function(e) {
+      if (e.touches.length === 1) {
+        _lb.dragging = true;
+        _lb.startX = e.touches[0].clientX - _lb.panX;
+        _lb.startY = e.touches[0].clientY - _lb.panY;
+      }
+    }, { passive: true });
+    lbImg && lbImg.addEventListener("touchmove", function(e) {
+      if (!_lb.dragging || e.touches.length !== 1) return;
+      _lb.panX = e.touches[0].clientX - _lb.startX;
+      _lb.panY = e.touches[0].clientY - _lb.startY;
+      applyLbTransform();
+    }, { passive: true });
+    lbImg && lbImg.addEventListener("touchend", function() {
+      _lb.dragging = false;
+    });
+  }
+
+  function applyLbTransform() {
+    var lbImg = document.getElementById("lightbox-img");
+    if (!lbImg) return;
+    lbImg.style.transform = "translate(" + _lb.panX + "px, " + _lb.panY + "px) scale(" + _lb.zoom + ")";
+  }
+
+  function _resetLbView() {
+    _lb.zoom = 1; _lb.panX = 0; _lb.panY = 0;
+    applyLbTransform();
+  }
+
+  /**
+   * Serialize an inline <svg> (e.g. a matplotlib SVG figure) to a data URI so it
+   * can be shown in the lightbox or copied like any other image.
+   */
+  function _svgDataUri(el) {
+    var svg = el.tagName && el.tagName.toLowerCase() === "svg" ? el : el.querySelector("svg");
+    if (!svg) return "";
+    var s = new XMLSerializer().serializeToString(svg);
+    return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+  }
+
+  /** Resolve the displayable image src of a trigger element (<img> or inline SVG). */
+  function _imgSrc(el) {
+    if (!el) return "";
+    if (el.tagName === "IMG") return el.src;
+    return _svgDataUri(el);
+  }
+
+  /**
+   * Collects all images from the current slide (cell-image + sliders).
+   * Returns [{src, alt}].
+   */
+  function _collectSlideImages() {
+    var currentSlide = slides[current];
+    if (!currentSlide) return [];
+    var imgs = [];
+    // Regular images and inline-SVG figures (cell-image)
+    currentSlide.querySelectorAll(".cell-image .lightbox-trigger").forEach(function(el) {
+      var src = _imgSrc(el);
+      if (src) imgs.push({ src: src, alt: el.getAttribute("alt") || "" });
+    });
+    // Sliders: collect all images from each slider
+    currentSlide.querySelectorAll(".cell-image-slider .slider-img").forEach(function(img) {
+      imgs.push({ src: img.src, alt: img.alt || "" });
+    });
+    return imgs;
+  }
+
+  function openLightbox(imgEl) {
+    _lb.images = _collectSlideImages();
+    var src = _imgSrc(imgEl);
+    _lb.index = _lb.images.findIndex(function(im) { return im.src === src; });
+    if (_lb.index < 0) { _lb.index = 0; }
+    _lbShow();
+  }
+
+  function openLightboxFromSlider(imgEl) {
+    openLightbox(imgEl);
+  }
+
+  function _lbShow() {
+    var lb = document.getElementById("lightbox");
+    var lbImg = document.getElementById("lightbox-img");
+    if (!lb || !lbImg || _lb.images.length === 0) return;
+
+    var im = _lb.images[_lb.index];
+    // Keep zoom/pan when switching images (no reset here)
+    lbImg.src = im.src;
+    lbImg.alt = im.alt;
+    lbImg.style.cursor = "grab";
+    lb.classList.remove("hidden");
+
+    _lbRenderThumbs();
+  }
+
+  function _lbRenderThumbs() {
+    var container = document.getElementById("lightbox-thumbs");
+    if (!container) return;
+    container.innerHTML = "";
+    _lb.images.forEach(function(im, i) {
+      var thumb = document.createElement("img");
+      thumb.src = im.src;
+      thumb.alt = im.alt;
+      thumb.className = "lb-thumb" + (i === _lb.index ? " lb-thumb-active" : "");
+      thumb.onclick = (function(idx) { return function() { lbGoTo(idx); }; })(i);
+      container.appendChild(thumb);
+    });
+    // Scroll active thumbnail into view
+    var active = container.querySelector(".lb-thumb-active");
+    if (active) active.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+
+  function lbGoTo(idx) {
+    if (idx < 0 || idx >= _lb.images.length) return;
+    _lb.index = idx;
+    // Keep zoom and pan when navigating between images
+    _lbShow();
+  }
+
+  function lbNavThumb(delta) {
+    lbGoTo(_lb.index + delta);
+  }
+
+  function lbResetZoom() {
+    _resetLbView();
+  }
+
+  function closeLightbox() {
+    var lb = document.getElementById("lightbox");
+    if (lb) lb.classList.add("hidden");
+    _resetLbView();
+  }
+
+  // -- Image Slider ----------------------------------------
+  // Per-slider state: id -> { current }
+  var _sliders = {};
+
+  function initSliders() {
+    document.querySelectorAll(".cell-image-slider").forEach(function(cell) {
+      var track = cell.querySelector(".slider-track");
+      if (!track) return;
+      var id = track.id;
+      _sliders[id] = { current: 0 };
+      _sliderUpdate(id, cell);
+    });
+  }
+
+  function sliderNav(btn, delta) {
+    var cell = btn.closest(".cell-image-slider");
+    var track = cell && cell.querySelector(".slider-track");
+    if (!track) return;
+    var id = track.id;
+    var total = track.querySelectorAll(".slider-slide").length;
+    var st = _sliders[id] || { current: 0 };
+    st.current = (st.current + delta + total) % total;
+    _sliders[id] = st;
+    _sliderUpdate(id, cell);
+  }
+
+  function _sliderUpdate(id, cell) {
+    var track = document.getElementById(id);
+    if (!track) return;
+    var st = _sliders[id] || { current: 0 };
+    var slideEls = track.querySelectorAll(".slider-slide");
+    slideEls.forEach(function(el, i) {
+      el.style.display = i === st.current ? "" : "none";
+    });
+    // Update dots
+    var dots = cell.querySelectorAll(".slider-dot");
+    dots.forEach(function(d, i) {
+      d.classList.toggle("active", i === st.current);
+    });
+    // Update dot click handlers
+    dots.forEach(function(d) {
+      d.onclick = function() {
+        var idx = parseInt(d.getAttribute("data-index"), 10);
+        _sliders[id].current = idx;
+        _sliderUpdate(id, cell);
+      };
+    });
+  }
+
+  // -- Sidebar toggle & resize ----------------------------
+  var _sbMinWidth = 120;
+  var _sbMaxWidth = 480;
+
+  function initSidebar() {
+    var saved = localStorage.getItem("tessera-sb-width");
+    if (saved) {
+      var w = parseInt(saved, 10);
+      if (w >= _sbMinWidth && w <= _sbMaxWidth) {
+        _savedSidebarWidth = w + "px";
+        document.documentElement.style.setProperty("--sidebar-width", _savedSidebarWidth);
+      }
+    }
+    // Reconcile collapse state. A remembered toggle (localStorage) wins over
+    // the server-rendered default; otherwise the .sb-collapsed body class
+    // (set when sidebar_collapsed=True) governs.
+    var storedCollapsed = localStorage.getItem("tessera-sb-collapsed");
+    if (storedCollapsed === "1") {
+      document.documentElement.style.setProperty("--sidebar-width", "0px");
+      document.body.classList.add("sb-collapsed");
+    } else if (storedCollapsed === "0") {
+      document.body.classList.remove("sb-collapsed");
+      document.documentElement.style.setProperty("--sidebar-width", _savedSidebarWidth);
+    }
+
+    var handle = document.getElementById("sidebar-resize-handle");
+    if (!handle) return;
+
+    handle.addEventListener("mousedown", function (e) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      handle.classList.add("dragging");
+      document.body.classList.add("sb-no-transition");
+
+      function onMove(e) {
+        var w = Math.max(_sbMinWidth, Math.min(_sbMaxWidth, e.clientX));
+        document.documentElement.style.setProperty("--sidebar-width", w + "px");
+      }
+
+      function onUp() {
+        handle.classList.remove("dragging");
+        document.body.classList.remove("sb-no-transition");
+        var w = getComputedStyle(document.documentElement)
+          .getPropertyValue("--sidebar-width").trim();
+        _savedSidebarWidth = w;
+        localStorage.setItem("tessera-sb-width", parseInt(w, 10));
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      }
+
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  }
+
+  function toggleSidebar() {
+    var collapsed = document.body.classList.toggle("sb-collapsed");
+    if (collapsed) {
+      var current = getComputedStyle(document.documentElement)
+        .getPropertyValue("--sidebar-width").trim();
+      if (parseInt(current, 10) > 0) _savedSidebarWidth = current;
+      document.documentElement.style.setProperty("--sidebar-width", "0px");
+    } else {
+      document.documentElement.style.setProperty("--sidebar-width", _savedSidebarWidth);
+    }
+    localStorage.setItem("tessera-sb-collapsed", collapsed ? "1" : "0");
+  }
+
+  // -- Sidebar search & collapsible sections --------------
+  var _collapsedSections = new Set();
+  var _searchActive = false;
+  var _searchRe = null;
+  var _regexMode = false;          // literal by default; remembered across reloads
+  var _ancestors = new Map();      // item el -> [ancestor section id, ...] (outermost first)
+  var _sectionGroups = new Map();  // section id -> [descendant item els]
+  var _searchTimer = null;
+  var SB_COLLAPSED_KEY = "tessera-sb-collapsed-sections";
+  var SB_REGEX_KEY = "tessera-sb-regex";
+
+  function initSidebarSections() {
+    if (!document.getElementById("slide-list")) return;   // chromeless / no sidebar
+    buildSectionTree();
+    hideEmptyCarets();
+    restoreCollapsed();
+    restoreRegexMode();
+    applySidebarVisibility();
+    // Hide the fold toolbar when the deck has no foldable sections.
+    var foldBar = document.getElementById("sidebar-fold-bar");
+    if (foldBar && _sectionEls().length === 0) foldBar.style.display = "none";
+  }
+
+  // Foldable sections (those with a non-empty descendant group), with level.
+  function _sectionEls() {
+    var out = [];
+    document.querySelectorAll('.sidebar-item[data-type="section"]').forEach(function (el) {
+      var group = _sectionGroups.get(el.dataset.target);
+      if (group && group.length) {
+        out.push({ el: el, id: el.dataset.target, level: parseInt(el.dataset.level, 10) || 0 });
+      }
+    });
+    return out;
+  }
+
+  function _applyFold(touched) {
+    touched.forEach(syncCaret);
+    persistCollapsed();
+    applySidebarVisibility();
+  }
+
+  function collapseAllSections() {
+    var touched = [];
+    _sectionEls().forEach(function (s) {
+      if (!_collapsedSections.has(s.id)) { _collapsedSections.add(s.id); touched.push(s.id); }
+    });
+    _applyFold(touched);
+  }
+
+  function expandAllSections() {
+    var touched = Array.from(_collapsedSections);
+    _collapsedSections.clear();
+    _applyFold(touched);
+  }
+
+  // Progressive: fold the deepest currently-open layer of sections.
+  function collapseLevel() {
+    var open = _sectionEls().filter(function (s) {
+      return !_collapsedSections.has(s.id) && !hasCollapsedAncestor(s.el);
+    });
+    if (!open.length) return;
+    var maxLevel = open.reduce(function (m, s) { return Math.max(m, s.level); }, 0);
+    var touched = [];
+    open.forEach(function (s) {
+      if (s.level === maxLevel) { _collapsedSections.add(s.id); touched.push(s.id); }
+    });
+    _applyFold(touched);
+  }
+
+  // Progressive: reveal the outermost currently-folded layer of sections.
+  function expandLevel() {
+    var folded = _sectionEls().filter(function (s) {
+      return _collapsedSections.has(s.id) && !hasCollapsedAncestor(s.el);
+    });
+    if (!folded.length) return;
+    var minLevel = folded.reduce(function (m, s) { return Math.min(m, s.level); }, Infinity);
+    var touched = [];
+    folded.forEach(function (s) {
+      if (s.level === minLevel) { _collapsedSections.delete(s.id); touched.push(s.id); }
+    });
+    _applyFold(touched);
+  }
+
+  // Walk the flat item list with a level stack to derive each item's ancestor
+  // sections. A section records its ancestors before pushing itself, so it is
+  // never its own ancestor; popping while top.level >= level means a level-1
+  // section's group spans nested level-2 subsections (level-based nesting).
+  function buildSectionTree() {
+    var items = Array.from(document.querySelectorAll(".sidebar-item"));
+    var stack = [];  // [{id, level}]
+    items.forEach(function (el) {
+      var type = el.dataset.type;
+      var level = parseInt(el.dataset.level, 10) || 0;
+      if (type === "section") {
+        while (stack.length && stack[stack.length - 1].level >= level) stack.pop();
+      }
+      var anc = stack.map(function (s) { return s.id; });
+      _ancestors.set(el, anc);
+      anc.forEach(function (id) {
+        if (!_sectionGroups.has(id)) _sectionGroups.set(id, []);
+        _sectionGroups.get(id).push(el);
+      });
+      if (type === "section") stack.push({ id: el.dataset.target, level: level });
+    });
+  }
+
+  function hideEmptyCarets() {
+    document.querySelectorAll('.sidebar-item[data-type="section"]').forEach(function (el) {
+      var group = _sectionGroups.get(el.dataset.target);
+      var caret = el.querySelector(".sidebar-caret");
+      if (caret && (!group || group.length === 0)) caret.classList.add("sidebar-caret-empty");
+    });
+  }
+
+  // -- Search --------------------------------------------
+  function filterSidebar(value) {
+    // Debounce so content-scope search stays responsive on large decks.
+    if (_searchTimer) clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function () { _applyFilter(value); }, 120);
+  }
+
+  function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  function _applyFilter(value) {
+    var input = document.getElementById("sidebar-search");
+    value = (value || "").trim();
+    if (value === "") {
+      _searchActive = false; _searchRe = null;
+      if (input) input.classList.remove("sidebar-search-error");
+    } else if (_regexMode) {
+      try {
+        _searchRe = new RegExp(value, "i");
+        _searchActive = true;
+        if (input) input.classList.remove("sidebar-search-error");
+      } catch (e) {
+        _searchRe = null; _searchActive = false;   // invalid regex -> no filter
+        if (input) input.classList.add("sidebar-search-error");
+      }
+    } else {
+      // Literal mode: escape the query so specials match verbatim (always valid).
+      _searchRe = new RegExp(escapeRegex(value), "i");
+      _searchActive = true;
+      if (input) input.classList.remove("sidebar-search-error");
+    }
+    applySidebarVisibility();
+  }
+
+  function _syncRegexUI() {
+    var btn = document.getElementById("sidebar-regex-toggle");
+    var wrap = document.getElementById("sidebar-search-wrap");
+    var input = document.getElementById("sidebar-search");
+    if (btn) btn.classList.toggle("active", _regexMode);
+    if (wrap) wrap.classList.toggle("regex-on", _regexMode);
+    if (input) input.placeholder = _regexMode ? "Filter slides… (regex)" : "Filter slides…";
+  }
+
+  function toggleRegexMode() {
+    _regexMode = !_regexMode;
+    try { localStorage.setItem(SB_REGEX_KEY, _regexMode ? "1" : "0"); } catch (e) {}
+    _syncRegexUI();
+    var input = document.getElementById("sidebar-search");
+    if (input) _applyFilter(input.value);   // re-run with the new interpretation
+  }
+
+  function restoreRegexMode() {
+    _regexMode = localStorage.getItem(SB_REGEX_KEY) === "1";
+    _syncRegexUI();
+    var input = document.getElementById("sidebar-search");
+    if (input && input.value) _applyFilter(input.value);   // honor a restored value
+  }
+
+  function getSearchHaystack(el) {
+    var scope = document.body.dataset.sbSearchScope || "title";
+    var t = el.querySelector(".sidebar-title");
+    var title = t ? t.textContent : "";
+    if (scope === "title_subtitle") return title + " " + (el.dataset.subtitle || "");
+    if (scope === "content") {
+      var slide = document.getElementById(el.dataset.target);
+      return title + " " + (slide ? slide.textContent : "");
+    }
+    return title;
+  }
+
+  function matchesSearch(el) {
+    if (!_searchActive || !_searchRe) return true;
+    return _searchRe.test(getSearchHaystack(el));
+  }
+
+  // -- Collapse ------------------------------------------
+  function toggleSection(event, sectionId) {
+    if (event) event.stopPropagation();
+    if (_collapsedSections.has(sectionId)) _collapsedSections.delete(sectionId);
+    else _collapsedSections.add(sectionId);
+    persistCollapsed();
+    syncCaret(sectionId);
+    applySidebarVisibility();
+  }
+
+  function syncCaret(sectionId) {
+    var sec = document.querySelector('.sidebar-item[data-target="' + cssEscape(sectionId) + '"]');
+    var caret = sec && sec.querySelector(".sidebar-caret");
+    if (caret) caret.classList.toggle("collapsed", _collapsedSections.has(sectionId));
+  }
+
+  function cssEscape(s) {
+    return (window.CSS && CSS.escape) ? CSS.escape(s) : String(s).replace(/["\\]/g, "\\$&");
+  }
+
+  function persistCollapsed() {
+    try {
+      localStorage.setItem(SB_COLLAPSED_KEY, JSON.stringify(Array.from(_collapsedSections)));
+    } catch (e) {}
+  }
+
+  function restoreCollapsed() {
+    try {
+      var raw = localStorage.getItem(SB_COLLAPSED_KEY);
+      if (raw) {
+        var arr = JSON.parse(raw);
+        if (Array.isArray(arr)) arr.forEach(function (id) { _collapsedSections.add(id); });
+      }
+    } catch (e) {}
+    _collapsedSections.forEach(function (id) { syncCaret(id); });
+  }
+
+  function hasCollapsedAncestor(el) {
+    var anc = _ancestors.get(el) || [];
+    for (var i = 0; i < anc.length; i++) if (_collapsedSections.has(anc[i])) return true;
+    return false;
+  }
+
+  // Single source of truth: search overrides collapse while a query is active.
+  function applySidebarVisibility() {
+    var items = document.querySelectorAll(".sidebar-item");
+    if (!items.length) return;
+    items.forEach(function (el) {
+      var visible = _searchActive ? matchesSearch(el) : !hasCollapsedAncestor(el);
+      el.classList.toggle("sidebar-hidden", !visible);
+    });
+  }
+
+  // Auto-expand collapsed ancestors of the active item so keyboard/arrow nav
+  // into a folded section reveals it. Called at the end of goTo().
+  function revealActiveSidebarItem() {
+    if (_searchActive) return;   // search shows matches regardless of collapse
+    var items = document.querySelectorAll(".sidebar-item");
+    var el = items[current];
+    if (!el) return;
+    var anc = _ancestors.get(el) || [];
+    var changed = false;
+    anc.forEach(function (id) {
+      if (_collapsedSections.has(id)) { _collapsedSections.delete(id); syncCaret(id); changed = true; }
+    });
+    if (changed) {
+      persistCollapsed();
+      if (!_searchActive) applySidebarVisibility();
+      el.scrollIntoView({ block: "nearest" });   // re-scroll now that it is shown
+    }
+  }
+
+  // -- Copy -----------------------------------------------
+  function copyCell(btn) {
+    var cell = btn.closest(".cell");
+    var body = cell && cell.querySelector(".cell-body");
+    if (!body) return;
+    var text = body.innerText || body.textContent || "";
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text).catch(function() {});
+    }
+  }
+
+  function _flashAction(btn, ok) {
+    if (!btn) return;
+    var prev = btn.innerHTML;
+    btn.innerHTML = ok ? "&#10003;" : "&#10007;";
+    setTimeout(function() { btn.innerHTML = prev; }, 1100);
+  }
+
+  /**
+   * Copy a figure / image cell's picture to the clipboard as a PNG. Works for
+   * <img> data URIs (PNG/WebP/SVG) and inline-SVG matplotlib figures by drawing
+   * onto a canvas. Falls back to copying the src URL as text (e.g. a tainted
+   * cross-origin remote image that can't be read back from the canvas).
+   */
+  function copyImage(btn) {
+    var cell = btn.closest(".cell");
+    if (!cell) return;
+    // For a slider, copy the currently visible slide; otherwise the cell image.
+    var el = null;
+    var sliderImgs = cell.querySelectorAll(".slider-img");
+    sliderImgs.forEach(function(img) { if (!el && img.offsetParent !== null) el = img; });
+    if (!el) {
+      el = cell.querySelector("img.cell-img")
+        || cell.querySelector(".matplotlib-svg")
+        || cell.querySelector("img, svg");
+    }
+    var src = _imgSrc(el);
+    if (!src) return;
+
+    var canCopyImg = navigator.clipboard && window.ClipboardItem;
+    if (!canCopyImg) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(src).then(function() { _flashAction(btn, true); },
+                                               function() { _flashAction(btn, false); });
+      }
+      return;
+    }
+
+    var img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = function() {
+      try {
+        var canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || img.width || 1;
+        canvas.height = img.naturalHeight || img.height || 1;
+        canvas.getContext("2d").drawImage(img, 0, 0);
+        canvas.toBlob(function(blob) {
+          if (!blob) { _flashAction(btn, false); return; }
+          navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+            .then(function() { _flashAction(btn, true); },
+                  function() { _flashAction(btn, false); });
+        }, "image/png");
+      } catch (e) {
+        // Canvas tainted (cross-origin) — fall back to copying the URL.
+        navigator.clipboard.writeText(src).then(function() { _flashAction(btn, true); },
+                                               function() { _flashAction(btn, false); });
+      }
+    };
+    img.onerror = function() {
+      navigator.clipboard.writeText(src).then(function() { _flashAction(btn, true); },
+                                             function() { _flashAction(btn, false); });
+    };
+    img.src = src;
+  }
+
+  // -- Plotly ----------------------------------------------
+  // Pull text/grid colours from the active theme's CSS variables so Plotly
+  // stays legible on light themes (where the old hardcoded light-grey font was
+  // invisible). Axes inherit the font colour and a muted grid colour.
+  function _plotlyThemeColors() {
+    var cs = getComputedStyle(document.body);
+    var text = (cs.getPropertyValue("--color-text") || "").trim() || "#eaeaea";
+    var grid = (cs.getPropertyValue("--color-border") || "").trim() || "rgba(128,128,128,.3)";
+    return { text: text, grid: grid };
+  }
+
+  function initPlotlyCharts() {
+    if (typeof Plotly === "undefined") return;
+    var c = _plotlyThemeColors();
+    var axis = { gridcolor: c.grid, zerolinecolor: c.grid, linecolor: c.grid };
+    var containers = document.querySelectorAll(".plotly-container");
+    containers.forEach(function(el) {
+      try {
+        var raw = el.getAttribute("data-fig");
+        if (!raw) return;
+        var fig = JSON.parse(raw);
+        var base = fig.layout || {};
+        var layout = Object.assign({}, base, {
+          paper_bgcolor: "rgba(0,0,0,0)",
+          plot_bgcolor:  "rgba(0,0,0,0)",
+          font: Object.assign({ color: c.text }, base.font || {}, { color: c.text }),
+          xaxis: Object.assign({}, axis, base.xaxis || {}),
+          yaxis: Object.assign({}, axis, base.yaxis || {}),
+          margin: { t: 30, r: 10, b: 40, l: 50 },
+          autosize: true,
+        });
+        Plotly.newPlot(el, fig.data || [], layout, { responsive: true });
+      } catch(e) {
+        el.textContent = "Error rendering chart: " + e.message;
+      }
+    });
+  }
+
+  function renderMermaidInSlide(slideEl) {
+    if (typeof mermaid === "undefined") return;
+    var unprocessed = Array.from(slideEl.querySelectorAll("pre.mermaid")).filter(function(el) {
+      return !el.getAttribute("data-processed");
+    });
+    if (unprocessed.length > 0) {
+      mermaid.run({ nodes: unprocessed });
+    }
+  }
+
+  function resizePlotlyInSlide(slideEl) {
+    if (typeof Plotly === "undefined") return;
+    var containers = slideEl.querySelectorAll(".plotly-container");
+    containers.forEach(function(el) {
+      if (el._fullLayout) Plotly.relayout(el, { autosize: true });
+    });
+  }
+
+  // -- Tabulator -------------------------------------------
+  // Build each interactive table the first time its slide is shown (so it is
+  // measured while visible, not inside a display:none slide), then redraw on
+  // every (re)activation and on resize to track the fixed-size stage scale.
+  function buildTabulator(el) {
+    if (el._tbBuilt || typeof Tabulator === "undefined") return;
+    var cfgEl = document.getElementById(el.id + "-cfg");
+    if (!cfgEl) return;
+    el._tbBuilt = true;
+    try {
+      var table = new Tabulator(el, JSON.parse(cfgEl.textContent));
+      el._tabulator = table;
+      var card = el.closest(".cell");
+      if (card) {
+        card.querySelectorAll("[data-tab-download]").forEach(function(b) {
+          b.addEventListener("click", function() {
+            var f = b.getAttribute("data-tab-download");
+            table.download(f, "data." + f);
+          });
+        });
+      }
+    } catch (e) {
+      el.textContent = "Error rendering table: " + e.message;
+    }
+  }
+
+  function renderTabulatorsInSlide(slideEl) {
+    if (typeof Tabulator === "undefined") return;
+    slideEl.querySelectorAll(".tessera-tabulator").forEach(function(el) {
+      buildTabulator(el);
+      var t = el._tabulator;
+      // Defer the redraw so it runs after the stage transform / layout settles.
+      if (t) requestAnimationFrame(function() { try { t.redraw(true); } catch (e) {} });
+    });
+  }
+
+  function expandPlotly(btn) {
+    expandCell(btn);
+  }
+
+  // -- Expose global functions ----------------------------
+  window.toggleSidebar         = toggleSidebar;
+  window.navigate              = navigate;
+  window.goToSlide             = goToSlide;
+  window.goToIndex             = goToIndex;
+  window.toggleFullscreen      = toggleFullscreen;
+  window.toggleOverview        = toggleOverview;
+  window.expandCell            = expandCell;
+  window.expandPlotly          = expandPlotly;
+  window.closeModal            = closeModal;
+  window.openLightbox          = openLightbox;
+  window.openLightboxFromSlider = openLightboxFromSlider;
+  window.closeLightbox         = closeLightbox;
+  window.lbGoTo                = lbGoTo;
+  window.lbNavThumb            = lbNavThumb;
+  window.lbResetZoom           = lbResetZoom;
+  window.copyCell              = copyCell;
+  window.copyImage             = copyImage;
+  window.sliderNav             = sliderNav;
+  window.filterSidebar         = filterSidebar;
+  window.toggleSection         = toggleSection;
+  window.toggleRegexMode       = toggleRegexMode;
+  window.collapseAllSections   = collapseAllSections;
+  window.expandAllSections     = expandAllSections;
+  window.collapseLevel         = collapseLevel;
+  window.expandLevel           = expandLevel;
+  window.deckZoom              = deckZoom;
+  window.deckZoomReset         = deckZoomReset;
+
+  // -- Boot -----------------------------------------------
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+})();
+
+</script>
+
+
+</body>
+</html>

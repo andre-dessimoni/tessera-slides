@@ -46,7 +46,9 @@ slide.add_metric(
 
 ## TableCell — `add_table()`
 
-Accepts CSV, dict, `list[list]`, or `pd.DataFrame`.
+Accepts CSV, dict, `list[list]`, `pd.DataFrame`, or a path to a CSV/TSV file.
+For a sortable / filterable / paginated table, use
+[`add_tabulator()`](tabulator.md) instead.
 
 ```python
 # CSV (separator auto-detected)

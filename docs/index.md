@@ -58,6 +58,7 @@ deck.write("report", open_browser=True)
 sections/quickstart
 sections/structure
 sections/cell-types
+sections/tabulator
 sections/plugins
 sections/slide-ids
 sections/links

@@ -6,6 +6,15 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 
+- **Interactive tables — `slide.add_tabulator()`** (new `Plugins.Tabulator()`),
+  backed by the bundled [Tabulator](https://tabulator.info) library (MIT). Sort,
+  filter, paginate, group, edit inline, and download (CSV/JSON). Takes the same
+  inputs as `add_table` — and both now also accept a **path to a CSV/TSV file**.
+  Per-column formatters/editors/calcs go through `columns=[...]`; the full
+  Tabulator option set is reachable via `options={...}`. Two stock themes are
+  vendored (light + dark); styling follows the deck theme automatically
+  (`Plugins.Tabulator(theme="auto"|"light"|"dark")`). Works offline /
+  under `Security(block_external=True)`.
 - **Bundled (offline) plugins.** Each plugin can load from a CDN (`source="cdn"`,
   default) or be embedded in the report (`source="bundled"`) so it works with no
   network at all. Flip the whole deck with `Deck(plugin_source="bundled")`. The
