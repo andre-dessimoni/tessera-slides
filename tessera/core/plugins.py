@@ -112,6 +112,21 @@ class MathJax(Plugin):
     name: ClassVar[str] = "mathjax"
 
 
+@dataclass
+class Tabulator(Plugin):
+    """Tabulator — required by ``slide.add_tabulator()`` (interactive tables).
+
+    Attributes:
+        theme: which bundled stylesheet to use. ``"auto"`` (default) follows the
+            deck theme — the dark sheet for the ``default``/``dark`` themes, the
+            light sheet for ``light``. Force it with ``"light"`` / ``"dark"``.
+    """
+
+    theme: Literal["auto", "light", "dark"] = "auto"
+
+    name: ClassVar[str] = "tabulator"
+
+
 class Plugins:
     """Namespace of the available plugins. Instantiate the one(s) you need::
 
@@ -122,3 +137,4 @@ class Plugins:
     Mermaid = Mermaid
     Highlight = Highlight
     MathJax = MathJax
+    Tabulator = Tabulator

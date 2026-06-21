@@ -67,7 +67,8 @@ def _file_asset(maker, mode_self_contained: bool, path: Path, filename: str) -> 
     return maker("copy", path=path, filename=filename)
 
 
-def resolve_plugin(plugin, *, source: str, self_contained: bool, sri: bool) -> dict:
+def resolve_plugin(plugin, *, source: str, self_contained: bool, sri: bool,
+                   deck_theme: str | None = None) -> dict:
     """Resolve one plugin to ``{"name", "assets", "options"}``.
 
     Args:
@@ -76,6 +77,8 @@ def resolve_plugin(plugin, *, source: str, self_contained: bool, sri: bool) -> d
             already applied by the caller).
         self_contained: whether bundled assets are inlined (vs copied as sidecars).
         sri: whether to attach Subresource-Integrity hashes to CDN assets.
+        deck_theme: the deck's theme name, used only to resolve Tabulator's
+            ``theme="auto"`` to a concrete light/dark stylesheet.
     """
     name = plugin.name
     entry = load_manifest()[name]
@@ -143,6 +146,24 @@ def resolve_plugin(plugin, *, source: str, self_contained: bool, sri: bool) -> d
             js_file = entry["js"].format(output=output)
             assets.append(_file_asset(_js, self_contained, lib_dir / js_file, js_file))
         options["output"] = output
+
+    elif name == "tabulator":
+        # tessera-facing theme ("auto"/"light"/"dark") -> a vendored stylesheet.
+        theme_key = getattr(plugin, "theme", "auto")
+        if theme_key == "auto":
+            theme_key = "light" if deck_theme == "light" else "dark"
+        css_base = entry["theme_map"].get(theme_key) or entry["theme_map"][entry["default_theme"]]
+        css_file = entry["css_file"].format(theme=css_base)
+        if source == "cdn":
+            css_url = entry["cdn_css"].format(version=version, theme=css_base)
+            css_integrity = entry["sri_css"].get(css_base) if (sri and _vouchable(plugin, entry["version"])) else None
+            assets.append(_css("src", url=css_url, integrity=css_integrity))
+            js_url = plugin.url or entry["cdn_js"].format(version=version)
+            js_integrity = entry["sri_js"] if (sri and _vouchable(plugin, entry["version"])) else None
+            assets.append(_js("src", url=js_url, integrity=js_integrity))
+        else:
+            assets.append(_file_asset(_css, self_contained, lib_dir / css_file, css_file))
+            assets.append(_file_asset(_js, self_contained, lib_dir / entry["js"], entry["js"]))
 
     else:  # pragma: no cover - guarded by Plugin subclasses
         raise KeyError(f"Unknown plugin {name!r}")

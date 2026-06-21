@@ -24,6 +24,7 @@ from tessera.core.plugins import (
     Plotly,
     Plugin,
     Plugins,
+    Tabulator,
 )
 from tessera.core.security import Security
 from tessera.exceptions import (
@@ -48,6 +49,7 @@ __all__ = [
     "Mermaid",
     "Highlight",
     "MathJax",
+    "Tabulator",
     "Security",
     "SlideDefaults",
     "CellDefaults",

@@ -182,8 +182,23 @@ def test_table_list_not_nested_raises():
 # ---------------------------------------------------------------------------
 
 def test_table_bad_type_raises():
-    with pytest.raises(InvalidDataError, match="Unsupported data type"):
+    with pytest.raises(InvalidDataError, match="Unsupported table data type"):
         TableCell(data=12345, separator="auto", index=False, params=params())
+
+
+def test_table_reads_csv_file_path(tmp_path):
+    csv_file = tmp_path / "data.csv"
+    csv_file.write_text("Name,Age\nAlice,30\nBob,25", encoding="utf-8")
+    c = TableCell(data=str(csv_file), separator="auto", index=False, params=params())
+    assert c.headers == ["Name", "Age"]
+    assert c.rows == [["Alice", "30"], ["Bob", "25"]]
+
+
+def test_table_single_line_csv_not_treated_as_path():
+    # A one-line CSV string that isn't an existing file stays content, not a path.
+    c = TableCell(data="a,b,c", separator="auto", index=False, params=params())
+    assert c.headers == ["a", "b", "c"]
+    assert c.rows == []
 
 
 # ---------------------------------------------------------------------------

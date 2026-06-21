@@ -221,6 +221,7 @@ class Assembler:
             resolved = resolve_plugin(
                 plugin, source=source,
                 self_contained=self.deck.self_contained, sri=sec.sri,
+                deck_theme=self.deck.theme,
             )
             for asset in resolved["assets"]:
                 assets.append(self._materialize_asset(asset))

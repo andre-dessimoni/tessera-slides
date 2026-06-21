@@ -29,6 +29,7 @@ from tessera.cells import (
     MetricCell,
     PlotlyCell,
     TableCell,
+    TabulatorCell,
     TextCell,
     cell_method,
 )
@@ -252,6 +253,57 @@ class Slide:
         _params: Any               = None,
     ) -> TableCell:
         return TableCell(data=data, separator=separator, index=index, params=_params)
+
+    @cell_method
+    def add_tabulator(
+        self,
+        data: "dict[str, Any] | list[list[Any]] | pd.DataFrame | str | None" = None,
+        *,
+        sheets:          "dict[str, Any] | None"    = None,
+        columns:         list[dict] | None          = None,
+        options:         dict | None                = None,
+        layout:          str                        = "fitColumns",
+        responsive:      bool                       = False,
+        pagination:      int | None                 = None,
+        selectable:      bool | int                 = False,
+        group_by:        str | list[str] | None     = None,
+        header_filter:   bool                       = False,
+        frozen_columns:  list[str] | None           = None,
+        frozen_rows:     int | None                 = None,
+        movable_columns: bool                       = True,
+        header_sort:     bool | None                = None,
+        row_numbers:     bool                       = False,
+        spreadsheet_mode: bool                      = False,
+        persistence:     bool                       = False,
+        download:        list[str] | None           = None,
+        height:          str | int | None           = None,
+        index:           bool                       = False,
+        separator:       Literal["auto", ",", "\t"] = "auto",
+        col:             int | None                 = None,
+        row:             int | None                 = None,
+        colspan:         int                        = 1,
+        rowspan:         int                        = 1,
+        caption:         str                        = "",
+        overflow:        bool                       = False,
+        copy_button:     bool                       = _UNSET,  # type: ignore[assignment]
+        expand_button:   bool                       = _UNSET,  # type: ignore[assignment]
+        tabulator_config: dict | None               = None,
+        _params: Any                                = None,
+    ) -> TabulatorCell:
+        self._require_plugin("tabulator", "add_tabulator")
+        return TabulatorCell(
+            data=data, params=_params,
+            sheets=sheets,
+            columns=columns, options=options, layout=layout,
+            responsive=responsive, pagination=pagination, selectable=selectable,
+            group_by=group_by, header_filter=header_filter,
+            frozen_columns=frozen_columns, frozen_rows=frozen_rows,
+            movable_columns=movable_columns, header_sort=header_sort,
+            row_numbers=row_numbers, spreadsheet_mode=spreadsheet_mode,
+            persistence=persistence,
+            download=download, height=height, index=index, separator=separator,
+            tabulator_config=tabulator_config,
+        )
 
     @cell_method
     def add_list(
@@ -494,6 +546,7 @@ class Slide:
                 "mermaid":   "Plugins.Mermaid()",
                 "highlight": "Plugins.Highlight()",
                 "mathjax":   "Plugins.MathJax()",
+                "tabulator": "Plugins.Tabulator()",
             }.get(plugin_name, f"the '{plugin_name}' plugin")
             raise PluginNotDeclaredError(
                 f"{method_name}() requires {hint}; declare it in "

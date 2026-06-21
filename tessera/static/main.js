@@ -1,7 +1,7 @@
 ﻿/* tessera — main.js
    Navigation, fullscreen, overview, modal, lightbox (zoom/pan/thumbnails),
-   image slider, plotly init.
-   No external dependencies (Plotly is initialised if present).
+   image slider, plotly / tabulator init.
+   No external dependencies (Plotly / Tabulator are initialised if present).
 */
 
 (function () {
@@ -97,12 +97,15 @@
     if (!document.body.classList.contains("fixed-size")) return;
     fitStage();
     var main = document.getElementById("main");
+    // Recompute the stage scale, then redraw the visible tables so Tabulator
+    // re-measures against the new transform.
+    var onFit = function() { fitStage(); renderTabulatorsInSlide(slides[current]); };
     // ResizeObserver on #main captures window resizes (it is pinned to the
     // window edges) and sidebar toggle/resize (which shifts its left edge).
     if (main && "ResizeObserver" in window) {
-      new ResizeObserver(fitStage).observe(main);
+      new ResizeObserver(onFit).observe(main);
     } else {
-      window.addEventListener("resize", fitStage);
+      window.addEventListener("resize", onFit);
     }
     initStagePan();
   }
@@ -114,6 +117,7 @@
     if (lvl) lvl.textContent = Math.round(_deckZoom * 100) + "%";
     // Fixed-size stages scale through the transform fit; recompute it.
     if (document.body.classList.contains("fixed-size")) fitStage();
+    renderTabulatorsInSlide(slides[current]);
   }
 
   function deckZoom(dir) {
@@ -152,6 +156,7 @@
 
     resizePlotlyInSlide(slides[current]);
     renderMermaidInSlide(slides[current]);
+    renderTabulatorsInSlide(slides[current]);
     revealActiveSidebarItem();
   }
 
@@ -938,6 +943,62 @@
     var containers = slideEl.querySelectorAll(".plotly-container");
     containers.forEach(function(el) {
       if (el._fullLayout) Plotly.relayout(el, { autosize: true });
+    });
+  }
+
+  // -- Tabulator -------------------------------------------
+  // Build each interactive table the first time its slide is shown (so it is
+  // measured while visible, not inside a display:none slide), then redraw on
+  // every (re)activation and on resize to track the fixed-size stage scale.
+
+  var _tabulatorFormatsReady = false;
+  function ensureTabulatorFormats() {
+    if (_tabulatorFormatsReady || typeof Tabulator === "undefined") return;
+    _tabulatorFormatsReady = true;
+    Tabulator.extendModule("format", "formatters", {
+      // Continuous row numbers across paginated pages.
+      // getPosition(true) returns the row's 1-based index in the full filtered
+      // set (post-filter, post-sort, before pagination slicing), so the counter
+      // never resets when the reader flips to a new page.
+      rownumGlobal: function(cell) {
+        try {
+          var pos = cell.getRow().getPosition(true);
+          return pos !== false ? pos : "";
+        } catch(e) { return ""; }
+      }
+    });
+  }
+
+  function buildTabulator(el) {
+    if (el._tbBuilt || typeof Tabulator === "undefined") return;
+    ensureTabulatorFormats();
+    var cfgEl = document.getElementById(el.id + "-cfg");
+    if (!cfgEl) return;
+    el._tbBuilt = true;
+    try {
+      var table = new Tabulator(el, JSON.parse(cfgEl.textContent));
+      el._tabulator = table;
+      var card = el.closest(".cell");
+      if (card) {
+        card.querySelectorAll("[data-tab-download]").forEach(function(b) {
+          b.addEventListener("click", function() {
+            var f = b.getAttribute("data-tab-download");
+            table.download(f, "data." + f);
+          });
+        });
+      }
+    } catch (e) {
+      el.textContent = "Error rendering table: " + e.message;
+    }
+  }
+
+  function renderTabulatorsInSlide(slideEl) {
+    if (typeof Tabulator === "undefined") return;
+    slideEl.querySelectorAll(".tessera-tabulator").forEach(function(el) {
+      buildTabulator(el);
+      var t = el._tabulator;
+      // Defer the redraw so it runs after the stage transform / layout settles.
+      if (t) requestAnimationFrame(function() { try { t.redraw(true); } catch (e) {} });
     });
   }
 

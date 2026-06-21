@@ -19,6 +19,7 @@ CSS_COMPONENTS = [
     "layout",
     "slide",
     "table",
+    "tabulator",
     "list",
     "toc",
     "code",

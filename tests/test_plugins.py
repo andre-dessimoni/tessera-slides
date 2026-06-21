@@ -10,6 +10,7 @@ _PLUGIN_BY_NAME = {
     "mermaid": Plugins.Mermaid,
     "highlight": Plugins.Highlight,
     "mathjax": Plugins.MathJax,
+    "tabulator": Plugins.Tabulator,
 }
 
 
@@ -176,6 +177,42 @@ def test_highlight_unvendored_style_falls_back_when_bundled():
     assert css["path"].name == "github-dark.min.css"
 
 
+# --- Tabulator ---
+
+def test_tabulator_cdn_emits_css_and_js_with_sri():
+    css, js = _only(Plugins.Tabulator(), source="cdn")
+    assert css["type"] == "css" and css["mode"] == "src"
+    assert "tabulator-tables@6.3.1" in css["url"]
+    assert css["integrity"].startswith("sha384-")
+    assert js["type"] == "js" and "tabulator.min.js" in js["url"]
+    assert js["integrity"].startswith("sha384-")
+
+
+def test_tabulator_theme_auto_uses_deck_theme():
+    # default/dark decks -> dark sheet; light deck -> light sheet
+    (css_dark, _js) = resolve_plugin(
+        Plugins.Tabulator(), source="cdn", self_contained=True, sri=True,
+        deck_theme="dark")["assets"]
+    (css_light, _js2) = resolve_plugin(
+        Plugins.Tabulator(), source="cdn", self_contained=True, sri=True,
+        deck_theme="light")["assets"]
+    assert "tabulator_midnight.min.css" in css_dark["url"]
+    assert "css/tabulator.min.css" in css_light["url"]
+
+
+def test_tabulator_theme_explicit_overrides_deck_theme():
+    (css, _js) = resolve_plugin(
+        Plugins.Tabulator(theme="light"), source="cdn", self_contained=True,
+        sri=True, deck_theme="dark")["assets"]
+    assert "css/tabulator.min.css" in css["url"]
+
+
+def test_tabulator_bundled_inlines_css_and_js():
+    css, js = _only(Plugins.Tabulator(theme="dark"), source="bundled")
+    assert css["mode"] == "inline" and css["path"].name == "tabulator_midnight.min.css"
+    assert js["mode"] == "inline" and js["path"].name == "tabulator.min.js"
+
+
 # ---------------------------------------------------------------------------
 # Deck-level plugin_source default + per-plugin override
 # ---------------------------------------------------------------------------
@@ -234,6 +271,9 @@ def test_every_manifest_file_exists_on_disk():
           for s in m["highlight"]["vendored_styles"]),
         *(("mathjax", m["mathjax"]["js"].format(output=o))
           for o in m["mathjax"]["vendored_outputs"]),
+        ("tabulator", m["tabulator"]["js"]),
+        *(("tabulator", m["tabulator"]["css_file"].format(theme=t))
+          for t in m["tabulator"]["vendored_themes"]),
     ]
     for lib, fname in expected:
         assert (vdir / lib / fname).exists(), f"missing vendored file: {lib}/{fname}"

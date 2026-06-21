@@ -1,0 +1,34 @@
+<div class="cell cell-tabulator{% if cell.params.overflow %} cell-overflow{% else %} cell-clip{% endif %}{% if cell.params.transparent %} cell-transparent{% endif %}
+  cell-halign-{{ cell.params.halign }} cell-valign-{{ cell.params.valign }}"
+  style="
+    grid-column: {{ cell.params.col }} / span {{ cell.params.colspan }};
+    grid-row:    {{ cell.params.row }} / span {{ cell.params.rowspan }};
+  "
+>
+  {% if cell.params.copy_button or cell.params.expand_button or cell.download %}
+  <div class="cell-actions">
+    {% for fmt in cell.download %}
+    <button class="btn-action" data-tab-download="{{ fmt }}" title="Download {{ fmt|upper }}">&#11015;{{ fmt|upper }}</button>
+    {% endfor %}
+    {% if cell.params.copy_button %}
+    <button class="btn-action" onclick="copyCell(this)" title="Copiar">&#128203;</button>
+    {% endif %}
+    {% if cell.params.expand_button %}
+    <button class="btn-action" onclick="expandCell(this)" title="Expandir">&#x26F6;</button>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <div class="cell-body">
+    {# The table is built by main.js when its slide becomes active, so it is
+       measured while visible and at the final stage scale (Tabulator mis-sizes
+       inside a hidden / CSS-scaled container). Config travels in a
+       non-executable JSON block. #}
+    <div id="{{ dom_id }}" class="tessera-tabulator"></div>
+    <script type="application/json" id="{{ dom_id }}-cfg">{{ config_json }}</script>
+  </div>
+
+  {% if cell.params.caption %}
+  <p class="cell-caption">{{ cell.params.caption }}</p>
+  {% endif %}
+</div>

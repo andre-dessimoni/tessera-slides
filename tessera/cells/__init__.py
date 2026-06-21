@@ -28,6 +28,7 @@ from tessera.cells.misc import (
 )
 from tessera.cells.plotly import PlotlyCell
 from tessera.cells.table import TableCell
+from tessera.cells.tabulator import TabulatorCell
 from tessera.cells.text import TextCell
 
 __all__ = [
@@ -42,6 +43,7 @@ __all__ = [
     "ImageSliderCell",
     "MatplotlibCell",
     "TableCell",
+    "TabulatorCell",
     "ListCell",
     "PlotlyCell",
     "CodeCell",
