@@ -158,6 +158,16 @@ class Slide:
             cell_id:Hashable,
             _caller_is_cell_method: bool = False
         ) -> None:
+        """Remove a cell from the slide and free its grid positions.
+
+        Args:
+            cell_id: The identifier of the cell to remove, as returned by
+                the cell's ``cell_id`` attribute or used as a key in
+                ``cell_map``.
+
+        Raises:
+            KeyError: If no cell with ``cell_id`` exists on this slide.
+        """
         if cell_id not in self._cell_map:
             raise KeyError(f"No slide found with ID: {cell_id}")
         
@@ -200,6 +210,35 @@ class Slide:
         valign:        str         = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,    # injected by the decorator
     ) -> TextCell:
+        """Add a text cell to the slide.
+
+        Content is rendered as Markdown by default. Supports standard Markdown
+        (headings, bold, italic, lists, code spans, links) and LaTeX math
+        (``$...$`` / ``$$...$$``) when ``Plugins.MathJax()`` is declared on
+        the deck.
+
+        Args:
+            content: Text to display. Parsed as Markdown unless
+                ``markdown=False``.
+            markdown: If ``True`` (default), render ``content`` as Markdown.
+                Pass ``False`` to display plain text without parsing.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the cell.
+            overflow: Show a scrollbar instead of clipping content.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+            transparent: If ``True``, the cell background is transparent.
+            halign: Horizontal alignment — ``"left"``, ``"center"``,
+                or ``"right"``.
+            valign: Vertical alignment — ``"top"``, ``"middle"``,
+                or ``"bottom"``.
+
+        Returns:
+            TextCell: The newly created and registered text cell.
+        """
         return TextCell(content=content, params=_params, markdown=markdown)
 
     @cell_method
@@ -221,6 +260,42 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> "ImageCell | MatplotlibCell":
+        """Add an image to the slide.
+
+        Accepts a file path, URL, base64 data URI, or a matplotlib ``Figure``.
+        Matplotlib figures are rendered to SVG (default) or WebP and embedded
+        inline. Clicking the image opens a lightbox viewer by default.
+
+        Args:
+            source: Image source. One of:
+
+                - File path (``str`` or ``pathlib.Path``) to a PNG/JPG/SVG/WebP.
+                - URL (``"https://..."``).
+                - Base64 data URI.
+                - ``matplotlib.figure.Figure`` — rendered to SVG or WebP and
+                  embedded inline.
+
+            lightbox: If ``True`` (default), clicking the image opens it in a
+                fullscreen lightbox viewer.
+            to_webp: Convert to WebP before embedding. Reduces file size for
+                photographs; for matplotlib figures uses WebP instead of SVG.
+            webp_quality: WebP quality level (1–100). ``None`` uses the
+                encoder's default (~80).
+            save_source: If ``True``, embed the original source file alongside
+                the processed image so it can be recovered from the HTML.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the image.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            ImageCell | MatplotlibCell: ``MatplotlibCell`` when ``source`` is a
+            matplotlib ``Figure``, otherwise ``ImageCell``.
+        """
         # A matplotlib Figure routes through the matplotlib pipeline (coherent
         # with add_image_slider). Duck-typed so matplotlib stays an optional dep.
         if hasattr(source, "savefig"):
@@ -252,6 +327,37 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> TableCell:
+        """Add a static HTML table to the slide.
+
+        Renders a plain, non-interactive ``<table>``. For sortable, filterable,
+        and paginated tables use ``add_tabulator`` instead.
+
+        Args:
+            data: Tabular data. Accepts:
+
+                - ``dict[str, list]`` — keys = column headers, values = columns.
+                - ``list[list]`` — first sub-list is the header row.
+                - ``pandas.DataFrame``.
+                - A CSV/TSV string.
+                - A path to a CSV/TSV file.
+
+            separator: Field separator for string or file inputs. ``"auto"``
+                (default) detects a tab in the first line; otherwise ``","``
+                or ``"\\t"``.
+            index: For pandas DataFrames only — if ``True``, include the index
+                as the first column.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the table.
+            overflow: Show a scrollbar when the table overflows the cell.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            TableCell: The newly created and registered table cell.
+        """
         return TableCell(data=data, separator=separator, index=index, params=_params)
 
     @cell_method
@@ -290,6 +396,98 @@ class Slide:
         tabulator_config: dict | None               = None,
         _params: Any                                = None,
     ) -> TabulatorCell:
+        """Add an interactive Tabulator.js table to the slide.
+
+        Requires ``Plugins.Tabulator()`` in the deck's plugin list. The table
+        supports sorting, filtering, pagination, grouping, row/column selection,
+        spreadsheet-style editing, clipboard copy/paste, and CSV/JSON export —
+        all self-contained inside the HTML file with no external requests when
+        using the default bundled source.
+
+        Pass ``data`` for a single interactive table, or ``sheets`` for a
+        multi-tab view (like an Excel workbook). Both accept the same input
+        types as ``add_table``: a ``dict`` of columns, a ``list[list]``
+        (first row = headers), a pandas ``DataFrame``, a CSV/TSV string, or a
+        path to a CSV/TSV file.
+
+        Args:
+            data: Tabular data for a single-sheet table. Accepts
+                ``dict[str, list]`` (keys = column headers), ``list[list]``
+                (first row = headers), a pandas ``DataFrame``, a CSV/TSV
+                string, or a CSV/TSV file path. Defaults to ``None``;
+                mutually exclusive with ``sheets``.
+            sheets: Multi-sheet mode. A ``dict`` whose keys become tab titles
+                and whose values are each parsed as tabular data (same types as
+                ``data``). Column headers appear as the first row of each
+                sheet's grid. Mutually exclusive with ``data``. Sorting,
+                filtering, pagination, and grouping options are ignored in
+                multi-sheet mode.
+            columns: Per-column Tabulator column definitions merged over the
+                auto-generated columns. Each dict is matched by ``"title"``
+                (or ``"field"``) — only changed keys need to be specified.
+                Useful keys: ``"formatter"`` (``"money"``, ``"star"``,
+                ``"progress"``, ``"tickCross"``), ``"editor"``,
+                ``"bottomCalc"`` / ``"topCalc"``, ``"frozen"``,
+                ``"headerFilter"``, ``"widthGrow"``.
+            options: Verbatim dict merged into the Tabulator constructor,
+                overriding all named keyword options. Use for anything not
+                exposed by name — ``"movableRows"``, ``"history"``,
+                ``"locale"``, nested tables, etc.
+            layout: Column sizing strategy. One of ``"fitColumns"`` (default),
+                ``"fitData"``, ``"fitDataFill"``, ``"fitDataStretch"``, or
+                ``"fitDataTable"``.
+            responsive: Collapse overflowing columns into an expandable row
+                instead of horizontal scroll. Defaults to ``False``.
+            pagination: Page size (rows per page). ``None`` renders all rows.
+            selectable: ``True`` or a max-count integer to allow row selection.
+            group_by: Column title (or list of titles) to group rows under
+                collapsible section headers.
+            header_filter: Add a text filter input to every column header.
+            frozen_columns: Column titles to pin to the left edge.
+            frozen_rows: Number of rows to pin to the top.
+            movable_columns: Allow readers to drag column headers to reorder
+                them. Defaults to ``True``.
+            header_sort: ``True`` / ``False`` to force column-header sorting
+                on or off. ``None`` keeps Tabulator's default (sortable).
+                Defaults to ``False`` in ``spreadsheet_mode``.
+            row_numbers: Add a frozen left column with sequential row numbers.
+                Numbers are continuous across paginated pages.
+            spreadsheet_mode: Enable range cell selection and clipboard
+                copy/paste (Ctrl-C / Ctrl-V). In ``sheets`` mode also makes
+                cells editable.
+            persistence: Save the reader's sort / filter / column-order tweaks
+                in ``localStorage`` and restore on reload. Off by default; the
+                persistence key includes a column-structure hash so stale state
+                is discarded automatically when the table changes.
+            download: Export buttons to show on the cell. Accepts ``["csv"]``,
+                ``["json"]``, or both. xlsx is not supported (needs SheetJS).
+                In multi-sheet mode downloads the active sheet only.
+            height: Fixed height for the table, e.g. ``"400px"`` or ``400``
+                (px). Enables Tabulator's virtual rendering for large tables.
+            index: Include the pandas DataFrame index as the first column.
+            separator: ``"auto"`` (detect from first line), ``","`` or
+                ``"\\t"`` — for string or file inputs only.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the table.
+            overflow: Show a scrollbar on the cell instead of clipping.
+                Defaults to ``False`` (Tabulator scrolls internally).
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+            tabulator_config: Final-pass dict merged after all other options,
+                overriding even ``options``.
+
+        Returns:
+            TabulatorCell: The newly created and registered table cell.
+
+        Raises:
+            PluginNotDeclaredError: If ``Plugins.Tabulator()`` is not in the
+                deck's plugin list.
+            ValueError: If both ``data`` and ``sheets`` are supplied, or if
+                neither is supplied.
+        """
         self._require_plugin("tabulator", "add_tabulator")
         return TabulatorCell(
             data=data, params=_params,
@@ -321,6 +519,25 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> ListCell:
+        """Add a bulleted or numbered list to the slide.
+
+        Args:
+            items: The list items to display. Each element is converted to a
+                string and rendered as a list entry.
+            ordered: If ``True``, render as a numbered (``<ol>``) list.
+                Defaults to ``False`` (bulleted ``<ul>``).
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the list.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            ListCell: The newly created and registered list cell.
+        """
         return ListCell(items=items, ordered=ordered, params=_params)
 
     @cell_method
@@ -339,6 +556,32 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> PlotlyCell:
+        """Add an interactive Plotly chart to the slide.
+
+        Requires ``Plugins.Plotly()`` in the deck's plugin list. The full
+        Plotly figure JSON is embedded in the HTML; the chart is interactive
+        (zoom, pan, hover tooltips) without any server round-trips.
+
+        Args:
+            fig: A ``plotly.graph_objects.Figure`` instance.
+            save_source: If ``True``, embed the raw figure JSON alongside the
+                rendered chart so it can be recovered from the HTML.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the chart.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            PlotlyCell: The newly created and registered Plotly chart cell.
+
+        Raises:
+            PluginNotDeclaredError: If ``Plugins.Plotly()`` is not in the
+                deck's plugin list.
+        """
         self._require_plugin("plotly", "add_plotly")
         return PlotlyCell(fig=fig, params=_params, save_source=save_source)
 
@@ -366,6 +609,43 @@ class Slide:
         valign:        str         = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> MatplotlibCell:
+        """Add a matplotlib figure to the slide.
+
+        The figure is rendered to SVG (vector, lossless) or WebP (raster) and
+        embedded as a base64 data URI — no external files needed. For
+        interactive charts see ``add_plotly``.
+
+        Args:
+            fig: A ``matplotlib.figure.Figure`` instance.
+            dpi: Render resolution in dots per inch. Only meaningful when
+                ``fmt="webp"`` (SVG is resolution-independent). Defaults to
+                ``150``.
+            fmt: Output format — ``"svg"`` (default, vector) or ``"webp"``
+                (raster). Overridden to ``"webp"`` when ``to_webp=True``.
+            to_webp: If ``True``, forces WebP output regardless of ``fmt``.
+            webp_quality: WebP quality level (1–100). ``None`` uses the
+                encoder's default.
+            save_source: If ``True``, the figure is pickled and embedded
+                alongside the rendered image so it can be recovered later.
+            lightbox: If ``True`` (default), clicking the figure opens it in
+                a fullscreen lightbox viewer.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the figure.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+            transparent: If ``True``, the cell background is transparent.
+            halign: Horizontal alignment — ``"left"``, ``"center"``,
+                or ``"right"``.
+            valign: Vertical alignment — ``"top"``, ``"middle"``,
+                or ``"bottom"``.
+
+        Returns:
+            MatplotlibCell: The newly created and registered figure cell.
+        """
         if to_webp:
             fmt = "webp"
         return MatplotlibCell(
@@ -389,6 +669,32 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> CodeCell:
+        """Add a syntax-highlighted code block to the slide.
+
+        Requires ``Plugins.Highlight()`` in the deck's plugin list. Highlighting
+        is applied by Highlight.js at render time in the browser.
+
+        Args:
+            code: The source code string to display.
+            language: Language identifier for syntax highlighting, e.g.
+                ``"python"``, ``"javascript"``, ``"sql"``, ``"bash"``.
+                Passed directly to Highlight.js. Defaults to ``"python"``.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the code block.
+            overflow: Show a scrollbar instead of wrapping long lines.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            CodeCell: The newly created and registered code cell.
+
+        Raises:
+            PluginNotDeclaredError: If ``Plugins.Highlight()`` is not in the
+                deck's plugin list.
+        """
         self._require_plugin("highlight", "add_code")
         return CodeCell(code=code, language=language, params=_params)
 
@@ -417,6 +723,47 @@ class Slide:
         expand_button:   bool        = _UNSET,  # type: ignore[assignment]
         _params: Any                 = None,
     ) -> MetricCell:
+        """Add a KPI metric card to the slide.
+
+        Displays a prominent value with a label and an optional delta indicator
+        (change vs a reference value), colour-coded green / red / neutral.
+
+        Args:
+            value: The primary metric value. Accepts ``int``, ``float``, or a
+                pre-formatted ``str`` (e.g. ``"€ 1,234"``).
+            label: Short descriptor shown below the value (e.g.
+                ``"Revenue"``).
+            delta: Change from a reference value shown as a secondary line with
+                a directional symbol. ``None`` hides the delta row entirely.
+            delta_label: Optional text appended after the delta value (e.g.
+                ``"vs last year"``).
+            lower_is_better: If ``True``, a negative delta is coloured green
+                and a positive delta red — useful for metrics like error rate
+                or cost. Defaults to ``False``.
+            symbol_good: Symbol prepended to a favourable delta. Defaults to
+                ``"▲"``.
+            symbol_bad: Symbol prepended to an unfavourable delta. Defaults to
+                ``"▼"``.
+            symbol_neutral: Symbol shown when delta is exactly zero. Defaults
+                to ``"—"``.
+            color_good: CSS colour for a favourable delta. Defaults to
+                ``"#4ade80"`` (green).
+            color_bad: CSS colour for an unfavourable delta. Defaults to
+                ``"#f87171"`` (red).
+            color_neutral: CSS colour for a neutral delta. Defaults to ``""``
+                (inherits the theme text colour).
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the metric card.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            MetricCell: The newly created and registered metric cell.
+        """
         return MetricCell(
             value=value, label=label,
             delta=delta, delta_label=delta_label,
@@ -445,6 +792,37 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> MermaidCell:
+        """Add a Mermaid diagram to the slide.
+
+        Requires ``Plugins.Mermaid()`` in the deck's plugin list. The diagram
+        string is rendered to SVG client-side by Mermaid.js on first display.
+        Supported types include flowcharts, sequence diagrams, Gantt charts,
+        class diagrams, ER diagrams, pie charts, and more.
+
+        Args:
+            diagram: A Mermaid diagram definition string, e.g.::
+
+                \"\"\"
+                flowchart LR
+                    A --> B --> C
+                \"\"\"
+
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the diagram.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            MermaidCell: The newly created and registered diagram cell.
+
+        Raises:
+            PluginNotDeclaredError: If ``Plugins.Mermaid()`` is not in the
+                deck's plugin list.
+        """
         self._require_plugin("mermaid", "add_mermaid")
         return MermaidCell(diagram=diagram, params=_params)
 
@@ -463,6 +841,26 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> HtmlCell:
+        """Add a raw HTML cell to the slide.
+
+        The content is injected verbatim into the slide DOM without escaping
+        or sanitisation. Use for custom widgets, embedded SVGs, or any markup
+        that tessera's other cells do not cover.
+
+        Args:
+            content: Raw HTML string to inject into the cell body.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the HTML block.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            HtmlCell: The newly created and registered HTML cell.
+        """
         return HtmlCell(content=content, params=_params)
 
     @cell_method
@@ -480,6 +878,26 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> IframeCell:
+        """Embed an external URL in an iframe cell.
+
+        The URL is loaded in a sandboxed ``<iframe>`` at render time. The
+        report must be opened in a browser with network access for the embedded
+        page to load.
+
+        Args:
+            url: The URL to embed (e.g. ``"https://example.com"``).
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Caption text displayed below the iframe.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            IframeCell: The newly created and registered iframe cell.
+        """
         return IframeCell(url=url, params=_params)
 
     @cell_method
@@ -495,6 +913,26 @@ class Slide:
         valign:      str    = _UNSET,  # type: ignore[assignment]
         _params: Any        = None,
     ) -> EmptyCell:
+        """Add an empty placeholder cell to reserve space on the grid.
+
+        Useful for leaving intentional gaps in complex layouts — for example,
+        to place content in columns 1 and 3 while keeping column 2 blank.
+
+        Args:
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            transparent: If ``True``, the placeholder has no background and no
+                border — invisible to the reader.
+            halign: Horizontal alignment — ``"left"``, ``"center"``,
+                or ``"right"``.
+            valign: Vertical alignment — ``"top"``, ``"middle"``,
+                or ``"bottom"``.
+
+        Returns:
+            EmptyCell: The newly created and registered empty cell.
+        """
         return EmptyCell(params=_params)
 
     @cell_method
@@ -516,6 +954,41 @@ class Slide:
         expand_button: bool        = _UNSET,  # type: ignore[assignment]
         _params: Any               = None,
     ) -> "ImageSliderCell":
+        """Add an image carousel to the slide.
+
+        Displays a sequence of images (or matplotlib figures) as a navigable
+        slideshow with previous/next controls. Each image can have its own
+        overlay caption.
+
+        Args:
+            sources: Ordered list of image sources. Each element may be:
+
+                - A file path (``str`` or ``pathlib.Path``).
+                - A URL (``"https://..."``).
+                - A base64 data URI.
+                - A ``matplotlib.figure.Figure`` — rendered inline.
+
+            captions: Per-image caption strings displayed as overlays. Must
+                match the length of ``sources`` when provided. Defaults to
+                empty strings for all images.
+            to_webp: Convert raster images to WebP before embedding. Reduces
+                file size for photographs.
+            webp_quality: WebP quality level (1–100). ``None`` uses the
+                encoder's default.
+            save_source: If ``True``, original source files are embedded
+                alongside the processed images.
+            col: Grid column (1-based). Auto-placed when omitted.
+            row: Grid row (1-based). Auto-placed when omitted.
+            colspan: Number of grid columns to span (default ``1``).
+            rowspan: Number of grid rows to span (default ``1``).
+            caption: Master caption displayed below the entire slider cell.
+            overflow: Show a scrollbar on the cell instead of clipping.
+            copy_button: Show a copy-to-clipboard button on the cell card.
+            expand_button: Show a fullscreen-expand button on the cell card.
+
+        Returns:
+            ImageSliderCell: The newly created and registered slider cell.
+        """
         from pathlib import Path
         import re
         resolved = []
@@ -577,11 +1050,13 @@ class Slide:
     # ------------------------------------------------------------------
 
     @property
-    def cells(self):
+    def cells(self) -> "list[Cell]":
+        """Ordered list of all cells registered on this slide."""
         return list(self._cells)
-    
-    @property 
-    def cell_map(self):
+
+    @property
+    def cell_map(self) -> "dict[Hashable, Cell]":
+        """Mapping from cell id to cell object for all cells on this slide."""
         return dict(self._cell_map)
 
 # ---------------------------------------------------------------------------
