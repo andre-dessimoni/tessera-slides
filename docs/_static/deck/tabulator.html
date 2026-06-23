@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="--deck-font-scale: 1.3;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), usb=(), payment=(), interest-cohort=()">
   <meta name="author"  content="">
   <meta name="version" content="">
-  <meta name="date"    content="2026-06-21">
+  <meta name="date"    content="2026-06-22">
   <title>Interactive tables</title>
   <style>
 /* --- default/image.css --- */
@@ -197,7 +197,7 @@
 .slider-img:hover { opacity: 0.88; }
 
 .slider-caption {
-  font-size: 0.75rem;
+  font-size: calc(0.75rem * var(--cell-font-scale, 1));
   color: var(--text-muted, #8b949e);
   margin: 4px 0 0;
   text-align: center;
@@ -274,6 +274,11 @@
   --font-sans: "Segoe UI", system-ui, sans-serif;
   --font-mono: "Fira Code", "Cascadia Code", monospace;
   --radius: 6px;
+  /* Deck-wide font scaling: all font-sizes are rem (spacing/layout is px),
+     so multiplying the root font-size scales every font and nothing else.
+     Overridden on <html> by Deck(fontsize_scale=...). */
+  --deck-font-scale: 1;
+  font-size: calc(100% * var(--deck-font-scale));
 }
 
 html, body {
@@ -948,10 +953,14 @@ body.sb-collapsed {
   min-height: 0;
   min-width: 0;
   overflow-wrap: break-word;
+  /* Per-cell font scaling baseline (set via --cell-font-scale on .cell), so
+     even content without its own font-size rule scales. Content rules below
+     fold the same multiplier into their own sizes. */
+  font-size: calc(1rem * var(--cell-font-scale, 1));
 }
 
 .cell-caption {
-  font-size: 0.72rem;
+  font-size: calc(0.72rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
   text-align: center;
   margin-top: 6px;
@@ -997,7 +1006,7 @@ body.sb-collapsed {
 .cell-halign-right  .cell-body { text-align: right; }
 
 /* ---- Markdown body (TextCell) ---- */
-.markdown-body { font-size: 0.9rem; line-height: 1.65; color: var(--color-text); }
+.markdown-body { font-size: calc(0.9rem * var(--cell-font-scale, 1)); line-height: 1.65; color: var(--color-text); }
 .markdown-body p  { margin-bottom: 0.6em; }
 .markdown-body ul,
 .markdown-body ol { padding-left: 1.5rem; margin-bottom: 0.6em; }
@@ -1007,9 +1016,9 @@ body.sb-collapsed {
 .markdown-body ol ol,
 .markdown-body ul ol,
 .markdown-body ol ul { font-size: 0.9em; color: var(--color-text-muted); margin-top: 0.2em; margin-bottom: 0; }
-.markdown-body h1 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5em; border-bottom: 1px solid var(--color-border); padding-bottom: 4px; }
-.markdown-body h2 { font-size: 1rem;    font-weight: 700; margin-bottom: 0.4em; }
-.markdown-body h3 { font-size: 0.9rem;  font-weight: 600; margin-bottom: 0.3em; }
+.markdown-body h1 { font-size: calc(1.15rem * var(--cell-font-scale, 1)); font-weight: 700; margin-bottom: 0.5em; border-bottom: 1px solid var(--color-border); padding-bottom: 4px; }
+.markdown-body h2 { font-size: calc(1rem * var(--cell-font-scale, 1));    font-weight: 700; margin-bottom: 0.4em; }
+.markdown-body h3 { font-size: calc(0.9rem * var(--cell-font-scale, 1));  font-weight: 600; margin-bottom: 0.3em; }
 .markdown-body code { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 1px 4px; border-radius: 3px; }
 .markdown-body pre  { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 8px; border-radius: var(--radius); overflow: auto; margin-bottom: 0.6em; }
 .markdown-body blockquote { border-left: 3px solid var(--color-accent); padding-left: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.6em; }
@@ -1044,7 +1053,7 @@ body.sb-collapsed {
 .hs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
 }
 
 .hs-table thead th {
@@ -1088,7 +1097,7 @@ body.sb-collapsed {
   border-radius: var(--radius);
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
 }
 
 .cell-tabulator .tabulator .tabulator-header,
@@ -1176,6 +1185,28 @@ body.sb-collapsed {
   opacity: 0.5;
 }
 
+/* Range selection (spreadsheet_mode) — override stock theme's near-black fill */
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-selected:not(.tabulator-range-row-header) {
+  background: color-mix(in srgb, var(--color-accent) 30%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator .tabulator-range {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-row-header {
+  background: var(--color-surface2);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-row-header.tabulator-range-selected {
+  background: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface2));
+  color: var(--color-text);
+}
+
 /* Download buttons reuse the .btn-action chrome; keep them legible */
 .cell-tabulator .cell-actions .btn-action[data-tab-download] {
   font-size: 0.7rem;
@@ -1192,7 +1223,7 @@ body.sb-collapsed {
 
 .hs-list {
   padding-left: 1.5rem;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--cell-font-scale, 1));
   line-height: 1.7;
   color: var(--color-text);
 }
@@ -1208,7 +1239,7 @@ body.sb-collapsed {
 /* Subníveis */
 .hs-list .hs-list {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
 }
 
@@ -1359,7 +1390,7 @@ body.sb-collapsed {
   height: 100%;
   overflow: auto;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
   line-height: 1.55;
   border-radius: var(--radius);
 }
@@ -1454,21 +1485,21 @@ body.sb-collapsed {
 }
 
 .metric-value {
-  font-size: 2.8rem;
+  font-size: calc(2.8rem * var(--cell-font-scale, 1));
   font-weight: 800;
   color: var(--color-text);
   line-height: 1;
 }
 
 .metric-label {
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .metric-delta {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--cell-font-scale, 1));
   font-weight: 600;
   margin-top: 4px;
 }
@@ -1525,7 +1556,7 @@ body.sb-collapsed {
         onclick="goToSlide('tabulator')">
       <span class="sidebar-caret-spacer"></span>
       <span class="sidebar-num">1</span>
-      <span class="sidebar-title">TabulatorCell â€” add_tabulator()</span>
+      <span class="sidebar-title">TabulatorCell — add_tabulator()</span>
     </li>
     <li class="sidebar-item sidebar-type-slide"
         data-target="formatters"
@@ -1587,7 +1618,7 @@ body.sb-collapsed {
     <div class="stage">
     <!-- Slide header -->
     <header class="slide-header">
-      <h1 class="slide-title">TabulatorCell â€” add_tabulator()</h1>
+      <h1 class="slide-title">TabulatorCell — add_tabulator()</h1>
     </header>
 
     <!-- Canvas: rendered cells -->
@@ -1606,7 +1637,7 @@ body.sb-collapsed {
 
   <div class="cell-body">
     <div id="tab-tabulator-_cell-1" class="tessera-tabulator"></div>
-    <script type="application/json" id="tab-tabulator-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product", "headerFilter": "input"}, {"title": "Category", "field": "Category", "headerFilter": "input"}, {"title": "Revenue", "field": "Revenue", "headerFilter": "input"}, {"title": "Margin", "field": "Margin", "headerFilter": "input"}, {"title": "Rating", "field": "Rating", "headerFilter": "input"}, {"title": "Reviewed", "field": "Reviewed", "headerFilter": "input"}], "responsiveLayout": "collapse"}</script>
+    <script type="application/json" id="tab-tabulator-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "renderHorizontal": "virtual", "columns": [{"title": "Product", "field": "Product", "headerFilter": "input"}, {"title": "Category", "field": "Category", "headerFilter": "input"}, {"title": "Revenue", "field": "Revenue", "headerFilter": "input"}, {"title": "Margin", "field": "Margin", "headerFilter": "input"}, {"title": "Rating", "field": "Rating", "headerFilter": "input"}, {"title": "Reviewed", "field": "Reviewed", "headerFilter": "input"}]}</script>
   </div>
 
   <p class="cell-caption">Click a header to sort; type in a header to filter</p>
@@ -1650,7 +1681,7 @@ body.sb-collapsed {
 
   <div class="cell-body">
     <div id="tab-formatters-_cell-1" class="tessera-tabulator"></div>
-    <script type="application/json" id="tab-formatters-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}, "bottomCalc": "sum"}, {"title": "Margin", "field": "Margin", "formatter": "progress", "formatterParams": {"min": 0, "max": 100, "legend": true}, "bottomCalc": "avg"}, {"title": "Rating", "field": "Rating", "formatter": "star", "formatterParams": {"stars": 5}}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross"}], "responsiveLayout": "collapse"}</script>
+    <script type="application/json" id="tab-formatters-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "renderHorizontal": "virtual", "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}, "bottomCalc": "sum"}, {"title": "Margin", "field": "Margin", "formatter": "progress", "formatterParams": {"min": 0, "max": 100, "legend": true}, "bottomCalc": "avg"}, {"title": "Rating", "field": "Rating", "formatter": "star", "formatterParams": {"stars": 5}}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross"}]}</script>
   </div>
 
   <p class="cell-caption">money / progress / star / tickCross formatters, with sum & avg calcs</p>
@@ -1694,7 +1725,7 @@ body.sb-collapsed {
 
   <div class="cell-body">
     <div id="tab-grouping-_cell-1" class="tessera-tabulator"></div>
-    <script type="application/json" id="tab-grouping-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}], "responsiveLayout": "collapse", "pagination": true, "paginationSize": 4, "paginationCounter": "rows", "groupBy": "Category"}</script>
+    <script type="application/json" id="tab-grouping-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "renderHorizontal": "virtual", "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue", "formatter": "money", "formatterParams": {"symbol": "$", "precision": 0}}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}], "pagination": true, "paginationSize": 4, "paginationCounter": "rows", "paginationSizeSelector": true, "height": "100%", "groupBy": "Category"}</script>
   </div>
 
   <p class="cell-caption">Grouped by Category, 4 rows per page</p>
@@ -1738,7 +1769,7 @@ body.sb-collapsed {
 
   <div class="cell-body">
     <div id="tab-editing-_cell-1" class="tessera-tabulator"></div>
-    <script type="application/json" id="tab-editing-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin", "editor": "number"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross", "editor": true}], "responsiveLayout": "collapse", "selectableRows": true}</script>
+    <script type="application/json" id="tab-editing-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "renderHorizontal": "virtual", "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin", "editor": "number"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed", "formatter": "tickCross", "editor": true}], "selectableRows": true, "selectableRange": [true], "selectableRangeColumns": [true], "selectableRangeRows": [true]}</script>
   </div>
 
   <p class="cell-caption">Tick 'Reviewed' or edit 'Margin' inline; click rows to select</p>
@@ -1786,7 +1817,7 @@ body.sb-collapsed {
 
   <div class="cell-body">
     <div id="tab-download-_cell-1" class="tessera-tabulator"></div>
-    <script type="application/json" id="tab-download-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}], "responsiveLayout": "collapse"}</script>
+    <script type="application/json" id="tab-download-_cell-1-cfg">{"data": [{"Product": "Alpha", "Category": "Tools", "Revenue": 12000, "Margin": 62, "Rating": 4, "Reviewed": true}, {"Product": "Bravo", "Category": "Tools", "Revenue": 8400, "Margin": 48, "Rating": 3, "Reviewed": false}, {"Product": "Charlie", "Category": "Parts", "Revenue": 15300, "Margin": 71, "Rating": 5, "Reviewed": true}, {"Product": "Delta", "Category": "Parts", "Revenue": 4200, "Margin": 33, "Rating": 2, "Reviewed": false}, {"Product": "Echo", "Category": "Parts", "Revenue": 9800, "Margin": 55, "Rating": 4, "Reviewed": false}, {"Product": "Foxtrot", "Category": "Tools", "Revenue": 6100, "Margin": 40, "Rating": 3, "Reviewed": true}], "layout": "fitColumns", "movableColumns": true, "renderHorizontal": "virtual", "columns": [{"title": "Product", "field": "Product"}, {"title": "Category", "field": "Category"}, {"title": "Revenue", "field": "Revenue"}, {"title": "Margin", "field": "Margin"}, {"title": "Rating", "field": "Rating"}, {"title": "Reviewed", "field": "Reviewed"}]}</script>
   </div>
 
   <p class="cell-caption">Use the download buttons (top-right) to export CSV / JSON</p>
@@ -1823,7 +1854,7 @@ body.sb-collapsed {
 <div id="overview" class="hidden">
   <div class="overview-thumb" onclick="goToSlide('tabulator'); toggleOverview()">
     <span class="overview-num">1</span>
-    <span class="overview-title">TabulatorCell â€” add_tabulator()</span>
+    <span class="overview-title">TabulatorCell — add_tabulator()</span>
   </div>
   <div class="overview-thumb" onclick="goToSlide('formatters'); toggleOverview()">
     <span class="overview-num">2</span>
@@ -2824,8 +2855,28 @@ body.sb-collapsed {
   // Build each interactive table the first time its slide is shown (so it is
   // measured while visible, not inside a display:none slide), then redraw on
   // every (re)activation and on resize to track the fixed-size stage scale.
+
+  var _tabulatorFormatsReady = false;
+  function ensureTabulatorFormats() {
+    if (_tabulatorFormatsReady || typeof Tabulator === "undefined") return;
+    _tabulatorFormatsReady = true;
+    Tabulator.extendModule("format", "formatters", {
+      // Continuous row numbers across paginated pages.
+      // getPosition(true) returns the row's 1-based index in the full filtered
+      // set (post-filter, post-sort, before pagination slicing), so the counter
+      // never resets when the reader flips to a new page.
+      rownumGlobal: function(cell) {
+        try {
+          var pos = cell.getRow().getPosition(true);
+          return pos !== false ? pos : "";
+        } catch(e) { return ""; }
+      }
+    });
+  }
+
   function buildTabulator(el) {
     if (el._tbBuilt || typeof Tabulator === "undefined") return;
+    ensureTabulatorFormats();
     var cfgEl = document.getElementById(el.id + "-cfg");
     if (!cfgEl) return;
     el._tbBuilt = true;

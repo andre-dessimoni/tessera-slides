@@ -4,3 +4,4 @@ myst-parser>=3.0
 sphinx-autobuild>=2024.2.4
 matplotlib>=3.10.8
 numpy>=1.24
+pyyaml>=6.0

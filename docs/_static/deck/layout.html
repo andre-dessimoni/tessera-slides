@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="--deck-font-scale: 1.3;">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +7,7 @@
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), usb=(), payment=(), interest-cohort=()">
   <meta name="author"  content="">
   <meta name="version" content="">
-  <meta name="date"    content="2026-06-20">
+  <meta name="date"    content="2026-06-22">
   <title>Layout</title>
   <style>
 /* --- default/image.css --- */
@@ -197,7 +197,7 @@
 .slider-img:hover { opacity: 0.88; }
 
 .slider-caption {
-  font-size: 0.75rem;
+  font-size: calc(0.75rem * var(--cell-font-scale, 1));
   color: var(--text-muted, #8b949e);
   margin: 4px 0 0;
   text-align: center;
@@ -274,6 +274,11 @@
   --font-sans: "Segoe UI", system-ui, sans-serif;
   --font-mono: "Fira Code", "Cascadia Code", monospace;
   --radius: 6px;
+  /* Deck-wide font scaling: all font-sizes are rem (spacing/layout is px),
+     so multiplying the root font-size scales every font and nothing else.
+     Overridden on <html> by Deck(fontsize_scale=...). */
+  --deck-font-scale: 1;
+  font-size: calc(100% * var(--deck-font-scale));
 }
 
 html, body {
@@ -948,10 +953,14 @@ body.sb-collapsed {
   min-height: 0;
   min-width: 0;
   overflow-wrap: break-word;
+  /* Per-cell font scaling baseline (set via --cell-font-scale on .cell), so
+     even content without its own font-size rule scales. Content rules below
+     fold the same multiplier into their own sizes. */
+  font-size: calc(1rem * var(--cell-font-scale, 1));
 }
 
 .cell-caption {
-  font-size: 0.72rem;
+  font-size: calc(0.72rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
   text-align: center;
   margin-top: 6px;
@@ -997,7 +1006,7 @@ body.sb-collapsed {
 .cell-halign-right  .cell-body { text-align: right; }
 
 /* ---- Markdown body (TextCell) ---- */
-.markdown-body { font-size: 0.9rem; line-height: 1.65; color: var(--color-text); }
+.markdown-body { font-size: calc(0.9rem * var(--cell-font-scale, 1)); line-height: 1.65; color: var(--color-text); }
 .markdown-body p  { margin-bottom: 0.6em; }
 .markdown-body ul,
 .markdown-body ol { padding-left: 1.5rem; margin-bottom: 0.6em; }
@@ -1007,9 +1016,9 @@ body.sb-collapsed {
 .markdown-body ol ol,
 .markdown-body ul ol,
 .markdown-body ol ul { font-size: 0.9em; color: var(--color-text-muted); margin-top: 0.2em; margin-bottom: 0; }
-.markdown-body h1 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5em; border-bottom: 1px solid var(--color-border); padding-bottom: 4px; }
-.markdown-body h2 { font-size: 1rem;    font-weight: 700; margin-bottom: 0.4em; }
-.markdown-body h3 { font-size: 0.9rem;  font-weight: 600; margin-bottom: 0.3em; }
+.markdown-body h1 { font-size: calc(1.15rem * var(--cell-font-scale, 1)); font-weight: 700; margin-bottom: 0.5em; border-bottom: 1px solid var(--color-border); padding-bottom: 4px; }
+.markdown-body h2 { font-size: calc(1rem * var(--cell-font-scale, 1));    font-weight: 700; margin-bottom: 0.4em; }
+.markdown-body h3 { font-size: calc(0.9rem * var(--cell-font-scale, 1));  font-weight: 600; margin-bottom: 0.3em; }
 .markdown-body code { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 1px 4px; border-radius: 3px; }
 .markdown-body pre  { font-family: var(--font-mono); font-size: 0.82em; background: var(--color-surface2); padding: 8px; border-radius: var(--radius); overflow: auto; margin-bottom: 0.6em; }
 .markdown-body blockquote { border-left: 3px solid var(--color-accent); padding-left: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.6em; }
@@ -1044,7 +1053,7 @@ body.sb-collapsed {
 .hs-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
 }
 
 .hs-table thead th {
@@ -1072,6 +1081,137 @@ body.sb-collapsed {
   background: var(--color-surface2);
 }
 
+/* --- default/tabulator.css --- */
+/* ============================================================
+   tabulator.css
+   Thin skin over the bundled Tabulator stock theme so interactive
+   tables track the active tessera theme. Scoped under .cell-tabulator
+   (specificity 0,2,0) so it wins over Tabulator's own `.tabulator…`
+   rules regardless of stylesheet order, and driven by --color-*
+   variables so one file works for the dark, light, and custom themes.
+   ============================================================ */
+
+.cell-tabulator .tabulator {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
+}
+
+.cell-tabulator .tabulator .tabulator-header,
+.cell-tabulator .tabulator .tabulator-header .tabulator-col {
+  background: var(--color-surface2);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator .tabulator-header .tabulator-col {
+  border-bottom: 2px solid var(--color-accent);
+}
+
+.cell-tabulator .tabulator .tabulator-col-title {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.cell-tabulator .tabulator-header-filter input,
+.cell-tabulator .tabulator-header-filter select {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+}
+
+.cell-tabulator .tabulator-row {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator-row.tabulator-row-even {
+  background: rgba(127, 127, 127, 0.06);
+}
+
+.cell-tabulator .tabulator-row:hover,
+.cell-tabulator .tabulator-row.tabulator-row-even:hover {
+  background: var(--color-surface2);
+}
+
+.cell-tabulator .tabulator-row.tabulator-selected,
+.cell-tabulator .tabulator-row.tabulator-selected:hover {
+  background: color-mix(in srgb, var(--color-accent) 28%, var(--color-surface));
+}
+
+.cell-tabulator .tabulator-row .tabulator-cell {
+  border-right: 1px solid var(--color-border);
+}
+
+.cell-tabulator .tabulator-row .tabulator-cell.tabulator-editing {
+  border: 1px solid var(--color-accent);
+}
+
+/* Group headers + calculation rows */
+.cell-tabulator .tabulator-row.tabulator-group,
+.cell-tabulator .tabulator .tabulator-calcs-holder,
+.cell-tabulator .tabulator-row.tabulator-calcs {
+  background: var(--color-surface2);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* Pagination footer */
+.cell-tabulator .tabulator .tabulator-footer {
+  background: var(--color-surface2);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page.active {
+  background: var(--color-accent);
+  color: #fff;
+  border-color: var(--color-accent);
+}
+
+.cell-tabulator .tabulator .tabulator-footer .tabulator-page:disabled {
+  opacity: 0.5;
+}
+
+/* Range selection (spreadsheet_mode) — override stock theme's near-black fill */
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-selected:not(.tabulator-range-row-header) {
+  background: color-mix(in srgb, var(--color-accent) 30%, var(--color-surface));
+  color: var(--color-text);
+}
+
+.cell-tabulator .tabulator .tabulator-range {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-row-header {
+  background: var(--color-surface2);
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.cell-tabulator .tabulator .tabulator-cell.tabulator-range-row-header.tabulator-range-selected {
+  background: color-mix(in srgb, var(--color-accent) 20%, var(--color-surface2));
+  color: var(--color-text);
+}
+
+/* Download buttons reuse the .btn-action chrome; keep them legible */
+.cell-tabulator .cell-actions .btn-action[data-tab-download] {
+  font-size: 0.7rem;
+}
+
 /* --- default/list.css --- */
 /* ============================================================
    list.css — ListCell (bullet e numerada)
@@ -1083,7 +1223,7 @@ body.sb-collapsed {
 
 .hs-list {
   padding-left: 1.5rem;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--cell-font-scale, 1));
   line-height: 1.7;
   color: var(--color-text);
 }
@@ -1099,7 +1239,7 @@ body.sb-collapsed {
 /* Subníveis */
 .hs-list .hs-list {
   margin-top: 0.25rem;
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
 }
 
@@ -1250,7 +1390,7 @@ body.sb-collapsed {
   height: 100%;
   overflow: auto;
   font-family: var(--font-mono);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--cell-font-scale, 1));
   line-height: 1.55;
   border-radius: var(--radius);
 }
@@ -1345,21 +1485,21 @@ body.sb-collapsed {
 }
 
 .metric-value {
-  font-size: 2.8rem;
+  font-size: calc(2.8rem * var(--cell-font-scale, 1));
   font-weight: 800;
   color: var(--color-text);
   line-height: 1;
 }
 
 .metric-label {
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--cell-font-scale, 1));
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
 
 .metric-delta {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--cell-font-scale, 1));
   font-weight: 600;
   margin-top: 4px;
 }
@@ -1946,8 +2086,8 @@ cell-overflow  cell-halign-left cell-valign-top"
 <script>
 ﻿/* tessera — main.js
    Navigation, fullscreen, overview, modal, lightbox (zoom/pan/thumbnails),
-   image slider, plotly init.
-   No external dependencies (Plotly is initialised if present).
+   image slider, plotly / tabulator init.
+   No external dependencies (Plotly / Tabulator are initialised if present).
 */
 
 (function () {
@@ -2043,12 +2183,15 @@ cell-overflow  cell-halign-left cell-valign-top"
     if (!document.body.classList.contains("fixed-size")) return;
     fitStage();
     var main = document.getElementById("main");
+    // Recompute the stage scale, then redraw the visible tables so Tabulator
+    // re-measures against the new transform.
+    var onFit = function() { fitStage(); renderTabulatorsInSlide(slides[current]); };
     // ResizeObserver on #main captures window resizes (it is pinned to the
     // window edges) and sidebar toggle/resize (which shifts its left edge).
     if (main && "ResizeObserver" in window) {
-      new ResizeObserver(fitStage).observe(main);
+      new ResizeObserver(onFit).observe(main);
     } else {
-      window.addEventListener("resize", fitStage);
+      window.addEventListener("resize", onFit);
     }
     initStagePan();
   }
@@ -2060,6 +2203,7 @@ cell-overflow  cell-halign-left cell-valign-top"
     if (lvl) lvl.textContent = Math.round(_deckZoom * 100) + "%";
     // Fixed-size stages scale through the transform fit; recompute it.
     if (document.body.classList.contains("fixed-size")) fitStage();
+    renderTabulatorsInSlide(slides[current]);
   }
 
   function deckZoom(dir) {
@@ -2098,6 +2242,7 @@ cell-overflow  cell-halign-left cell-valign-top"
 
     resizePlotlyInSlide(slides[current]);
     renderMermaidInSlide(slides[current]);
+    renderTabulatorsInSlide(slides[current]);
     revealActiveSidebarItem();
   }
 
@@ -2884,6 +3029,62 @@ cell-overflow  cell-halign-left cell-valign-top"
     var containers = slideEl.querySelectorAll(".plotly-container");
     containers.forEach(function(el) {
       if (el._fullLayout) Plotly.relayout(el, { autosize: true });
+    });
+  }
+
+  // -- Tabulator -------------------------------------------
+  // Build each interactive table the first time its slide is shown (so it is
+  // measured while visible, not inside a display:none slide), then redraw on
+  // every (re)activation and on resize to track the fixed-size stage scale.
+
+  var _tabulatorFormatsReady = false;
+  function ensureTabulatorFormats() {
+    if (_tabulatorFormatsReady || typeof Tabulator === "undefined") return;
+    _tabulatorFormatsReady = true;
+    Tabulator.extendModule("format", "formatters", {
+      // Continuous row numbers across paginated pages.
+      // getPosition(true) returns the row's 1-based index in the full filtered
+      // set (post-filter, post-sort, before pagination slicing), so the counter
+      // never resets when the reader flips to a new page.
+      rownumGlobal: function(cell) {
+        try {
+          var pos = cell.getRow().getPosition(true);
+          return pos !== false ? pos : "";
+        } catch(e) { return ""; }
+      }
+    });
+  }
+
+  function buildTabulator(el) {
+    if (el._tbBuilt || typeof Tabulator === "undefined") return;
+    ensureTabulatorFormats();
+    var cfgEl = document.getElementById(el.id + "-cfg");
+    if (!cfgEl) return;
+    el._tbBuilt = true;
+    try {
+      var table = new Tabulator(el, JSON.parse(cfgEl.textContent));
+      el._tabulator = table;
+      var card = el.closest(".cell");
+      if (card) {
+        card.querySelectorAll("[data-tab-download]").forEach(function(b) {
+          b.addEventListener("click", function() {
+            var f = b.getAttribute("data-tab-download");
+            table.download(f, "data." + f);
+          });
+        });
+      }
+    } catch (e) {
+      el.textContent = "Error rendering table: " + e.message;
+    }
+  }
+
+  function renderTabulatorsInSlide(slideEl) {
+    if (typeof Tabulator === "undefined") return;
+    slideEl.querySelectorAll(".tessera-tabulator").forEach(function(el) {
+      buildTabulator(el);
+      var t = el._tabulator;
+      // Defer the redraw so it runs after the stage transform / layout settles.
+      if (t) requestAnimationFrame(function() { try { t.redraw(true); } catch (e) {} });
     });
   }
 
