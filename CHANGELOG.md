@@ -4,6 +4,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-06-22
+
 ### Added
 
 - **Font scaling.** `Deck(fontsize_scale=…)` scales every font in the
