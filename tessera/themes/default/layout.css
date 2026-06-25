@@ -321,6 +321,10 @@ body.sb-no-transition #sidebar-resize-handle {
   bottom: var(--toolbar-height);
   overflow: auto;   /* scrollbars appear when the deck is zoomed in (fluid mode) */
   transition: left 0.2s ease;
+  /* Let JS own pinch-zoom and horizontal swipe (see initTouchGestures): the
+     browser keeps native two-axis panning for zoomed-in slides, but its own
+     pinch/double-tap zoom is disabled so our handler can preventDefault. */
+  touch-action: pan-x pan-y;
 }
 
 /* While the sidebar width animates (toggle) or is dragged, the deck area reflows
