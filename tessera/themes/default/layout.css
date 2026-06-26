@@ -595,18 +595,67 @@ body.sb-collapsed {
 }
 
 /* ---- Print ---- */
+/* Goal: one slide per page, no sidebar/toolbar. The on-screen layout pins
+   everything to a single fixed viewport (html/body overflow:hidden, #main
+   position:fixed), so printing needs to undo that and let the deck flow down
+   the page — otherwise only the first slide (or a blank page) is printed. */
 @media print {
-  #sidebar, #toolbar, #overview, #modal, .cell-actions { display: none !important; }
+  /* Landscape pages (decks are 16:9). Tweak the margin to taste. */
+  @page { size: landscape; margin: 0.5cm; }
+
+  /* Release the single-viewport clamp and keep the deck's own (dark) colours —
+     browsers drop backgrounds in print unless color-adjust is exact. */
+  html, body {
+    height: auto;
+    overflow: visible;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* No chrome / overlays in the printout. */
+  #sidebar, #toolbar, #sidebar-resize-handle,
+  #overview, #modal, .cell-actions { display: none !important; }
+
+  /* Let #main grow with its content instead of being a fixed viewport. */
   #main {
     position: static;
-    left: 0;
+    overflow: visible;
+    height: auto;
+    width: 100%;
   }
+
+  /* Every slide is shown, fills exactly one page, and ignores the on-screen
+     deck zoom. overflow:hidden clamps each to 100vh so it never spills onto a
+     second page; break-after starts the next slide on a fresh page. */
   .slide {
     display: flex !important;
-    page-break-after: always;
+    width: 100%;
     height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+    zoom: 1 !important;
+    break-after: page;
+    break-inside: avoid;
   }
-  .slide-notes {
-    display: block !important;
-  }
+  .slide:last-child { break-after: auto; }   /* no trailing blank page */
+
+  .slide-notes { display: block !important; }
+
+  /* Fixed-size decks scale the stage with a screen-fit transform (JS-driven);
+     that factor is meaningless on paper, so flow the stage to the page like a
+     fluid deck and let each slide fill its own page. */
+  .fixed-size .slide { width: 100%; height: 100vh; }
+  .fixed-size .stage { width: 100%; height: 100%; transform: none; }
+
+  /* Interactive widgets don't print well, so swap each for the static fallback
+     generated on beforeprint (see charts.js initChartPrinting): a plain table
+     from the row data, and a scalable SVG snapshot of the chart (legend incl.). */
+  .tessera-tabulator { display: none !important; }
+  .hs-print-table    { display: table !important; width: 100%; }
+  .plotly-container  { display: none !important; }
+  .plotly-print      { display: block !important; width: 100%; height: 100%; overflow: visible; }
+  .plotly-print svg  { width: 100%; height: 100%; }
 }
+
+/* The print-only fallbacks (built on beforeprint) are hidden on screen. */
+.hs-print-table, .plotly-print { display: none; }

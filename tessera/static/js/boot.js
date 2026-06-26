@@ -29,6 +29,7 @@
     T.initToolbar();
     T.initStage();
     T.initTouchGestures();
+    T.initChartPrinting();
     T.applyDeckZoom();
   }
 

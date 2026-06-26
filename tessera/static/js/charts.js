@@ -128,10 +128,122 @@
     T.expandCell(btn);
   }
 
+  // -- Print support ---------------------------------------
+  // The live widgets don't print well: Tabulator is a virtual-DOM table (only
+  // visible rows in the DOM, internal scroll) and its native printAsHtml hook
+  // conflicts across multiple tables; Plotly is a fixed-size on-screen SVG whose
+  // legend gets clipped. So on `beforeprint` we generate a print-only static
+  // fallback next to each widget — a plain <table> from the row data, and a
+  // scalable SVG snapshot of each chart — and the print CSS hides the live
+  // widget and shows the fallback. Everything here is synchronous so it is in
+  // place before the browser snapshots the page.
+
+  function _flatColumns(defs) {
+    var out = [];
+    (defs || []).forEach(function (c) {
+      if (c.columns && c.columns.length) out = out.concat(_flatColumns(c.columns));
+      else out.push(c);
+    });
+    return out;
+  }
+
+  // Build/refresh a static <table> from a Tabulator's *config* (the inlined
+  // {id}-cfg JSON), not the live instance: Tabulator builds asynchronously, so a
+  // freshly-built widget's getData() is still empty during the synchronous
+  // beforeprint pass — only the already-rendered slide would have data. The
+  // config carries every column and every row up front, so this works for all
+  // slides (visited or not) and prints the full data set. Hidden on screen.
+  function buildPrintTable(el) {
+    var cfgEl = document.getElementById(el.id + "-cfg");
+    if (!cfgEl) return;
+    var cfg;
+    try { cfg = JSON.parse(cfgEl.textContent); } catch (e) { return; }
+    var data = cfg.data || [];
+    var cols = _flatColumns(cfg.columns);
+    if (!cols.length) {                 // autoColumns / multi-sheet -> derive
+      if (!data.length) return;
+      cols = Object.keys(data[0]).map(function (k) { return { title: k, field: k }; });
+    }
+
+    var next = el.nextElementSibling;
+    if (next && next.classList.contains("hs-print-table")) next.remove();
+
+    var tbl = document.createElement("table");
+    tbl.className = "hs-table hs-print-table";
+    var thead = document.createElement("thead");
+    var htr = document.createElement("tr");
+    cols.forEach(function (c) {
+      var th = document.createElement("th");
+      th.textContent = c.title || c.field || "";
+      htr.appendChild(th);
+    });
+    thead.appendChild(htr);
+    tbl.appendChild(thead);
+
+    var tbody = document.createElement("tbody");
+    data.forEach(function (row, i) {
+      var tr = document.createElement("tr");
+      cols.forEach(function (c) {
+        var td = document.createElement("td");
+        var v = c.field ? row[c.field] : (i + 1);   // fieldless col == row number
+        td.textContent = (v === undefined || v === null) ? "" : v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tbl.appendChild(tbody);
+    el.parentNode.insertBefore(tbl, el.nextSibling);
+  }
+
+  // Build/refresh a scalable inline-SVG snapshot of a Plotly chart (includes the
+  // legend) next to the live container; hidden on screen, shown in print.
+  function buildPrintChart(el) {
+    if (!(window.Plotly && Plotly.Snapshot && Plotly.Snapshot.toSVG)) return;
+    if (!el._fullLayout) return;        // never rendered (unvisited) -> skip
+    var svg;
+    try { svg = Plotly.Snapshot.toSVG(el); } catch (e) { return; }
+    if (!svg) return;
+    // toSVG returns a string in most builds, but coerce a node just in case.
+    if (typeof svg !== "string") {
+      svg = svg.outerHTML || new XMLSerializer().serializeToString(svg);
+    }
+
+    var next = el.nextElementSibling;
+    if (next && next.classList.contains("plotly-print")) next.remove();
+
+    var wrap = document.createElement("div");
+    wrap.className = "plotly-print";
+    wrap.innerHTML = svg;
+    // The exported SVG carries fixed width/height; convert to a viewBox so it
+    // scales to the print cell instead of overflowing it.
+    var s = wrap.querySelector("svg");
+    if (s) {
+      var w = parseFloat(s.getAttribute("width"));
+      var h = parseFloat(s.getAttribute("height"));
+      if (w && h && !s.getAttribute("viewBox")) s.setAttribute("viewBox", "0 0 " + w + " " + h);
+      s.removeAttribute("width");
+      s.removeAttribute("height");
+      s.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    }
+    el.parentNode.insertBefore(wrap, el.nextSibling);
+  }
+
+  function prepareForPrint() {
+    // Static tables are built from the inlined config, so they work even if the
+    // live Tabulator never rendered (unvisited slide / library not yet ready).
+    document.querySelectorAll(".tessera-tabulator").forEach(buildPrintTable);
+    document.querySelectorAll(".plotly-container").forEach(buildPrintChart);
+  }
+
+  function initChartPrinting() {
+    window.addEventListener("beforeprint", prepareForPrint);
+  }
+
   T.initPlotlyCharts        = initPlotlyCharts;
   T.resizePlotlyInSlide     = resizePlotlyInSlide;
   T.renderMermaidInSlide    = renderMermaidInSlide;
   T.renderTabulatorsInSlide = renderTabulatorsInSlide;
   T.expandPlotly            = expandPlotly;
+  T.initChartPrinting       = initChartPrinting;
 
 })(window.Tessera = window.Tessera || {});
