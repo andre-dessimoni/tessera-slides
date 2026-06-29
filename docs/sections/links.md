@@ -55,7 +55,7 @@ link to each other, and slide 3 links to Google. Click the links inside the
 preview to navigate between slides.
 
 ```python
-from tessera import Deck
+from montin import Deck
 
 deck = Deck(title="Links")
 
@@ -86,6 +86,6 @@ deck.write("links.html", open_browser=True)
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/links.html#intro"
+<iframe class="montin-embed" src="../_static/deck/links.html#intro"
         loading="lazy" allowfullscreen></iframe>
 ```

@@ -4,7 +4,7 @@ Some cell types need a JavaScript library. You declare the ones you use via the
 `Plugins` container and pass them to `Deck(plugins=[...])`:
 
 ```python
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 deck = Deck(
     title="Report",
@@ -92,12 +92,12 @@ Plugins.Plotly(url="https://intranet.local/plotly.js") # a company mirror
 Plugins.MathJax().set_cdn("https://intranet.local/mathjax/tex-svg.js")
 ```
 
-Bundled mode always uses the version tessera vendors; see
+Bundled mode always uses the version Montin vendors; see
 [the vendored libraries](#updating-the-bundled-libraries) to change it.
 
 ## Updating the bundled libraries
 
-The embedded copies live under `tessera/static/vendor/`, one folder per library
+The embedded copies live under `montin/static/vendor/`, one folder per library
 (`plotly/`, `mermaid/`, `highlight/`, `mathjax/`) holding its code plus its
 `LICENSE` file(s); versions are pinned in `manifest.json`. To refresh or bump a
 version (maintainers): edit the version in `manifest.json` and run

@@ -3,8 +3,8 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tessera-report"
-version = "0.5.0"
+name = "montin"
+version = "0.6.0"
 description = "Generate self-contained, interactive HTML reports from data in Python"
 readme = "README.md"
 license = "MIT"
@@ -45,17 +45,17 @@ dev      = [
 ]
 
 [project.urls]
-Homepage      = "https://github.com/andre-dessimoni/tessera-report"
-Repository    = "https://github.com/andre-dessimoni/tessera-report"
-Issues        = "https://github.com/andre-dessimoni/tessera-report/issues"
-Documentation = "https://tessera-report.readthedocs.io/"
+Homepage      = "https://github.com/andre-dessimoni/montin"
+Repository    = "https://github.com/andre-dessimoni/montin"
+Issues        = "https://github.com/andre-dessimoni/montin/issues"
+Documentation = "https://montin.readthedocs.io/"
 
 [tool.setuptools.packages.find]
 where   = ["."]
-include = ["tessera*"]
+include = ["montin*"]
 
 [tool.setuptools.package-data]
-"tessera" = [
+"montin" = [
     "templates/*.html",
     "themes/**/*.css",
     "static/*.js",
@@ -63,12 +63,12 @@ include = ["tessera*"]
     "static/vendor/**/*",
     "py.typed",
 ]
-"tessera.themes.default"    = ["*.css"]
-"tessera.themes.light"      = ["*.css"]
-"tessera.themes.dark"       = ["*.css"]
-"tessera.themes.light-blue" = ["*.css"]
-"tessera.themes.academic"   = ["*.css"]
-"tessera.themes.sobrio"     = ["*.css"]
+"montin.themes.default"    = ["*.css"]
+"montin.themes.light"      = ["*.css"]
+"montin.themes.dark"       = ["*.css"]
+"montin.themes.light-blue" = ["*.css"]
+"montin.themes.academic"   = ["*.css"]
+"montin.themes.sobrio"     = ["*.css"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

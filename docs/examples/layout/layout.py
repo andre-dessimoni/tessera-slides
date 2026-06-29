@@ -5,7 +5,7 @@ deep-link to it from an <iframe src="...layout.html#grid-sizing"> block.
 Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
-from tessera import CellDefaults, Deck, SlideDefaults
+from montin import CellDefaults, Deck, SlideDefaults
 
 # --- Standardized docs settings (docs/script-settings.yaml) -----------------
 import sys as _sys

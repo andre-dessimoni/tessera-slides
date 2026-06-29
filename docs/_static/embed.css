@@ -1,11 +1,11 @@
 /* ------------------------------------------------------------------
-   embed.css — responsive container for embedded tessera slide previews
-   Used by the {raw} html <iframe class="tessera-embed"> blocks in the docs.
+   embed.css — responsive container for embedded montin slide previews
+   Used by the {raw} html <iframe class="montin-embed"> blocks in the docs.
    The slide decks are generated with size=(1280, 720) (16:9) + scale_up,
    so a 16:9 frame fills exactly with no letterboxing at any width.
    ------------------------------------------------------------------ */
 
-.tessera-embed {
+.montin-embed {
   display: block;
   width: 100%;
   max-width: 100%;

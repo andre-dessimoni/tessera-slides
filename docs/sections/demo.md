@@ -1,6 +1,6 @@
 # Live demo
 
-The report below is an example of the capabilities of tessera.
+The report below is an example of the capabilities of Montin.
 
 For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom toolbar.
 
@@ -11,7 +11,7 @@ The code used to generate it is shown in the sequence.
 ---
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/example1.html"
+<iframe class="montin-embed" src="../_static/example1.html"
         loading="lazy" allowfullscreen></iframe>
 ```
 

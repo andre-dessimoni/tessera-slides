@@ -1,4 +1,4 @@
-"""Sphinx configuration for tessera documentation."""
+"""Sphinx configuration for Montin documentation."""
 
 import os
 import subprocess
@@ -35,7 +35,7 @@ _SLIDE_GENERATORS = [
 
 def _generate_slides(app=None):
     if os.environ.get("READTHEDOCS"):
-        print("tessera: skipping slide generation on Read the Docs "
+        print("montin: skipping slide generation on Read the Docs "
               "(serving committed _static/*.html)")
         return
 
@@ -43,7 +43,7 @@ def _generate_slides(app=None):
     env = {**os.environ, "PYTHONPATH": str(_ROOT)}
     for script in _SLIDE_GENERATORS:
         if not script.exists():
-            print(f"tessera: skip — generator not found: {script.name}")
+            print(f"montin: skip — generator not found: {script.name}")
             continue
         try:
             subprocess.run(
@@ -53,9 +53,9 @@ def _generate_slides(app=None):
                 timeout=120,
                 env=env,
             )
-            print(f"tessera: generated slides from {script.name}")
+            print(f"montin: generated slides from {script.name}")
         except Exception as exc:
-            print(f"tessera: warning — {script.name} failed: {exc}")
+            print(f"montin: warning — {script.name} failed: {exc}")
 
 
 def setup(app):
@@ -71,10 +71,10 @@ if __name__ == "__main__":
 # Project
 # ---------------------------------------------------------------------------
 
-project   = "tessera"
+project   = "Montin"
 copyright = "2026, André Rezende Dessimoni Carvalho"
 author    = "André Rezende Dessimoni Carvalho"
-release   = "0.5.0"
+release   = "0.6.0"
 
 # ---------------------------------------------------------------------------
 # Extensions
@@ -117,12 +117,12 @@ html_static_path = ["_static"]
 pygments_style = "default"
 
 html_theme = "furo"
-html_title = "tessera"
-html_logo  = "_static/tessera-logo.png"
+html_title = "Montin"
+html_logo  = "_static/montin-logo.png"
 html_theme_options = {
     "sidebar_hide_name":    False,
     "navigation_with_keys": True,
-    "source_repository":    "https://github.com/andre-dessimoni/tessera-report/",
+    "source_repository":    "https://github.com/andre-dessimoni/montin/",
     "source_branch":        "main",
     "source_directory":     "docs/",
 }

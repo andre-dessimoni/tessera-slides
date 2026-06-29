@@ -4,15 +4,15 @@
 
 ```bash
 # Core only
-pip install tessera-report
+pip install montin
 
 # Adds Markdown rendering + WebP image conversion
-pip install "tessera-report[full]"
+pip install "montin[full]"
 ```
 
 Charts and tables use libraries you already have — `add_plotly` needs `plotly`,
 `add_table(df)` / `add_matplotlib` need `pandas` / `matplotlib`. Since you create
-those objects yourself, install them as you normally would; tessera doesn't pin
+those objects yourself, install them as you normally would; Montin doesn't pin
 them.
 
 ## Basic structure
@@ -22,7 +22,7 @@ Every report follows the same pattern:
 ```python
 
 import plotly.express as px
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 # 1. Create the deck
 deck = Deck(
@@ -79,7 +79,7 @@ This generates `report.html` — a single file with no external dependencies.
 For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom toolbar.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/quick-start-report.html"
+<iframe class="montin-embed" src="../_static/quick-start-report.html"
         loading="lazy" allowfullscreen></iframe>
 ```
 

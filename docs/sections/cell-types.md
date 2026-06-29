@@ -18,7 +18,7 @@ slide.add_text(
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#text"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#text"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -38,7 +38,7 @@ slide.add_metric(
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#metric"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#metric"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -65,7 +65,7 @@ slide.add_table(pd.read_csv("data.csv"))
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#table"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#table"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -86,7 +86,7 @@ slide.add_image(
 In `self_contained=True` mode, local images are embedded as base64.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#image"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#image"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -105,7 +105,7 @@ slide.add_image_slider(
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#image-slider"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#image-slider"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -135,7 +135,7 @@ may be more straight forward to add items from code data structures, instead of 
 on string interpolation.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#list"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#list"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -155,7 +155,7 @@ slide.add_code(
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#code"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#code"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -174,7 +174,7 @@ slide.add_plotly(fig, caption="Iris Dataset")
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#plotly"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#plotly"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -234,7 +234,7 @@ gantt
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#mermaid"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#mermaid"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -293,7 +293,7 @@ slide.add_html("""
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#html"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#html"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -311,7 +311,7 @@ slide.add_iframe(
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#iframe"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#iframe"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -330,6 +330,6 @@ slide.add_empty()                                    # col 2, row 2 — empty sp
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/cell_types.html#empty"
+<iframe class="montin-embed" src="../_static/deck/cell_types.html#empty"
         loading="lazy" allowfullscreen></iframe>
 ```

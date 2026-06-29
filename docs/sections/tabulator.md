@@ -6,7 +6,7 @@ backed by [Tabulator](https://tabulator.info) (bundled, MIT-licensed). It needs
 the `Tabulator` plugin:
 
 ```python
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 deck = Deck(title="Report", plugins=[Plugins.Tabulator()])
 slide = deck.add_slide("Sales")
@@ -24,7 +24,7 @@ slide.add_tabulator(my_dataframe)
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/tabulator.html#tabulator"
+<iframe class="montin-embed" src="../_static/deck/tabulator.html#tabulator"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -76,7 +76,7 @@ slide.add_tabulator(df, columns=[
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/tabulator.html#formatters"
+<iframe class="montin-embed" src="../_static/deck/tabulator.html#formatters"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -97,7 +97,7 @@ Useful column keys:
 ### Grouping, editing & download
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/tabulator.html#editing"
+<iframe class="montin-embed" src="../_static/deck/tabulator.html#editing"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -120,7 +120,7 @@ slide.add_tabulator(df, options={
 Spreadsheet mode, multi-sheet workbooks, nested tables, range selection, and
 interaction history are all reachable this way — see the
 [Tabulator docs](https://tabulator.info/docs/6.3). Excel (`xlsx`) download needs
-an extra library (SheetJS) that tessera does not bundle, so `download` covers
+an extra library (SheetJS) that Montin does not bundle, so `download` covers
 `csv` and `json` only.
 
 ## Offline & themes

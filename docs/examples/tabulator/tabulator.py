@@ -5,7 +5,7 @@ slide_id so the docs deep-link to it (e.g. <iframe src="...tabulator.html#format
 Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 # --- Standardized docs settings (docs/script-settings.yaml) -----------------
 import sys as _sys

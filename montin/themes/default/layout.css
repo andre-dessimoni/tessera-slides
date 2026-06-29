@@ -1,0 +1,661 @@
+/* ============================================================
+   layout.css — estrutura geral da página
+   ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --sidebar-width: 220px;
+  /* Height of a single toolbar row. --toolbar-height is the space #main /
+     #sidebar reserve for the toolbar; it starts at one row and is grown by JS
+     when the toolbar wraps onto additional rows on narrow screens. */
+  --toolbar-row-height: 44px;
+  --toolbar-height: 44px;
+  --color-bg: #1a1a2e;
+  --color-surface: #16213e;
+  --color-surface2: #0f3460;
+  --color-accent: #e94560;
+  --color-text: #eaeaea;
+  --color-text-muted: #8892a4;
+  --color-border: #2a2a4a;
+  --font-sans: "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Fira Code", "Cascadia Code", monospace;
+  --radius: 6px;
+  /* Deck-wide font scaling: all font-sizes are rem (spacing/layout is px),
+     so multiplying the root font-size scales every font and nothing else.
+     Overridden on <html> by Deck(fontsize_scale=...). */
+  --deck-font-scale: 1;
+  font-size: calc(100% * var(--deck-font-scale));
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* ---- Sidebar ---- */
+#sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: calc(100% - var(--toolbar-height));
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 100;
+  transition: width 0.2s ease;
+}
+
+/* ---- Sidebar resize handle ---- */
+#sidebar-resize-handle {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  transform: translateX(-50%);
+  width: 6px;
+  height: calc(100% - var(--toolbar-height));
+  cursor: col-resize;
+  z-index: 101;
+  border-radius: 3px;
+  transition: left 0.2s ease, background 0.15s;
+}
+
+#sidebar-resize-handle:hover,
+#sidebar-resize-handle.dragging {
+  background: var(--color-accent);
+  opacity: 0.4;
+}
+
+/* Disable transitions while dragging for immediate feedback */
+body.sb-no-transition #sidebar,
+body.sb-no-transition #main,
+body.sb-no-transition #toolbar,
+body.sb-no-transition #sidebar-resize-handle {
+  transition: none !important;
+}
+
+#sidebar-header {
+  flex-shrink: 0;
+  padding: 16px 12px 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-accent);
+  border-bottom: 1px solid var(--color-border);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* On short viewports vertical space is scarce (made tighter by a wrapped,
+   multi-row toolbar), so the slide list gets squeezed. Drop the title to give
+   the list ~45px more room; the deck title remains in the browser tab. */
+@media (max-height: 480px) {
+  #sidebar-header { display: none; }
+}
+
+/* ---- Sidebar search box ---- */
+#sidebar-search-wrap {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-search {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+  font-size: 0.78rem;
+  font-family: var(--font-sans);
+  outline: none;
+}
+
+#sidebar-search::placeholder { color: var(--color-text-muted); }
+#sidebar-search:focus { border-color: var(--color-accent); }
+#sidebar-search.sidebar-search-error {
+  border-color: var(--color-accent);
+  background: rgba(233, 69, 96, 0.12);
+}
+
+/* Regex-mode toggle */
+#sidebar-regex-toggle {
+  flex-shrink: 0;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius);
+  padding: 4px 7px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+#sidebar-regex-toggle:hover { color: var(--color-text); }
+#sidebar-regex-toggle.active {
+  color: #fff;
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+/* Common-patterns tooltip — shown only in regex mode on hover/focus */
+#sidebar-regex-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% - 2px);
+  left: 10px;
+  right: 10px;
+  z-index: 120;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 7px 9px;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+#sidebar-regex-tip code {
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  background: var(--color-surface);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+
+#sidebar-search-wrap.regex-on:hover #sidebar-regex-tip,
+#sidebar-search-wrap.regex-on:focus-within #sidebar-regex-tip {
+  display: block;
+}
+
+/* ---- Fold toolbar (collapse/expand all / by level) ---- */
+#sidebar-fold-bar {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+#sidebar-fold-bar button {
+  flex: 1;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: var(--radius);
+  padding: 3px 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+#sidebar-fold-bar button:hover {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+#slide-list {
+  list-style: none;
+  padding: 8px 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+#slide-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+#slide-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+#slide-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  transition: background 0.15s, color 0.15s;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-item.sidebar-hidden { display: none; }
+
+/* Section fold caret (and a matching spacer so titles align) */
+.sidebar-caret,
+.sidebar-caret-spacer {
+  flex-shrink: 0;
+  width: 14px;
+}
+
+.sidebar-caret {
+  text-align: center;
+  font-size: 0.72rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transform: rotate(90deg);          /* expanded rest state — points down */
+  transition: transform 0.12s ease, color 0.12s;
+}
+
+.sidebar-caret.collapsed { transform: rotate(0deg); }   /* points right */
+.sidebar-caret:hover { color: var(--color-text); }
+.sidebar-caret.sidebar-caret-empty { visibility: hidden; cursor: default; }
+
+.sidebar-item:hover {
+  background: var(--color-surface2);
+  color: var(--color-text);
+}
+
+.sidebar-item.active {
+  color: var(--color-text);
+  border-left-color: var(--color-accent);
+  background: var(--color-surface2);
+}
+
+.sidebar-item.sidebar-type-title,
+.sidebar-item.sidebar-type-section {
+  font-weight: 600;
+  color: var(--color-text);
+  font-size: 0.82rem;
+}
+
+/* Section hierarchy — indent and dim deeper levels */
+.sidebar-item.sidebar-type-section.sidebar-level-2 {
+  padding-left: 20px;
+  font-size: 0.77rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.sidebar-item.sidebar-type-section.sidebar-level-3 {
+  padding-left: 28px;
+  font-size: 0.73rem;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  opacity: 0.65;
+}
+
+.sidebar-num {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  min-width: 20px;
+  text-align: right;
+}
+
+/* ---- Main ---- */
+#main {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  right: 0;
+  bottom: var(--toolbar-height);
+  overflow: auto;   /* scrollbars appear when the deck is zoomed in (fluid mode) */
+  transition: left 0.2s ease;
+  /* Let JS own pinch-zoom and horizontal swipe (see initTouchGestures): the
+     browser keeps native two-axis panning for zoomed-in slides, but its own
+     pinch/double-tap zoom is disabled so our handler can preventDefault. */
+  touch-action: pan-x pan-y;
+}
+
+/* While the sidebar width animates (toggle) or is dragged, the deck area reflows
+   and would briefly show scrollbars before settling. Suppress them for the
+   duration so they don't flicker; overflow: auto is restored once it settles. */
+body.sb-animating #main,
+body.sb-no-transition #main {
+  overflow: hidden;
+}
+
+/* The .stage wrapper is transparent in fluid mode (children flow into .slide as
+   before); in fixed-size mode it becomes the native-size, transform-scaled stage
+   inside a layout-sized .slide (see the .fixed-size rules below). */
+.stage { display: contents; }
+
+/* Deck-area zoom (toolbar control). Fluid slides scale via CSS zoom so the
+   layout reflows and #main shows scrollbars when zoomed in. Fixed-size stages
+   scale through the transform fit instead (see main.js fitStage). */
+body:not(.fixed-size) .slide {
+  zoom: var(--deck-zoom, 1);
+}
+
+/* ---- Hidden sidebar / toolbar (single-slide / embeddable) ---- */
+/* The toolbar is already full-width (left: 0); only #main shifts with the sidebar. */
+.no-sidebar #main {
+  left: 0;
+}
+
+.no-toolbar #main {
+  bottom: 0;
+}
+
+/* Collapsed sidebar — drives the width from the body class so a deck can
+   render collapsed with no flash, while JS toggle still works. */
+body.sb-collapsed {
+  --sidebar-width: 0px;
+}
+
+.slide {
+  display: none;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 20px 24px 12px;
+}
+
+.slide.active {
+  display: flex;
+}
+
+/* ---- Fixed-size (scaled stage) mode ---- */
+/* The active slide becomes a fixed-dimension canvas scaled with a CSS
+   transform to fit #main. Everything inside scales together, like a PDF.
+   Modal & lightbox live outside #main, so they stay unscaled. */
+.fixed-size #main {
+  display: flex;
+  /* `safe` keeps the stage reachable (scrollable to the top-left) when it is
+     zoomed larger than the viewport, instead of clipping the start. */
+  align-items: safe center;
+  justify-content: safe center;
+  overflow: auto;
+}
+
+/* Fixed-size: the .slide is an outer box whose *layout* size equals the scaled
+   stage, so #main shows scrollbars / pans when zoomed in. The inner .stage keeps
+   its native pixel size and is scaled with a transform (same crisp rendering as
+   before — content lays out at native size, then scales). */
+.fixed-size .slide {
+  width:  calc(var(--stage-w) * var(--stage-sx, 1));
+  height: calc(var(--stage-h) * var(--stage-sy, 1));
+  flex: none;
+  padding: 0;
+  overflow: hidden;
+}
+
+.fixed-size .slide.active { display: block; }
+
+.fixed-size .stage {
+  display: flex;
+  flex-direction: column;
+  width:  var(--stage-w);
+  height: var(--stage-h);
+  padding: 20px 24px 12px;   /* matches the base .slide padding, scaled with the stage */
+  transform: scale(var(--stage-sx, 1), var(--stage-sy, 1));
+  transform-origin: top left;
+}
+
+.fixed-size #main.can-pan { cursor: grab; }
+.fixed-size #main.panning { cursor: grabbing; }
+.fixed-size #main.panning .stage { cursor: grabbing; }
+
+/* ---- Toolbar ---- */
+/* The toolbar wraps onto extra rows on narrow viewports so every control stays
+   visible instead of overflowing. Its height is content-driven (min one row);
+   JS mirrors the real height back into --toolbar-height so #main / #sidebar
+   reserve the right amount of space when it grows to two or more rows. */
+#toolbar {
+  position: fixed;
+  bottom: 0;
+  /* Spans the full window width (the sidebar sits above it) so it is never
+     squeezed by the sidebar into a tall vertical stack on narrow screens. */
+  left: 0;
+  right: 0;
+  min-height: var(--toolbar-row-height);
+  padding: 4px 8px;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 12px;
+  z-index: 100;
+  container-type: inline-size;   /* enables the width query for the credit */
+}
+
+#toolbar button {
+  background: none;
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  padding: 4px 10px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+
+#toolbar button:hover {
+  background: var(--color-surface2);
+}
+
+#slide-counter {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* "Made with montin" credit, pinned to the right of the toolbar. Absolutely
+   positioned (relative to the fixed #toolbar) so it is out of the flex flow and
+   the navigation controls keep their centred layout. */
+#toolbar-credit {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+#toolbar-credit span { font-weight: 600; }
+#toolbar-credit:hover { color: var(--color-accent); }
+
+/* Hide the credit once the toolbar gets too narrow (e.g. a wide sidebar), so
+   the centred controls never collide with it. */
+@container (max-width: 620px) {
+  #toolbar-credit { display: none; }
+}
+
+/* Zoom controls (− 🔍100% +) */
+#zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#btn-zoom-reset {
+  min-width: 4.6em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;   /* steady width as the % changes */
+}
+
+#zoom-level { display: inline-block; }
+
+#slide-input {
+  width: 44px;
+  text-align: center;
+  background: var(--color-surface2);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+  border-radius: var(--radius);
+  padding: 2px 4px;
+  font-size: 0.85rem;
+}
+
+/* ---- Overview ---- */
+#overview {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+  padding: 32px;
+  overflow-y: auto;
+  z-index: 200;
+}
+
+#overview.hidden { display: none; }
+
+.overview-thumb {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overview-thumb:hover { border-color: var(--color-accent); }
+
+.overview-num {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+}
+
+.overview-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---- Modal ---- */
+#modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+}
+
+#modal.hidden { display: none; }
+
+#modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 80vw;
+  max-height: 80vh;
+  overflow: auto;
+  position: relative;
+  min-width: 320px;
+}
+
+#modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+/* ---- Print ---- */
+/* Goal: one slide per page, no sidebar/toolbar. The on-screen layout pins
+   everything to a single fixed viewport (html/body overflow:hidden, #main
+   position:fixed), so printing needs to undo that and let the deck flow down
+   the page — otherwise only the first slide (or a blank page) is printed. */
+@media print {
+  /* Landscape pages (decks are 16:9). Tweak the margin to taste. */
+  @page { size: landscape; margin: 0.5cm; }
+
+  /* Release the single-viewport clamp and keep the deck's own (dark) colours —
+     browsers drop backgrounds in print unless color-adjust is exact. */
+  html, body {
+    height: auto;
+    overflow: visible;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* No chrome / overlays in the printout. */
+  #sidebar, #toolbar, #sidebar-resize-handle,
+  #overview, #modal, .cell-actions { display: none !important; }
+
+  /* Let #main grow with its content instead of being a fixed viewport. */
+  #main {
+    position: static;
+    overflow: visible;
+    height: auto;
+    width: 100%;
+  }
+
+  /* Every slide is shown, fills exactly one page, and ignores the on-screen
+     deck zoom. overflow:hidden clamps each to 100vh so it never spills onto a
+     second page; break-after starts the next slide on a fresh page. */
+  .slide {
+    display: flex !important;
+    width: 100%;
+    height: 100vh;
+    box-sizing: border-box;
+    overflow: hidden;
+    zoom: 1 !important;
+    break-after: page;
+    break-inside: avoid;
+  }
+  .slide:last-child { break-after: auto; }   /* no trailing blank page */
+
+  .slide-notes { display: block !important; }
+
+  /* Fixed-size decks scale the stage with a screen-fit transform (JS-driven);
+     that factor is meaningless on paper, so flow the stage to the page like a
+     fluid deck and let each slide fill its own page. */
+  .fixed-size .slide { width: 100%; height: 100vh; }
+  .fixed-size .stage { width: 100%; height: 100%; transform: none; }
+
+  /* Interactive widgets don't print well, so swap each for the static fallback
+     generated on beforeprint (see charts.js initChartPrinting): a plain table
+     from the row data, and a scalable SVG snapshot of the chart (legend incl.). */
+  .montin-tabulator { display: none !important; }
+  .hs-print-table    { display: table !important; width: 100%; }
+  .plotly-container  { display: none !important; }
+  .plotly-print      { display: block !important; width: 100%; height: 100%; overflow: visible; }
+  .plotly-print svg  { width: 100%; height: 100%; }
+}
+
+/* The print-only fallbacks (built on beforeprint) are hidden on screen. */
+.hs-print-table, .plotly-print { display: none; }

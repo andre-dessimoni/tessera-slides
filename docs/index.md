@@ -1,6 +1,6 @@
-# tessera
+# Montin
 
-**tessera** is a Python library for generating **self-contained, interactive
+**Montin** is a Python library for generating **self-contained, interactive
 HTML reports** from data — a single `.html` file with no runtime, ideal for
 batch-generated ML and analytics output, dashboards, and technical reports.
 
@@ -11,27 +11,27 @@ file you can email, commit, or serve.
 
 ```bash
 # Core only
-pip install tessera-report
+pip install montin
 
 # Adds Markdown rendering + WebP image conversion
-pip install "tessera-report[full]"
+pip install "montin[full]"
 ```
 
 ## Live demo
 
-The report below is an example of the capabilities of tessera.
+The report below is an example of the capabilities of Montin.
 
 For a better view, click the &#x26F6; `Fullscreen (F)` button on the bottom toolbar.
 
 ```{raw} html
-<iframe class="tessera-embed" src="_static/example1.html"
+<iframe class="montin-embed" src="_static/example1.html"
         loading="lazy" allowfullscreen></iframe>
 ```
 
 ## Example of use:
 
 ```python
-from tessera import Deck, Plugins, SlideDefaults
+from montin import Deck, Plugins, SlideDefaults
 
 deck = Deck(
     title="Report",

@@ -1,6 +1,8 @@
-# tessera
+# Montin
 
-[![CI](https://github.com/andre-dessimoni/tessera-report/actions/workflows/ci.yml/badge.svg)](https://github.com/andre-dessimoni/tessera-report/actions/workflows/ci.yml)
+> **See the whole.**
+
+[![CI](https://github.com/andre-dessimoni/montin/actions/workflows/ci.yml/badge.svg)](https://github.com/andre-dessimoni/montin/actions/workflows/ci.yml)
 
 Build **self-contained, interactive HTML reports** from Python — one file you
 can commit, or serve, with no runtime and no dependencies on the viewer's
@@ -12,19 +14,19 @@ images, diagrams), and the whole deck embeds into a single `.html`.
 
 ## Documentation
 
-https://tessera-report.readthedocs.io/
+https://montin.readthedocs.io/
 
 ## Installation
 
 ```bash
-pip install tessera-report
+pip install montin
 ```
 
 
 ## Quick start
 
 ```python
-from tessera import Deck
+from montin import Deck
 
 deck = Deck(
     title="My Report",
@@ -95,6 +97,29 @@ slide.add_text(
     transparent=True,   # hides cell border and background
 )
 ```
+
+## About the name
+
+**Montin** fuses two roots:
+
+- **Muntin** — the slender bar that divides a window's panes into one composed
+  whole. It maps directly onto the library's **CSS Grid**: the structure that
+  organizes cells and panels across a report.
+- **Monte** — a heap of raw data (simulations, DOE iterations, notebooks) waiting
+  to be processed and understood.
+
+Montin is the structure that turns a heap of data into understanding — and, from
+above, you *see the whole*.
+
+### Palette
+
+| Name | Hex | Use |
+|---|---|---|
+| Ink | `#0F1F2E` | Primary text, dark background |
+| Slate | `#35546B` | Secondary colour, UI elements |
+| Stone | `#9AA6B2` | Neutral, secondary text |
+| Sand | `#E9ECEF` | Light background, borders |
+| Accent | `#E07A3F` | Highlight (logo sun, CTAs, links) |
 
 ## License
 

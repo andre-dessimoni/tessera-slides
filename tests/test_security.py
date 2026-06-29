@@ -5,11 +5,11 @@ import re
 
 import pytest
 
-from tessera import Deck, Plugins, Security, SecurityError
+from montin import Deck, Plugins, Security, SecurityError
 
 
 def _render(deck):
-    from tessera.core.assembler import Assembler
+    from montin.core.assembler import Assembler
     return Assembler(deck)._render()
 
 

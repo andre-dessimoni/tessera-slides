@@ -2,8 +2,8 @@
 
 import pytest
 
-from tessera import Deck
-from tessera.cells import ImageSliderCell, MatplotlibCell
+from montin import Deck
+from montin.cells import ImageSliderCell, MatplotlibCell
 
 mpl = pytest.importorskip("matplotlib")
 mpl.use("Agg")

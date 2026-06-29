@@ -3,6 +3,12 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Added
+- **Touchscreen gestures**: Sweeping change slides and pinching applies zoom.
+- **Small screen friendly toolbar and sidebar**: Toolbar buttons now collapse in
+  rows when it does not fit the screen space, and sidebar hides it top title.
+- **Printing / PDF export**: The deck now prints (Ctrl+P / Save as PDF) with one
+  slide per page and no sidebar or toolbar.
 
 ## [0.5.0] - 2026-06-22
 
@@ -25,7 +31,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - **Bundled (offline) plugins.** Each plugin can load from a CDN (`source="cdn"`,
   default) or be embedded in the report (`source="bundled"`) so it works with no
   network at all. Flip the whole deck with `Deck(plugin_source="bundled")`. The
-  embedded libraries are vendored under `tessera/static/vendor/<library>/` — each
+  embedded libraries are vendored under `montin/static/vendor/<library>/` — each
   alongside its `LICENSE` (Plotly/Mermaid MIT, highlight.js BSD-3-Clause, MathJax
   Apache-2.0) — and refreshed by the dev script `scripts/update_vendor.py` (which
   fetches code + licenses, with a `--check` mode and an update log).
@@ -48,7 +54,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   propagated to slide and cell previews.
 - WebP support for images and figures: `to_webp=True` / `webp_quality=` on
   `add_image`, `add_matplotlib`, `add_image_slider` (requires the new optional
-  `pillow` dependency: `pip install 'tessera-report[image]'`).
+  `pillow` dependency: `pip install 'montin[image]'`).
 - Contents folder: `Deck(contents_folder=...)` plus `save_source=True` on the
   media `add_*` (incl. `add_plotly`, which exports a standalone HTML). Saves
   assets to `_<report>_contents/` (created lazily). When the deck is
@@ -59,7 +65,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- **Optional-dependency extras now cover only what tessera itself imports.**
+- **Optional-dependency extras now cover only what Montin itself imports.**
   `[full]` is `markdown-it-py` + `pillow`; the standalone `[plotly]` and
   `[pandas]` extras were removed. You build `Figure`/`DataFrame` objects yourself,
   so those libraries are already present when you call `add_plotly`/`add_table`/
@@ -88,13 +94,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed (breaking)
 
-- **Renamed the PyPI distribution `tessera-slides` → `tessera-report`.** The
-  import package is unchanged (`import tessera`). Install with
-  `pip install tessera-report`. The old `tessera-slides` distribution continues
-  to install a deprecation shim that depends on `tessera-report`.
 - **Renamed the main class `HTMLSlides` → `Deck`** (no alias; update
-  `from tessera import HTMLSlides` to `from tessera import Deck`). The internal
-  module `tessera.core.slides` moved to `tessera.core.deck`.
+  `from montin import HTMLSlides` to `from montin import Deck`). The internal
+  module `montin.core.slides` moved to `montin.core.deck`.
 - **Replaced the flat `Plugin(name, source)` with the `Plugins.*` classes.**
   Update `Plugin("plotly", "cdn")` to `Plugins.Plotly(source="cdn")` (or just
   `Plugins.Plotly()` — the default source is now `"cdn"`). `Plugin` remains as the

@@ -2,9 +2,9 @@
 
 import pytest
 
-from tessera import Deck, Plugin
-from tessera.core.slide import Slide, _normalize_sizes
-from tessera.exceptions import CellPlacementError
+from montin import Deck, Plugin
+from montin.core.slide import Slide, _normalize_sizes
+from montin.exceptions import CellPlacementError
 
 
 # ---------------------------------------------------------------------------

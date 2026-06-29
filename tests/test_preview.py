@@ -1,7 +1,7 @@
 """Tests for Jupyter previews: _repr_html_ on Deck, Slide, and Cell."""
 
-from tessera import Deck, Plugins
-from tessera.utils.notebook import iframe_srcdoc, preview_error
+from montin import Deck, Plugins
+from montin.utils.notebook import iframe_srcdoc, preview_error
 
 
 # ---------------------------------------------------------------------------

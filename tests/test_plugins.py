@@ -2,8 +2,8 @@
 
 import pytest
 
-from tessera import Deck, Plugins
-from tessera.exceptions import PluginNotDeclaredError
+from montin import Deck, Plugins
+from montin.exceptions import PluginNotDeclaredError
 
 _PLUGIN_BY_NAME = {
     "plotly": Plugins.Plotly,
@@ -106,7 +106,7 @@ def test_error_message_mentions_method_name():
 # Plugin asset resolution (CDN vs bundled, version/url overrides, options)
 # ---------------------------------------------------------------------------
 
-from tessera.utils.vendor import load_manifest, resolve_plugin   # noqa: E402
+from montin.utils.vendor import load_manifest, resolve_plugin   # noqa: E402
 
 
 def _only(plugin, **kw):
@@ -218,7 +218,7 @@ def test_tabulator_bundled_inlines_css_and_js():
 # ---------------------------------------------------------------------------
 
 def _render(deck):
-    from tessera.core.assembler import Assembler
+    from montin.core.assembler import Assembler
     return Assembler(deck)._render()
 
 
@@ -260,7 +260,7 @@ def test_bundled_sidecar_writes_file(tmp_path):
 # ---------------------------------------------------------------------------
 
 def test_every_manifest_file_exists_on_disk():
-    from tessera.utils.vendor import vendor_dir
+    from montin.utils.vendor import vendor_dir
     m = load_manifest()
     vdir = vendor_dir()
     expected = [
@@ -281,7 +281,7 @@ def test_every_manifest_file_exists_on_disk():
 
 def test_every_library_ships_its_license():
     # Attribution: each vendored library keeps its LICENSE next to its code.
-    from tessera.utils.vendor import vendor_dir
+    from montin.utils.vendor import vendor_dir
     m = load_manifest()
     vdir = vendor_dir()
     for name, entry in m.items():

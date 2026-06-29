@@ -4,11 +4,11 @@ import json
 
 import pytest
 
-from tessera import Deck, Plugins, Security
-from tessera.cells.base import CellParams
-from tessera.cells.tabulator import TabulatorCell, _safe_fields, _safe_json
-from tessera.core.assembler import Assembler
-from tessera.exceptions import PluginNotDeclaredError
+from montin import Deck, Plugins, Security
+from montin.cells.base import CellParams
+from montin.cells.tabulator import TabulatorCell, _safe_fields, _safe_json
+from montin.core.assembler import Assembler
+from montin.exceptions import PluginNotDeclaredError
 
 
 def params(**kwargs) -> CellParams:
@@ -181,7 +181,7 @@ def test_render_emits_table_and_data():
     deck = Deck(title="T", plugins=[Plugins.Tabulator()])
     deck.add_slide("S", nrows=1, ncols=1).add_tabulator({"Name": ["Alice"]})
     html = Assembler(deck)._render()
-    assert 'class="tessera-tabulator"' in html        # the table mount point
+    assert 'class="montin-tabulator"' in html        # the table mount point
     assert 'type="application/json"' in html          # its config block
     assert '"Name": "Alice"' in html or '"Name":"Alice"' in html
     assert "tabulator-tables@6.3.1" in html           # cdn default
@@ -297,4 +297,4 @@ def test_bundled_block_external_has_no_external_urls():
     deck.add_slide("S", nrows=1, ncols=1).add_tabulator([["A", "B"], [1, 2]])
     html = Assembler(deck)._render()   # raises if any external URL survives
     assert "cdn.jsdelivr.net" not in html
-    assert 'class="tessera-tabulator"' in html
+    assert 'class="montin-tabulator"' in html

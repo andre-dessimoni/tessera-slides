@@ -1,6 +1,6 @@
 # Slide IDs
 
-Every slide has an identifier (`slide_id`). When `slide_id` is omitted, tessera
+Every slide has an identifier (`slide_id`). When `slide_id` is omitted, Montin
 assigns an automatic one of the form `_slide-<n>` (the leading underscore
 distinguishes it from user-supplied IDs). You can supply any hashable value —
 integer, string, tuple, etc.

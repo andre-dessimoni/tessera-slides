@@ -1,10 +1,10 @@
 # Security & offline use
 
 :::{warning}
-**Scope of these measures:** The security options below govern how tessera loads its own JavaScript plugins — CDN integrity checks, CSP, offline guarantees. They say nothing about the trustworthiness of the report itself. An HTML file is editable by anyone; **never open a .html file from a source you don't trust**, regardless of what it claims to be made with.
+**Scope of these measures:** The security options below govern how Montin loads its own JavaScript plugins — CDN integrity checks, CSP, offline guarantees. They say nothing about the trustworthiness of the report itself. An HTML file is editable by anyone; **never open a .html file from a source you don't trust**, regardless of what it claims to be made with.
 :::
 
-tessera's purpose is a report that transfers **no data** and works **fully
+Montin's purpose is a report that transfers **no data** and works **fully
 offline**. A generated `.html` embeds its own styling, scripts, and (when
 `self_contained`) its images and libraries, so it can be opened by double-clicking
 — no server, no internet, nothing sent anywhere. That makes it a good fit for
@@ -14,7 +14,7 @@ The `Security` object lets you turn that from a default into an *enforced,
 verifiable* property:
 
 ```python
-from tessera import Deck, Plugins, Security
+from montin import Deck, Plugins, Security
 
 deck = Deck(
     title="Confidential Report",
@@ -78,7 +78,7 @@ With `block_external=True`:
 1. every plugin is embedded (an explicit `source="cdn"` raises, rather than being
    silently overridden);
 2. a strict CSP forbids all outbound requests;
-3. after rendering, tessera scans the file for external resource URLs and raises
+3. after rendering, Montin scans the file for external resource URLs and raises
    `SecurityError` — listing them — if any remain.
 
 To confirm by hand: disconnect from the network, open the file, and check that
@@ -86,7 +86,7 @@ charts, diagrams, and math still render; the browser's **Network** tab should sh
 no external requests.
 
 :::{note}
-`block_external` only embeds things tessera controls. If *you* add an external
+`block_external` only embeds things Montin controls. If *you* add an external
 resource — `add_image("https://…")`, a custom CSS `@import url(https://…)`, or an
 `<iframe src="https://…">` in your own content — the post-render check catches it
 and tells you which one to embed or remove. A plain clickable `<a href="https://…">`

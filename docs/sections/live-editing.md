@@ -23,13 +23,13 @@ theme and plugins.
 
 ### Laying out cell outputs
 
-Because a single slide previews on its own, you can use tessera purely as a
+Because a single slide previews on its own, you can use Montin purely as a
 **layout engine for notebook outputs** — build one slide, drop a few cells onto
 its grid, and return it as the cell's last expression. No file is written:
 
 ```python
 import plotly.express as px
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 deck  = Deck(title="scratch", plugins=[Plugins.Plotly()])
 slide = deck.add_slide("Run 42", nrows=1, ncols=3)
@@ -46,7 +46,7 @@ handy for experiment summaries — without leaving the notebook.
 
 ## Autosave
 
-Pass `autosave` with a filename to have tessera write the HTML file automatically
+Pass `autosave` with a filename to have Montin write the HTML file automatically
 after each change, so you can live-preview in a browser while building the deck.
 
 
@@ -75,7 +75,7 @@ writes on every cell addition, or keep autosave disabled, manually saving with `
 A convenient way to use autosave is alongside the
 [Live Preview](https://marketplace.visualstudio.com/items?itemName=ms-vscode.live-server)
 extension in VSCode. Open the generated `.html` file with **Live Preview** (right-click
-the file → *Show Preview*) and it will automatically refresh whenever tessera
+the file → *Show Preview*) and it will automatically refresh whenever Montin
 rewrites it. This gives you an instant side-by-side view — code on the left,
 the rendered report on the right — without leaving the editor, as shown below:
 

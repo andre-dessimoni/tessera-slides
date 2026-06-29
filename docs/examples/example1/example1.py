@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import plotly.express as px
 
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 # --- Standardized docs settings (docs/script-settings.yaml) -----------------
 import sys as _sys

@@ -32,8 +32,8 @@ jobs:
           cache-dependency-path: pyproject.toml
 
       # `dev` pulls the test tools plus plotly/pandas/matplotlib so every cell
-      # type is exercised; `full` adds tessera's own optional deps (markdown, pillow).
-      - name: Install tessera-report and test dependencies
+      # type is exercised; `full` adds montin's own optional deps (markdown, pillow).
+      - name: Install montin and test dependencies
         run: pip install -e ".[full,dev]"
 
       # Fails if a vendored library is missing, stale (SRI hash drifted), or a

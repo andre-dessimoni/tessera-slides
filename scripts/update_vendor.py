@@ -2,9 +2,9 @@
 """
 update_vendor.py — refresh the bundled (vendored) plugin libraries.
 
-tessera can embed Plotly / Mermaid / highlight.js / MathJax directly into a
+montin can embed Plotly / Mermaid / highlight.js / MathJax directly into a
 report so it works with no network at all (``source="bundled"``). Those minified
-files live in ``tessera/static/vendor/`` and are described by ``manifest.json``.
+files live in ``montin/static/vendor/`` and are described by ``manifest.json``.
 
 This dev-only script reads the version pins in ``manifest.json``, downloads each
 library from its CDN, writes the files into the vendor folder, computes the
@@ -35,11 +35,11 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VENDOR_DIR = Path(__file__).resolve().parent.parent / "tessera" / "static" / "vendor"
+VENDOR_DIR = Path(__file__).resolve().parent.parent / "montin" / "static" / "vendor"
 MANIFEST = VENDOR_DIR / "manifest.json"
 UPDATE_LOG = VENDOR_DIR / "UPDATE_LOG.md"
 
-_UA = {"User-Agent": "tessera-vendor-updater/1.0 (+https://github.com/andre-dessimoni/tessera-report)"}
+_UA = {"User-Agent": "montin-vendor-updater/1.0 (+https://github.com/andre-dessimoni/montin)"}
 
 
 def _sri(data: bytes) -> str:

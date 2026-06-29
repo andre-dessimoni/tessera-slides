@@ -1,6 +1,6 @@
 import pytest
 
-from tessera import CellDefaults, Deck, Plugins, SlideDefaults
+from montin import CellDefaults, Deck, Plugins, SlideDefaults
 
 
 @pytest.fixture

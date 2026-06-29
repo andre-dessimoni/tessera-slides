@@ -2,10 +2,10 @@
 
 import pytest
 
-from tessera.cells.base import CellParams
-from tessera.cells.image import ImageCell
-from tessera.cells.image_slider import ImageSliderCell
-from tessera.cells.misc import (
+from montin.cells.base import CellParams
+from montin.cells.image import ImageCell
+from montin.cells.image_slider import ImageSliderCell
+from montin.cells.misc import (
     CodeCell,
     EmptyCell,
     HtmlCell,
@@ -14,9 +14,9 @@ from tessera.cells.misc import (
     MermaidCell,
     MetricCell,
 )
-from tessera.cells.table import TableCell, _detect_separator
-from tessera.cells.text import TextCell
-from tessera.exceptions import InvalidDataError
+from montin.cells.table import TableCell, _detect_separator
+from montin.cells.text import TextCell
+from montin.exceptions import InvalidDataError
 
 
 # ---------------------------------------------------------------------------
@@ -328,7 +328,7 @@ def test_valign_middle_via_slide(deck):
 
 
 def test_halign_center_inherited_from_cell_defaults():
-    from tessera import CellDefaults, Deck
+    from montin import CellDefaults, Deck
     deck = Deck(title="X", cell_defaults=CellDefaults(halign="center"))
     s = deck.add_slide("S", nrows=1, ncols=1)
     cell = s.add_text("hello")
@@ -336,7 +336,7 @@ def test_halign_center_inherited_from_cell_defaults():
 
 
 def test_valign_bottom_inherited_from_cell_defaults():
-    from tessera import CellDefaults, Deck
+    from montin import CellDefaults, Deck
     deck = Deck(title="X", cell_defaults=CellDefaults(valign="bottom"))
     s = deck.add_slide("S", nrows=1, ncols=1)
     cell = s.add_text("hello")
@@ -344,7 +344,7 @@ def test_valign_bottom_inherited_from_cell_defaults():
 
 
 def test_per_cell_halign_overrides_default():
-    from tessera import CellDefaults, Deck
+    from montin import CellDefaults, Deck
     deck = Deck(title="X", cell_defaults=CellDefaults(halign="center"))
     s = deck.add_slide("S", nrows=1, ncols=2)
     c1 = s.add_text("default")

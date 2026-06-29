@@ -5,8 +5,8 @@ import re
 
 import pytest
 
-from tessera import CellDefaults, Deck, Plugins, SlideDefaults
-from tessera.core.slide import Slide
+from montin import CellDefaults, Deck, Plugins, SlideDefaults
+from montin.core.slide import Slide
 
 
 # ---------------------------------------------------------------------------

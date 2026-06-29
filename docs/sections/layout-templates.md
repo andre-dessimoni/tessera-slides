@@ -20,7 +20,7 @@ slide.add_text("F", row=2, col=3)   # row 2, col 3
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/layout.html#grid-basic"
+<iframe class="montin-embed" src="../_static/deck/layout.html#grid-basic"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -45,7 +45,7 @@ Mixed units work — `fr` values fill the remaining space after fixed sizes are
 applied, the same way they do in native CSS Grid.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/layout.html#grid-sizing"
+<iframe class="montin-embed" src="../_static/deck/layout.html#grid-sizing"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -76,7 +76,7 @@ slide.add_image("photo.png", col=2, row=1, rowspan=2)
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/layout.html#grid-spanning"
+<iframe class="montin-embed" src="../_static/deck/layout.html#grid-spanning"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -90,7 +90,7 @@ layout templates and apply them selectively, without changing the global default
 set on `Deck`.
 
 ```python
-from tessera import Deck, SlideDefaults, CellDefaults
+from montin import Deck, SlideDefaults, CellDefaults
 
 deck = Deck(title="Template Report")
 
@@ -119,7 +119,7 @@ The priority order for each parameter is:
 3. **Global default** — `slide_defaults` / `cell_defaults` set on `Deck`.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/layout.html#templates-results"
+<iframe class="montin-embed" src="../_static/deck/layout.html#templates-results"
         loading="lazy" allowfullscreen></iframe>
 ```
 

@@ -3,7 +3,7 @@
 ## Deck — `Deck`
 
 ```{eval-rst}
-.. autoclass:: tessera.Deck
+.. autoclass:: montin.Deck
    :members: add_title, add_section, add_toc, add_slide, write
    :undoc-members: False
 ```
@@ -13,10 +13,10 @@
 ## Configuration
 
 ```{eval-rst}
-.. autoclass:: tessera.SlideDefaults
+.. autoclass:: montin.SlideDefaults
    :members:
 
-.. autoclass:: tessera.CellDefaults
+.. autoclass:: montin.CellDefaults
    :members:
 ```
 
@@ -25,14 +25,14 @@
 ## Plugins
 
 ```{eval-rst}
-.. autoclass:: tessera.Plugin
+.. autoclass:: montin.Plugin
    :members:
 
-.. autoclass:: tessera.Plotly
-.. autoclass:: tessera.Mermaid
-.. autoclass:: tessera.Highlight
-.. autoclass:: tessera.MathJax
-.. autoclass:: tessera.Tabulator
+.. autoclass:: montin.Plotly
+.. autoclass:: montin.Mermaid
+.. autoclass:: montin.Highlight
+.. autoclass:: montin.MathJax
+.. autoclass:: montin.Tabulator
 ```
 
 ---
@@ -40,7 +40,7 @@
 ## Security
 
 ```{eval-rst}
-.. autoclass:: tessera.Security
+.. autoclass:: montin.Security
    :members:
 ```
 
@@ -49,7 +49,7 @@
 ## Slide
 
 ```{eval-rst}
-.. autoclass:: tessera.core.slide.Slide
+.. autoclass:: montin.core.slide.Slide
    :members:
    :undoc-members: False
 ```
@@ -59,18 +59,18 @@
 ## Cells
 
 ```{eval-rst}
-.. autoclass:: tessera.cells.text.TextCell
-.. autoclass:: tessera.cells.misc.MetricCell
-.. autoclass:: tessera.cells.table.TableCell
-.. autoclass:: tessera.cells.image.ImageCell
-.. autoclass:: tessera.cells.image_slider.ImageSliderCell
-.. autoclass:: tessera.cells.misc.ListCell
-.. autoclass:: tessera.cells.misc.CodeCell
-.. autoclass:: tessera.cells.plotly.PlotlyCell
-.. autoclass:: tessera.cells.misc.MermaidCell
-.. autoclass:: tessera.cells.misc.HtmlCell
-.. autoclass:: tessera.cells.misc.IframeCell
-.. autoclass:: tessera.cells.misc.EmptyCell
+.. autoclass:: montin.cells.text.TextCell
+.. autoclass:: montin.cells.misc.MetricCell
+.. autoclass:: montin.cells.table.TableCell
+.. autoclass:: montin.cells.image.ImageCell
+.. autoclass:: montin.cells.image_slider.ImageSliderCell
+.. autoclass:: montin.cells.misc.ListCell
+.. autoclass:: montin.cells.misc.CodeCell
+.. autoclass:: montin.cells.plotly.PlotlyCell
+.. autoclass:: montin.cells.misc.MermaidCell
+.. autoclass:: montin.cells.misc.HtmlCell
+.. autoclass:: montin.cells.misc.IframeCell
+.. autoclass:: montin.cells.misc.EmptyCell
 ```
 
 ---
@@ -78,10 +78,10 @@
 ## Exceptions
 
 ```{eval-rst}
-.. autoclass:: tessera.HtmlSlidesError
-.. autoclass:: tessera.CellPlacementError
-.. autoclass:: tessera.PluginNotDeclaredError
-.. autoclass:: tessera.ThemeNotFoundError
-.. autoclass:: tessera.InvalidDataError
-.. autoclass:: tessera.SecurityError
+.. autoclass:: montin.MontinError
+.. autoclass:: montin.CellPlacementError
+.. autoclass:: montin.PluginNotDeclaredError
+.. autoclass:: montin.ThemeNotFoundError
+.. autoclass:: montin.InvalidDataError
+.. autoclass:: montin.SecurityError
 ```

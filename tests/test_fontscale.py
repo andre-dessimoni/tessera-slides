@@ -1,9 +1,9 @@
 """Tests for font scaling — deck-wide ``fontsize_scale`` and per-cell ``fontscale``."""
 
-from tessera import Deck
-from tessera.core.deck import CellDefaults
-from tessera.core.assembler import Assembler
-from tessera.utils.theme_resolver import ThemeResolver
+from montin import Deck
+from montin.core.deck import CellDefaults
+from montin.core.assembler import Assembler
+from montin.utils.theme_resolver import ThemeResolver
 
 
 def render(deck: Deck) -> str:

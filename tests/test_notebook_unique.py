@@ -2,9 +2,9 @@
 
 import pytest
 
-from tessera import Deck
-from tessera.exceptions import InvalidDataError
-import tessera.utils.notebook as nb
+from montin import Deck
+from montin.exceptions import InvalidDataError
+import montin.utils.notebook as nb
 
 
 def _patch(monkeypatch, cell_id, msg_id, kind="zmq"):

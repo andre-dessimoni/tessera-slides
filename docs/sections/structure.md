@@ -1,6 +1,6 @@
 # Deck structure
 
-Beyond content slides, tessera provides three structural slide types for
+Beyond content slides, Montin provides three structural slide types for
 organising long reports: **title**, **section**, and **TOC**.
 
 ## Title slide
@@ -29,7 +29,7 @@ The `subtitle` appears below the title in a smaller muted style. A decorative
 accent bar is drawn under the title block on the default theme.
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#title"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#title"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -53,7 +53,7 @@ deck.add_section("Feature store",  level=2)
 ```
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#section_lvl1a"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#section_lvl1a"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -73,7 +73,7 @@ are indented and dimmed, and the current section is highlighted. Below, the
 level-2 **Networking** section is the current one:
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#section_lvl2aa"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#section_lvl2aa"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -90,7 +90,7 @@ The demo deck's **Appendix** is added this way (and with `show_toc=False`), so i
 is a bare divider that never appears in any TOC:
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#section_lvl3c"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#section_lvl3c"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -108,7 +108,7 @@ With the default `show_toc=True`, the **Model Performance** section renders the
 inline TOC and highlights itself (contrast this with the bare Appendix above):
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#section_lvl1b"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#section_lvl1b"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -136,7 +136,7 @@ deck.write("report")                        # TOC now lists both sections
 The entries are clickable — selecting one navigates to that section:
 
 ```{raw} html
-<iframe class="tessera-embed" src="../_static/deck/title-sections-example.html#toc"
+<iframe class="montin-embed" src="../_static/deck/title-sections-example.html#toc"
         loading="lazy" allowfullscreen></iframe>
 ```
 
@@ -160,7 +160,7 @@ deck.add_toc(auto=False)
 ## Putting it together
 
 ```python
-from tessera import Deck, Plugins
+from montin import Deck, Plugins
 
 deck = Deck(
     title="Q3 Platform Report",

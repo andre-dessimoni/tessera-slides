@@ -2,9 +2,9 @@
 
 import pytest
 
-from tessera import Deck
-from tessera.exceptions import ThemeNotFoundError
-from tessera.utils.theme_resolver import ThemeResolver
+from montin import Deck
+from montin.exceptions import ThemeNotFoundError
+from montin.utils.theme_resolver import ThemeResolver
 
 SUPPORTED_THEMES = ["default", "light", "dark", "light-blue", "academic", "sobrio"]
 

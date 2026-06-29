@@ -6,7 +6,7 @@ other, and slide 3 links out to an external website.
 Run via `make.bat deck` (or any docs build). See docs/conf.py.
 """
 
-from tessera import Deck
+from montin import Deck
 
 # --- Standardized docs settings (docs/script-settings.yaml) -----------------
 import sys as _sys
