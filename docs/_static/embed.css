@@ -1,4 +1,27 @@
 /* ------------------------------------------------------------------
+   Brand fonts — Sora SemiBold for headings, Inter Regular for body.
+   Both pulled from Google Fonts. `display=swap` shows a fallback first
+   and swaps in the brand font when it loads (avoids invisible text).
+   ------------------------------------------------------------------ */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap");
+
+/* Furo reads these custom properties for its font stacks. Overriding them
+   here (default light + .dark dark mode) restyles the whole theme. */
+body,
+body[data-theme="dark"],
+body[data-theme="light"] {
+  --font-stack: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, Arial, sans-serif;
+  --font-stack--headings: "Sora", var(--font-stack);
+}
+
+/* Sora SemiBold (600) for the heading weight specifically. */
+h1, h2, h3, h4, h5, h6,
+.sidebar-brand-text {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------
    embed.css — responsive container for embedded montin slide previews
    Used by the {raw} html <iframe class="montin-embed"> blocks in the docs.
    The slide decks are generated with size=(1280, 720) (16:9) + scale_up,
